@@ -1194,8 +1194,11 @@ EOT;
 		 */
 		$hits = apply_filters( 'jetpack_relatedposts_filter_hits', $hits, $post_id );
 
+		// take the first $size hits
+		$subset_hits = array_slice( $hits, 0, $size );
+
 		$related_posts = array();
-		foreach ( $hits as $i => $hit ) {
+		foreach ( $subset_hits as $i => $hit ) {
 			$related_posts[] = $this->_get_related_post_data_for_post( $hit['id'], $i, $post_id );
 		}
 		return $related_posts;
@@ -1214,8 +1217,9 @@ EOT;
 		$now_ts = time();
 		$cache_meta_key = '_jetpack_related_posts_cache';
 
+		// increase the size so we can increase the chances of getting public posts
 		$body = array(
-			'size' => (int) $size,
+			'size' => ceil( 1.5 * (int) $size ),
 		);
 
 		if ( !empty( $filters ) )
