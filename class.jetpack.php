@@ -6883,4 +6883,47 @@ p {
 		}
 		return false;
 	}
+
+	/**
+	 * Get item of an array by index, aceepting nested index
+	 * Taken from [Bottomline](https://github.com/maciejczyzewski/bottomline)
+	 *
+	 *  $arr = array( 'foo' => array( 'bar' => 'ter' )
+	 *  Jetpack::get( $arr, 'bar' );
+	 *  // -> null
+	 *  Jetpack::get( $arr, 'bar', 0);
+	 *
+	 *  // -> 0
+	 *  Jetpack::get( $arr ), 'foo.bar');
+	 *  // => 'ter'
+	 *
+	 * @param array|object   $collection array of values
+	 * @param string         $key        array key or object attribute
+	 * @param Closure|mixed  $default    default value to return if index does not exist
+	 * @since  5.1.0
+	 *
+	 * @return array|mixed|null
+	 *
+	 */
+	public static function get( $collection, $key, $default = null ) {
+		if ( is_array( $collection ) && isset( $collection[ $key ] ) ) {
+			return $collection[ $key ];
+		}
+		foreach ( explode( '.', $key ) as $segment ) {
+			if ( is_object( $collection ) ) {
+				if ( isset( $collection->{$segment} ) ) {
+					$collection = $collection->{$segment};
+				} else {
+					return $default && $default instanceof Closure ? $default() : $default;
+				}
+			} else {
+				if ( isset( $collection[ $segment ] ) ) {
+					$collection = $collection[ $segment ];
+				} else {
+					return $default && $default instanceof Closure ? $default() : $default;
+				}
+			}
+		}
+		return $collection;
+	}
 }
