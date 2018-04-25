@@ -91,6 +91,14 @@ class Jetpack_Core_Json_Api_Endpoints {
 			'callback' => __CLASS__ . '::delete_jitm_message'
 		) );
 
+		register_rest_route( 'jetpack/v4', '/json-api-wrapper', array(
+			'methods' => array(
+				WP_REST_Server::READABLE,
+				WP_REST_Server::EDITABLE,
+			),
+			'callback' => __CLASS__ . '::wrap_json_api_request',
+		) );
+
 		// Authorize a remote user
 		register_rest_route( 'jetpack/v4', '/remote_authorize', array(
 			'methods' => WP_REST_Server::EDITABLE,
@@ -608,6 +616,99 @@ class Jetpack_Core_Json_Api_Endpoints {
 
 			return $response;
 		}
+	}
+
+	/**
+	 * Handles verification that a site is registered
+	 *
+	 * @since 5.4.0
+	 *
+	 * @param WP_REST_Request $request The request sent to the WP REST API.
+	 *
+	 * @return array|wp-error
+	 */
+	public static function wrap_json_api_request( $request ) {
+		require_once JETPACK__PLUGIN_DIR . 'class.jetpack-xmlrpc-server.php';
+		$verify_api_user_args = array(
+			's'
+		);
+		// $verify_api_user_args = false;
+
+		$method       = (string) 'GET';
+		$url          = (string) 'https://public-api.wordpress.com/rest/v1.1/sites/126251976/posts?http_envelope=1';
+		$post_body    = $request->get_body();
+		$user_details = (array) [];
+		$locale       = (string) get_user_locale();
+
+		/* debugging
+		error_log( "-- begin json api via jetpack debugging -- " );
+		error_log( "METHOD: $method" );
+		error_log( "URL: $url" );
+		error_log( "POST BODY: $post_body" );
+		error_log( "VERIFY_ARGS: " . print_r( $verify_api_user_args, 1 ) );
+		error_log( "VERIFIED USER_ID: " . (int) $user_id );
+		error_log( "-- end json api via jetpack debugging -- " );
+		*/
+
+		if ( 'en' !== $locale ) {
+			// .org mo files are named slightly different from .com, and all we have is this the locale -- try to guess them.
+			$new_locale = $locale;
+			if ( strpos( $locale, '-' ) !== false ) {
+				$locale_pieces = explode( '-', $locale );
+				$new_locale = $locale_pieces[0];
+				$new_locale .= ( ! empty( $locale_pieces[1] ) ) ? '_' . strtoupper( $locale_pieces[1] ) : '';
+			} else {
+				// .com might pass 'fr' because thats what our language files are named as, where core seems
+				// to do fr_FR - so try that if we don't think we can load the file.
+				if ( ! file_exists( WP_LANG_DIR . '/' . $locale . '.mo' ) ) {
+					$new_locale =  $locale . '_' . strtoupper( $locale );
+				}
+			}
+
+			if ( file_exists( WP_LANG_DIR . '/' . $new_locale . '.mo' ) ) {
+				unload_textdomain( 'default' );
+				load_textdomain( 'default', WP_LANG_DIR . '/' . $new_locale . '.mo' );
+			}
+		}
+
+		$old_user = wp_get_current_user();
+		//// TODO:
+		$user_id=1;
+		wp_set_current_user( $user_id );
+
+		$token = Jetpack_Data::get_access_token( get_current_user_id() );
+		if ( !$token || is_wp_error( $token ) ) {
+			return false;
+		}
+
+		define( 'REST_API_REQUEST', true );
+		define( 'WPCOM_JSON_API__BASE', 'public-api.wordpress.com/rest/v1' );
+
+		// needed?
+		require_once ABSPATH . 'wp-admin/includes/admin.php';
+
+		require_once JETPACK__PLUGIN_DIR . 'class.json-api.php';
+		$api = WPCOM_JSON_API::init( $method, $url, $post_body );
+		$api->token_details['user'] = $user_details;
+		require_once JETPACK__PLUGIN_DIR . 'class.json-api-endpoints.php';
+
+		$display_errors = ini_set( 'display_errors', 0 );
+		ob_start();
+		$content_type = $api->serve( true );
+		$output = ob_get_clean();
+		ini_set( 'display_errors', $display_errors );
+
+		$nonce = wp_generate_password( 10, false );
+		$hmac  = hash_hmac( 'md5', $nonce . $output, $token->secret );
+
+		wp_set_current_user( isset( $old_user->ID ) ? $old_user->ID : 0 );
+
+		return array(
+			$output,
+			$nonce,
+			$hmac,
+		);
+
 	}
 
 	/**
