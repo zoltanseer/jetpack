@@ -91,7 +91,7 @@ class Jetpack_Core_Json_Api_Endpoints {
 			'callback' => __CLASS__ . '::delete_jitm_message'
 		) );
 
-		register_rest_route( 'jetpack/v4', '/json-api-wrapper', array(
+		register_rest_route( 'jetpack/v4', '/json-api/(.+)', array(
 			'methods' => array(
 				WP_REST_Server::READABLE,
 				WP_REST_Server::EDITABLE,
@@ -629,13 +629,9 @@ class Jetpack_Core_Json_Api_Endpoints {
 	 */
 	public static function wrap_json_api_request( $request ) {
 		require_once JETPACK__PLUGIN_DIR . 'class.jetpack-xmlrpc-server.php';
-		$verify_api_user_args = array(
-			's'
-		);
-		// $verify_api_user_args = false;
 
 		$method       = (string) 'GET';
-		$url          = (string) 'https://public-api.wordpress.com/rest/v1.1/sites/126251976/posts?http_envelope=1';
+		$url          = (string) 'https://public-api.wordpress.com/rest' . substr( $request->get_route(), 20 );
 		$post_body    = $request->get_body();
 		$user_details = (array) [];
 		$locale       = (string) get_user_locale();
