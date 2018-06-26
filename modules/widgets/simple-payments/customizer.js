@@ -1,4 +1,4 @@
-/* global jQuery, jpSimplePaymentsStrings, confirm */
+/* global jQuery, jpSimplePaymentsStrings, confirm, _ */
 /* eslint no-var: 0, quote-props: 0 */
 
 ( function( api, wp, $ ) {
@@ -16,41 +16,15 @@
 			if ( ! widgetContainer.is( '[id*="jetpack_simple_payments_widget"]' ) ) {
 				return;
 			}
-
 			event.preventDefault();
 
 			syncProductLists();
 
 			var widgetForm = widgetContainer.find( '> .widget-inside > .form, > .widget-inside > form' );
 
-			if ( ! widgetForm.find( '.jetpack-simple-payments-form' ).is( ':visible' ) ) {
-				widgetForm.find( '.jetpack-simple-payments-add-product' )
-					.add( '.jetpack-simple-payments-edit-product' )
-					.add( '.jetpack-simple-payments-products' )
-					.removeAttr( 'disabled' );
-			} else {
-				widgetForm.find( '.jetpack-simple-payments-save-product' )
-					.add( '.jetpack-simple-payments-cancel-form' )
-					.add( '.jetpack-simple-payments-delete-product' )
-					.removeAttr( 'disabled' );
-			}
+			enableFormActions( widgetForm );
 
-			var newImageId = parseInt( widgetForm.find( '.jetpack-simple-payments-form-image-id' ).val(), 10 );
-			var newImageSrc = widgetForm.find( '.jetpack-simple-payments-form-image-src' ).val();
-
-			var placeholder = widgetForm.find( '.jetpack-simple-payments-image-fieldset .placeholder' );
-			var image = widgetForm.find( '.jetpack-simple-payments-image > img' );
-			var imageControls = widgetForm.find( '.jetpack-simple-payments-image' );
-
-			if ( newImageId && newImageSrc ) {
-				image.attr( 'src', newImageSrc );
-				placeholder.hide();
-				imageControls.show();
-			} else {
-				placeholder.show();
-				image.removeAttr( 'src' );
-				imageControls.hide();
-			}
+			updateProductImage( widgetForm );
 		} );
 	} );
 
@@ -71,6 +45,10 @@
 		widgetForm.find( '.jetpack-simple-payments-cancel-form' ).on( 'click', clearForm( widgetForm ) );
 		//Delete Selected Product
 		widgetForm.find( '.jetpack-simple-payments-delete-product' ).on( 'click', deleteProduct( widgetForm ) );
+		//Input, Select and Checkbox change
+		widgetForm.find( 'select, input, textarea, checkbox' ).on( 'change input propertychange', _.debounce( function() {
+			disableFormActions( widgetForm );
+		}, 250 ) );
 	}
 
 	function syncProductLists() {
@@ -97,13 +75,13 @@
 
 	function showForm( widgetForm ) {
 		//disable widget title and product selector
-		widgetForm.find( '.jetpack-simple-payments-widget-title' ).attr( 'disabled', 'disabled' );
-		widgetForm.find( '.jetpack-simple-payments-products' ).attr( 'disabled', 'disabled' );
-		//disable add and edit buttons
-		widgetForm.find( '.jetpack-simple-payments-add-product' ).attr( 'disabled', 'disabled' );
-		widgetForm.find( '.jetpack-simple-payments-edit-product' ).attr( 'disabled', 'disabled' );
-		//disable save, delete and cancel until the widget update event is fired
-		widgetForm.find( '.jetpack-simple-payments-save-product' )
+		widgetForm.find( '.jetpack-simple-payments-widget-title' )
+			.add( '.jetpack-simple-payments-products' )
+			//disable add and edit buttons
+			.add( '.jetpack-simple-payments-add-product' )
+			.add( '.jetpack-simple-payments-edit-product' )
+			//disable save, delete and cancel until the widget update event is fired
+			.add( '.jetpack-simple-payments-save-product' )
 			.add( '.jetpack-simple-payments-cancel-form' )
 			.add( '.jetpack-simple-payments-delete-product' )
 			.attr( 'disabled', 'disabled' );
@@ -112,12 +90,13 @@
 	}
 
 	function hideForm( widgetForm ) {
-		//enable widget title and product selector
-		widgetForm.find( '.jetpack-simple-payments-widget-title' ).removeAttr( 'disabled' );
-		widgetForm.find( '.jetpack-simple-payments-products' ).removeAttr( 'disabled' );
-		//endable add and edit buttons
-		widgetForm.find( '.jetpack-simple-payments-add-product' ).removeAttr( 'disabled' );
-		widgetForm.find( '.jetpack-simple-payments-edit-product' ).removeAttr( 'disabled' );
+		//enable widget title, product selector
+		widgetForm.find( '.jetpack-simple-payments-widget-title' )
+			.add( '.jetpack-simple-payments-products' )
+			//add and edit buttons
+			.add( '.jetpack-simple-payments-add-product' )
+			.add( '.jetpack-simple-payments-edit-product' )
+			.removeAttr( 'disabled' );
 		//hide the form
 		widgetForm.find( '.jetpack-simple-payments-form' ).hide();
 	}
@@ -152,6 +131,35 @@
 			widgetForm.find( '.jetpack-simple-payments-add-product, .jetpack-simple-payments-edit-product' ).attr( 'disabled', 'disabled' );
 			changeFormAction( widgetForm, 'clear' );
 		};
+	}
+
+	function enableFormActions( widgetForm ) {
+		var isFormVisible = widgetForm.find( '.jetpack-simple-payments-form' ).is( ':visible' );
+		var isProductSelectVisible = widgetForm.find( '.jetpack-simple-payments-products' ).is( ':visible' ); //areProductsVisible ?
+		var isEdit = widgetForm.find( '.jetpack-simple-payments-form-action' ).val() === 'edit';
+
+		if ( isFormVisible ) {
+			widgetForm.find( '.jetpack-simple-payments-save-product' )
+				.add( '.jetpack-simple-payments-cancel-form' )
+				.removeAttr( 'disabled' );
+		} else {
+			widgetForm.find( '.jetpack-simple-payments-add-product' ).removeAttr( 'disabled' );
+		}
+
+		if ( isFormVisible && isEdit ) {
+			widgetForm.find( '.jetpack-simple-payments-delete-product' ).removeAttr( 'disabled' );
+		}
+
+		if ( isProductSelectVisible && ! isFormVisible ) {
+			widgetForm.find( '.jetpack-simple-payments-edit-product' ).removeAttr( 'disabled' );
+		}
+	}
+
+	function disableFormActions( widgetForm ) {
+		widgetForm.find( '.jetpack-simple-payments-save-product' )
+			.add( '.jetpack-simple-payments-cancel-form' )
+			.add( '.jetpack-simple-payments-delete-product' )
+			.attr( 'disabled', 'disabled' );
 	}
 
 	function selectImage( widgetForm ) {
@@ -203,6 +211,25 @@
 		};
 	}
 
+	function updateProductImage( widgetForm ) {
+		var newImageId = parseInt( widgetForm.find( '.jetpack-simple-payments-form-image-id' ).val(), 10 );
+		var newImageSrc = widgetForm.find( '.jetpack-simple-payments-form-image-src' ).val();
+
+		var placeholder = widgetForm.find( '.jetpack-simple-payments-image-fieldset .placeholder' );
+		var image = widgetForm.find( '.jetpack-simple-payments-image > img' );
+		var imageControls = widgetForm.find( '.jetpack-simple-payments-image' );
+
+		if ( newImageId && newImageSrc ) {
+			image.attr( 'src', newImageSrc );
+			placeholder.hide();
+			imageControls.show();
+		} else {
+			placeholder.show();
+			image.removeAttr( 'src' );
+			imageControls.hide();
+		}
+	}
+
 	function isFormValid( widgetForm ) {
 		var errors = false;
 		var postTitle = widgetForm.find( '.jetpack-simple-payments-form-product-title' ).val();
@@ -235,6 +262,8 @@
 			if ( ! isFormValid( widgetForm ) ) {
 				return;
 			}
+
+			disableFormActions( widgetForm );
 
 			var request = wp.ajax.post( 'customize-jetpack-simple-payments-button-save', {
 				'customize-jetpack-simple-payments-nonce': api.settings.nonce[ 'customize-jetpack-simple-payments' ],
@@ -303,6 +332,8 @@
 				return;
 			}
 
+			disableFormActions( widgetForm );
+
 			var request = wp.ajax.post( 'customize-jetpack-simple-payments-button-delete', {
 				'customize-jetpack-simple-payments-nonce': api.settings.nonce[ 'customize-jetpack-simple-payments' ],
 				'customize_changeset_uuid': api.settings.changeset.uuid,
@@ -316,9 +347,15 @@
 				productList.remove( productList.selectedIndex );
 				productList.dispatchEvent( new Event( 'change' ) );
 
-				if ( widgetForm.find( 'select.jetpack-simple-payments-products' ).has( 'option' ).length === 0 ) {
+				if ( $( productList ).has( 'option' ).length === 0 ) {
+					//hide products select and label
 					widgetForm.find( '.jetpack-simple-payments-products-fieldset' ).hide();
+					//show empty products list warning
 					widgetForm.find( '.jetpack-simple-payments-products-warning' ).show();
+					//disable add and edit buttons
+					widgetForm.find( '.jetpack-simple-payments-add-product' )
+						.add( '.jetpack-simple-payments-edit-product' )
+						.attr( 'disabled', 'disabled' );
 				}
 
 				changeFormAction( widgetForm, 'clear' );
