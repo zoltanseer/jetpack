@@ -458,24 +458,28 @@ class Publicize extends Publicize_Base {
 			return true;
 		}
 
-		$xml_response            = $xml->getResponse();
-		$connection_test_message = $xml_response['faultString'];
-
-		// Set up refresh if the user can
-		$user_can_refresh = current_user_can( $this->GLOBAL_CAP );
-		if ( $user_can_refresh ) {
-			$nonce        = wp_create_nonce( "keyring-request-" . $service_name );
-			$refresh_text = sprintf( _x( 'Refresh connection with %s', 'Refresh connection with {social media service}', 'jetpack' ), $this->get_service_label( $service_name ) );
-			$refresh_url  = $this->refresh_url( $service_name );
+		switch( $xml->getErrorCode() ) {
+			case 410: // Gone or deprecated
+				$error_data = array(
+					'status' => 'deprecated'
+				);
+				break;
+			default:
+				// Set up refresh if the user can
+				$user_can_refresh = current_user_can( $this->GLOBAL_CAP );
+				if ( $user_can_refresh ) {
+					$refresh_text = sprintf( _x( 'Refresh connection with %s', 'Refresh connection with {social media service}', 'jetpack' ), $this->get_service_label( $service_name ) );
+					$refresh_url  = $this->refresh_url( $service_name );
+				}
+				$error_data = array(
+					'status'            => 'refresh',
+					'user_can_refresh'  => $user_can_refresh,
+					'refresh_text'      => $refresh_text,
+					'refresh_url'       => $refresh_url
+				);
+				break;
 		}
-
-		$error_data = array(
-			'user_can_refresh' => $user_can_refresh,
-			'refresh_text'     => $refresh_text,
-			'refresh_url'      => $refresh_url
-		);
-
-		return new WP_Error( 'pub_conn_test_failed', $connection_test_message, $error_data );
+		return new WP_Error( 'publicize_connection_test_failed', $xml->getErrorMessage(), $error_data );
 	}
 
 	/**
