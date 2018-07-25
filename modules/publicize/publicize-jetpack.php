@@ -461,7 +461,8 @@ class Publicize extends Publicize_Base {
 		switch( $xml->getErrorCode() ) {
 			case 410: // Gone or deprecated
 				$error_data = array(
-					'status' => 'deprecated'
+					'status' => 'deprecated',
+					'user_can_refresh' => false,
 				);
 				break;
 			default:
