@@ -20,6 +20,8 @@ add_action( 'rest_api_init', array( 'Jetpack_Core_Json_Api_Endpoints', 'register
 // Load API endpoints that are synced with WP.com
 // Each of these is a class that will register its own routes on 'rest_api_init'.
 require_once JETPACK__PLUGIN_DIR . '_inc/lib/core-api/load-wpcom-endpoints.php';
+// Load Jetpack's own REST API endpoints that work mainly with requirements on the Admin Page
+require_once JETPACK__PLUGIN_DIR . '_inc/lib/core-api/load-jetpack-admin-endpoints.php';
 
 /**
  * Class Jetpack_Core_Json_Api_Endpoints
@@ -877,7 +879,7 @@ class Jetpack_Core_Json_Api_Endpoints {
 	 *
 	 * @since 6.8.0
 	 *
-	 * @return array|WP_Error WP_Error returned if connection test does not succeed. 
+	 * @return array|WP_Error WP_Error returned if connection test does not succeed.
 	 */
 	public static function jetpack_connection_test() {
 		$response = Jetpack_Client::wpcom_json_api_request_as_blog(
