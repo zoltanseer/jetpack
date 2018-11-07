@@ -64,22 +64,22 @@ function JetpackRestApiClient( root, nonce ) {
 			};
 		},
 
-		fetchSiteConnectionStatus: () => getRequest( `${ apiRoot }jetpack/v4/connection`, getParams )
+		fetchSiteConnectionStatus: () => getRequest( `${ apiRoot }jetpack/v6/connection`, getParams )
 			.then( parseJsonResponse ),
 
-		fetchSiteConnectionTest: () => getRequest( `${ apiRoot }jetpack/v4/connection/test`, getParams )
+		fetchSiteConnectionTest: () => getRequest( `${ apiRoot }jetpack/v6/connection/test`, getParams )
 			.then( checkStatus )
 			.then( parseJsonResponse ),
 
-		fetchUserConnectionData: () => getRequest( `${ apiRoot }jetpack/v4/connection/data`, getParams )
+		fetchUserConnectionData: () => getRequest( `${ apiRoot }jetpack/v6/connection/data`, getParams )
 			.then( parseJsonResponse ),
 
-		fetchUserTrackingSettings: () => getRequest( `${ apiRoot }jetpack/v4/tracking/settings`, getParams )
+		fetchUserTrackingSettings: () => getRequest( `${ apiRoot }jetpack/v6/tracking/settings`, getParams )
 			.then( checkStatus )
 			.then( parseJsonResponse ),
 
 		updateUserTrackingSettings: ( newSettings ) => postRequest(
-			`${ apiRoot }jetpack/v4/tracking/settings`,
+			`${ apiRoot }jetpack/v6/tracking/settings`,
 			postParams,
 			{
 				body: JSON.stringify( newSettings )
@@ -88,13 +88,13 @@ function JetpackRestApiClient( root, nonce ) {
 			.then( checkStatus )
 			.then( parseJsonResponse ),
 
-		disconnectSite: () => postRequest( `${ apiRoot }jetpack/v4/connection`, postParams, {
+		disconnectSite: () => postRequest( `${ apiRoot }jetpack/v6/connection`, postParams, {
 			body: JSON.stringify( { isActive: false } )
 		} )
 			.then( checkStatus )
 			.then( parseJsonResponse ),
 
-		fetchConnectUrl: () => getRequest( `${ apiRoot }jetpack/v4/connection/url`, getParams )
+		fetchConnectUrl: () => getRequest( `${ apiRoot }jetpack/v6/connection/url`, getParams )
 			.then( checkStatus )
 			.then( parseJsonResponse ),
 
@@ -210,7 +210,7 @@ function JetpackRestApiClient( root, nonce ) {
 			.then( checkStatus )
 			.then( parseJsonResponse ),
 
-		getPlans: () => getRequest( `${ apiRoot }jetpack/v4/plans`, getParams )
+		getPlans: () => getRequest( `${ apiRoot }jetpack/v6/plans`, getParams )
 			.then( checkStatus )
 			.then( parseJsonResponse ),
 
@@ -234,7 +234,7 @@ function JetpackRestApiClient( root, nonce ) {
 			.then( parseJsonResponse )
 			.then( body => JSON.parse( body.data ) ),
 
-		fetchRewindStatus: () => getRequest( `${ apiRoot }jetpack/v4/rewind`, getParams )
+		fetchRewindStatus: () => getRequest( `${ apiRoot }jetpack/v6/rewind`, getParams )
 			.then( checkStatus )
 			.then( parseJsonResponse )
 			.then( body => JSON.parse( body.data ) ),
