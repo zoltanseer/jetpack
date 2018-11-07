@@ -59,8 +59,7 @@ export const fetchAvailablePlans = () => {
 		dispatch( {
 			type: JETPACK_SITE_PLANS_FETCH
 		} );
-		return restApi.getPlans().then( sitePlans => {
-			const plans = JSON.parse( sitePlans );
+		return restApi.getPlans().then( plans => {
 			dispatch( {
 				type: JETPACK_SITE_PLANS_FETCH_RECEIVE,
 				plans,
