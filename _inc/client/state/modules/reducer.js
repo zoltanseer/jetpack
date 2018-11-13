@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { combineReducers } from 'redux';
+import { combineReducers } from '@wordpress/data';
 import get from 'lodash/get';
 import assign from 'lodash/assign';
 import includes from 'lodash/includes';

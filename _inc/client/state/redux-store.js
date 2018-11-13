@@ -1,25 +1,17 @@
 /**
  * External dependencies
  */
-import { createStore, applyMiddleware, compose } from 'redux';
-import thunk from 'redux-thunk';
-import { routerMiddleware } from 'react-router-redux';
-import { hashHistory } from 'react-router';
+import { registerStore } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
+import applyMiddlewares from 'state/middlewares';
 import reducer from 'state/reducer';
 
-const history = routerMiddleware( hashHistory );
+// export default createJetpackStore();
+const jetpackStore = registerStore( 'jetpack', {
+	reducer
+} );
 
-export default createJetpackStore();
-
-function createJetpackStore() {
-	const finalCreateStore = compose(
-		applyMiddleware( thunk ),
-		applyMiddleware( history ),
-		typeof window === 'object' && typeof window.devToolsExtension !== 'undefined' ? window.devToolsExtension() : f => f
-	)( createStore );
-	return finalCreateStore( reducer );
-}
+export default applyMiddlewares( jetpackStore );
