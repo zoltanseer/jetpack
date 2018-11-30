@@ -1319,6 +1319,13 @@ class Jetpack {
 		return ( 0 === $other_linked_users ) ? false : $other_linked_users;
 	}
 
+	/*
+	 * Returns true if the site is a freshly installed WordPress site. 
+	 */
+	public function is_fresh_wordpress_site() {
+		return apply_filters( 'is_fresh_wordpress_site', false );
+	}
+
 	/**
 	 * Return whether we are dealing with a multi network setup or not.
 	 * The reason we are type casting this is because we want to avoid the situation where
