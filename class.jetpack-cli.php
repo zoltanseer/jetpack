@@ -16,6 +16,23 @@ class Jetpack_CLI extends WP_CLI_Command {
 	public $color_close = "\033[0m";
 
 	/**
+	 * Assert that Jetpack is running on a freshly created WordPress site
+	 * 
+	 * ## EXAMPLES
+	 * 
+	 * wp jetpack isfreshsite
+	 *
+	 */
+	public function isfreshsite( $args, $assoc_args ) {
+		$is = Jetpack::is_fresh_wordpress_site();
+		if ( $is ) {
+			WP_CLI::success( __( 'Is fresh WordPress site', 'jetpack' ) );
+		} else {
+			WP_CLI::error( __( 'Is not a fresh WordPress site', 'jetpack' ) );
+		}
+	}
+
+	/**
 	 * Get Jetpack Details
 	 *
 	 * ## OPTIONS
