@@ -35,3 +35,5 @@ function jetpack_map_block_load_assets( $attr, $content ) {
 	Jetpack_Gutenberg::load_assets_as_required( 'map', $dependencies );
 	return preg_replace( '/<div /', '<div data-api-key="'. esc_attr( $api_key ) .'" ', $content, 1 );
 }
+
+jetpack_register_block( 'address' );
