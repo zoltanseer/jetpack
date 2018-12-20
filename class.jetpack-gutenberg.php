@@ -49,7 +49,6 @@ class Jetpack_Gutenberg {
 		'map',
 		'markdown',
 		'simple-payments',
-		'related-posts',
 		'contact-form',
 		'field-text',
 		'field-name',
@@ -119,7 +118,7 @@ class Jetpack_Gutenberg {
 		if ( Jetpack_Constants::is_true( 'REST_API_REQUEST' ) ) {
 			// We defer the loading of the blocks until we have a better scope in reset requests.
 
-			add_filter( 'rest_request_before_callbacks', array( __CLASS__, 'load' ) );
+			add_filter( 'rest_request_before_callbacks', array( __CLASS__, 'load' ), 10, 3 );
 			return;
 		}
 
@@ -146,7 +145,13 @@ class Jetpack_Gutenberg {
 		self::register( $type, $args, $availability );
 	}
 
-	static function load( $request = null ) {
+	static function load(  $response = null, $handler = null, $request = null ) {
+
+		if ( ! is_null( $request ) && $request->get_param( 'beta' )  ) {
+			if ( wp_endswith( $request->get_route(), 'gutenberg/available-extensions' ) ) {
+				Jetpack_Constants::set_constant( 'JETPACK_BETA_BLOCKS', true );
+			}
+		}
 		/**
 		 * Filter the list of block editor blocks that are available through jetpack.
 		 *
@@ -157,7 +162,6 @@ class Jetpack_Gutenberg {
 		 * @param array
 		 */
 		self::$blocks = apply_filters( 'jetpack_set_available_blocks', self::$default_blocks );
-
 		/**
 		 * Filter the list of block editor plugins that are available through jetpack.
 		 *
@@ -171,7 +175,7 @@ class Jetpack_Gutenberg {
 		self::set_blocks_availability();
 		self::set_plugins_availability();
 		self::register_blocks();
-		return $request;
+		return $response;
 	}
 
 	static function is_registered( $slug ) {
