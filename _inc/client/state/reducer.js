@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { combineReducers } from 'redux';
-import { routerReducer } from 'react-router-redux';
+import { connectRouter } from 'connected-react-router';
 import { globalNotices } from 'components/global-notices/state/notices/reducer';
 
 /**
@@ -42,8 +42,9 @@ const jetpackReducer = combineReducers( {
 	siteVerify,
 } );
 
-export default combineReducers( {
-	jetpack: jetpackReducer,
-	routing: routerReducer,
-	globalNotices: globalNotices,
-} );
+export default history =>
+	combineReducers( {
+		router: connectRouter( history ),
+		jetpack: jetpackReducer,
+		globalNotices: globalNotices,
+	} );
