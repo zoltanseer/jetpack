@@ -2,6 +2,7 @@
  * External dependencies
  */
 import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { translate as __ } from 'i18n-calypso';
 import Button from 'components/button';
@@ -17,8 +18,8 @@ import { getCurrentVersion, userCanEditPosts } from 'state/initial-state';
 import { fetchSiteConnectionTest } from 'state/connection';
 
 export class Masthead extends React.Component {
-	static defaultProps = {
-		route: { path: '' },
+	static propTypes = {
+		path: PropTypes.string.isRequired,
 	};
 
 	trackDashClick = () => {
@@ -64,9 +65,9 @@ export class Masthead extends React.Component {
 			),
 			isDashboardView = includes(
 				[ '/', '/dashboard', '/apps', '/my-plan', '/plans' ],
-				this.props.route.path
+				this.props.path
 			),
-			isStatic = '' === this.props.route.path;
+			isStatic = '' === this.props.path;
 
 		return (
 			<div className="jp-masthead">

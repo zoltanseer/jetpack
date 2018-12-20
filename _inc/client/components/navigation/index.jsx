@@ -41,25 +41,25 @@ export class Navigation extends React.Component {
 		let navTabs;
 		if ( this.props.userCanManageModules ) {
 			navTabs = (
-				<NavTabs selectedText={ this.props.route.name }>
+				<NavTabs selectedText={ this.props.getPathName() }>
 					<NavItem
 						path="#/dashboard"
 						onClick={ this.trackDashboardClick }
-						selected={ this.props.route.path === '/dashboard' || this.props.route.path === '/' }
+						selected={ this.props.path === '/dashboard' || this.props.path === '/' }
 					>
 						{ __( 'At a Glance', { context: 'Navigation item.' } ) }
 					</NavItem>
 					<NavItem
 						path="#/my-plan"
 						onClick={ this.trackMyPlanClick }
-						selected={ this.props.route.path === '/my-plan' }
+						selected={ this.props.path === '/my-plan' }
 					>
 						{ __( 'My Plan', { context: 'Navigation item.' } ) }
 					</NavItem>
 					<NavItem
 						path="#/plans"
 						onClick={ this.trackPlansClick }
-						selected={ this.props.route.path === '/plans' }
+						selected={ this.props.path === '/plans' }
 					>
 						{ __( 'Plans', { context: 'Navigation item.' } ) }
 					</NavItem>
@@ -67,10 +67,10 @@ export class Navigation extends React.Component {
 			);
 		} else {
 			navTabs = (
-				<NavTabs selectedText={ this.props.route.name }>
+				<NavTabs selectedText={ this.props.getPathName() }>
 					<NavItem
 						path="#/dashboard"
-						selected={ this.props.route.path === '/dashboard' || this.props.route.path === '/' }
+						selected={ this.props.path === '/dashboard' || this.props.path === '/' }
 					>
 						{ __( 'At a Glance', { context: 'Navigation item.' } ) }
 					</NavItem>
@@ -79,14 +79,14 @@ export class Navigation extends React.Component {
 		}
 		return (
 			<div id="jp-navigation" className="dops-navigation">
-				<SectionNav selectedText={ this.props.route.name }>{ navTabs }</SectionNav>
+				<SectionNav selectedText={ this.props.getPathName() }>{ navTabs }</SectionNav>
 			</div>
 		);
 	}
 }
 
 Navigation.propTypes = {
-	route: PropTypes.object.isRequired,
+	getPathName: PropTypes.func.isRequired,
 };
 
 export default connect( state => {

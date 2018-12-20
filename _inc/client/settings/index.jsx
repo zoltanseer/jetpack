@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { translate as __ } from 'i18n-calypso';
 
 /**
@@ -19,12 +20,13 @@ import Sharing from 'sharing';
 import Traffic from 'traffic';
 import Writing from 'writing';
 
-export default class extends React.Component {
-	static displayName = 'SearchableSettings';
-
+export default class SearchableSettings extends React.Component {
+	static propTypes = {
+		path: PropTypes.string.isRequired,
+	};
 	render() {
 		const commonProps = {
-			route: this.props.route,
+			path: this.props.path,
 			searchTerm: this.props.searchTerm,
 			rewindStatus: this.props.rewindStatus,
 		};
@@ -42,38 +44,36 @@ export default class extends React.Component {
 				</div>
 				<Discussion
 					siteRawUrl={ this.props.siteRawUrl }
-					active={ '/discussion' === this.props.route.path }
+					active={ '/discussion' === this.props.path }
 					{ ...commonProps }
 				/>
 				<Performance
-					active={
-						'/performance' === this.props.route.path || '/settings' === this.props.route.path
-					}
+					active={ '/performance' === this.props.path || '/settings' === this.props.path }
 					{ ...commonProps }
 				/>
 				<Security
 					siteAdminUrl={ this.props.siteAdminUrl }
 					siteRawUrl={ this.props.siteRawUrl }
-					active={ '/security' === this.props.route.path }
+					active={ '/security' === this.props.path }
 					{ ...commonProps }
 				/>
 				<Traffic
 					siteRawUrl={ this.props.siteRawUrl }
 					siteAdminUrl={ this.props.siteAdminUrl }
-					active={ '/traffic' === this.props.route.path }
+					active={ '/traffic' === this.props.path }
 					{ ...commonProps }
 				/>
 				<Writing
 					siteAdminUrl={ this.props.siteAdminUrl }
-					active={ '/writing' === this.props.route.path }
+					active={ '/writing' === this.props.path }
 					{ ...commonProps }
 				/>
 				<Sharing
 					siteAdminUrl={ this.props.siteAdminUrl }
-					active={ '/sharing' === this.props.route.path }
+					active={ '/sharing' === this.props.path }
 					{ ...commonProps }
 				/>
-				<Privacy active={ '/privacy' === this.props.route.path } { ...commonProps } />
+				<Privacy active={ '/privacy' === this.props.path } { ...commonProps } />
 				<SearchableModules searchTerm={ this.props.searchTerm } />
 			</div>
 		);

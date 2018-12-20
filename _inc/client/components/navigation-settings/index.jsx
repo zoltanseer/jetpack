@@ -38,12 +38,12 @@ export const NavigationSettings = createReactClass( {
 
 	componentWillMount() {
 		// We need to handle the search term not only on route update but also on page load in case of some external redirects
-		this.onRouteChange( this.context.router.getCurrentLocation() );
-		this.context.router.listen( this.onRouteChange );
+		// this.onRouteChange( this.props.path );
+		// this.context.router.listen( this.onRouteChange );
 	},
 
-	onRouteChange( newRoute ) {
-		const search = newRoute.search || '',
+	onRouteChange( path ) {
+		const search = path.search || '',
 			pairs = search.substr( 1 ).split( '&' ),
 			term = pairs.filter( item => {
 				return 0 === item.indexOf( 'term=' );
@@ -118,7 +118,7 @@ export const NavigationSettings = createReactClass( {
 		let navItems, sharingTab;
 		if ( this.props.userCanManageModules ) {
 			navItems = (
-				<NavTabs selectedText={ this.props.route.name }>
+				<NavTabs selectedText={ this.props.getPathName() }>
 					{ this.hasAnyOfThese( [
 						'carousel',
 						'lazy-images',
@@ -130,9 +130,7 @@ export const NavigationSettings = createReactClass( {
 						<NavItem
 							path="#performance"
 							onClick={ this.handleClickForTracking( 'performance' ) }
-							selected={
-								this.props.route.path === '/performance' || this.props.route.path === '/settings'
-							}
+							selected={ this.props.path === '/performance' || this.props.path === '/settings' }
 						>
 							{ __( 'Performance', { context: 'Navigation item.' } ) }
 						</NavItem>
@@ -149,7 +147,7 @@ export const NavigationSettings = createReactClass( {
 						<NavItem
 							path="#writing"
 							onClick={ this.handleClickForTracking( 'writing' ) }
-							selected={ this.props.route.path === '/writing' }
+							selected={ this.props.path === '/writing' }
 						>
 							{ __( 'Writing', { context: 'Navigation item.' } ) }
 						</NavItem>
@@ -158,7 +156,7 @@ export const NavigationSettings = createReactClass( {
 						<NavItem
 							path="#sharing"
 							onClick={ this.handleClickForTracking( 'sharing' ) }
-							selected={ this.props.route.path === '/sharing' }
+							selected={ this.props.path === '/sharing' }
 						>
 							{ __( 'Sharing', { context: 'Navigation item.' } ) }
 						</NavItem>
@@ -172,7 +170,7 @@ export const NavigationSettings = createReactClass( {
 						<NavItem
 							path="#discussion"
 							onClick={ this.handleClickForTracking( 'discussion' ) }
-							selected={ this.props.route.path === '/discussion' }
+							selected={ this.props.path === '/discussion' }
 						>
 							{ __( 'Discussion', { context: 'Navigation item.' } ) }
 						</NavItem>
@@ -189,7 +187,7 @@ export const NavigationSettings = createReactClass( {
 						<NavItem
 							path="#traffic"
 							onClick={ this.handleClickForTracking( 'traffic' ) }
-							selected={ this.props.route.path === '/traffic' }
+							selected={ this.props.path === '/traffic' }
 						>
 							{ __( 'Traffic', { context: 'Navigation item.' } ) }
 						</NavItem>
@@ -199,7 +197,7 @@ export const NavigationSettings = createReactClass( {
 						<NavItem
 							path="#security"
 							onClick={ this.handleClickForTracking( 'security' ) }
-							selected={ this.props.route.path === '/security' }
+							selected={ this.props.path === '/security' }
 						>
 							{ __( 'Security', { context: 'Navigation item.' } ) }
 						</NavItem>
@@ -216,21 +214,19 @@ export const NavigationSettings = createReactClass( {
 					<NavItem
 						path="#sharing"
 						onClick={ this.handleClickForTracking( 'sharing' ) }
-						selected={ this.props.route.path === '/sharing' }
+						selected={ this.props.path === '/sharing' }
 					>
 						{ __( 'Sharing', { context: 'Navigation item.' } ) }
 					</NavItem>
 				);
 			}
 			navItems = (
-				<NavTabs selectedText={ this.props.route.name }>
+				<NavTabs selectedText={ this.props.getPathName() }>
 					{ this.hasAnyOfThese( [ 'after-the-deadline', 'post-by-email' ] ) && (
 						<NavItem
 							path="#writing"
 							onClick={ this.handleClickForTracking( 'writing' ) }
-							selected={
-								this.props.route.path === '/writing' || this.props.route.path === '/settings'
-							}
+							selected={ this.props.path === '/writing' || this.props.path === '/settings' }
 						>
 							{ __( 'Writing', { context: 'Navigation item.' } ) }
 						</NavItem>
@@ -246,7 +242,7 @@ export const NavigationSettings = createReactClass( {
 		return (
 			<div id="jp-navigation" className="dops-navigation">
 				<QuerySitePlugins />
-				<SectionNav selectedText={ this.props.route.name }>
+				<SectionNav selectedText={ this.props.getPathName() }>
 					{ navItems }
 					{ this.maybeShowSearch() }
 				</SectionNav>
@@ -260,12 +256,15 @@ NavigationSettings.contextTypes = {
 };
 
 NavigationSettings.propTypes = {
+	getPathName: PropTypes.func.isRequired,
 	userCanManageModules: PropTypes.bool.isRequired,
 	isSubscriber: PropTypes.bool.isRequired,
 	userCanPublish: PropTypes.bool.isRequired,
 	isLinked: PropTypes.bool.isRequired,
 	isSiteConnected: PropTypes.bool.isRequired,
 	isModuleActivated: PropTypes.func.isRequired,
+	path: PropTypes.string.isRequired,
+	search: PropTypes.string.isRequired,
 	searchHasFocus: PropTypes.bool.isRequired,
 };
 

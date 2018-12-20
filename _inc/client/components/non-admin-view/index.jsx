@@ -23,14 +23,14 @@ class NonAdminView extends React.Component {
 	shouldComponentUpdate( nextProps ) {
 		return (
 			nextProps.siteConnectionStatus !== this.props.siteConnectionStatus ||
-			nextProps.route.path !== this.props.route.path
+			nextProps.path !== this.props.path
 		);
 	}
 
-	renderMainContent = route => {
+	renderMainContent = path => {
 		let pageComponent,
 			navComponent = <Navigation { ...this.props } />;
-		switch ( route ) {
+		switch ( path ) {
 			case '/dashboard':
 			default:
 				pageComponent = <AtAGlance { ...this.props } />;
@@ -43,7 +43,6 @@ class NonAdminView extends React.Component {
 					navComponent = <NavigationSettings { ...this.props } />;
 					pageComponent = (
 						<SearchableSettings
-							route={ this.props.route }
 							siteAdminUrl={ this.props.siteAdminUrl }
 							siteRawUrl={ this.props.siteRawUrl }
 							searchTerm={ this.props.searchTerm }
@@ -64,7 +63,7 @@ class NonAdminView extends React.Component {
 	};
 
 	render() {
-		return this.renderMainContent( this.props.route.path );
+		return this.renderMainContent( this.props.path );
 	}
 }
 

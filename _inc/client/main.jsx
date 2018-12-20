@@ -4,7 +4,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import includes from 'lodash/includes';
-import { createHistory } from 'history';
 import { withRouter } from 'react-router';
 import { translate as __ } from 'i18n-calypso';
 
@@ -51,6 +50,26 @@ import QueryRewindStatus from 'components/data/query-rewind-status';
 import { getRewindStatus } from 'state/rewind';
 
 class Main extends React.Component {
+	pathNames = {
+		'/': __( 'At A Glance', { context: 'Navigation item.' } ),
+		'/dashboard': __( 'At A Glance' ),
+		'/my-plan': __( 'My Plan', { context: 'Navigation item.' } ),
+		'/plans': __( 'Plans', { context: 'Navigation item.' } ),
+		'/settings': __( 'Settings', { context: 'Navigation item.' } ),
+		'/discussion': __( 'Discussion', { context: 'Navigation item.' } ),
+		'/security': __( 'Security', { context: 'Navigation item.' } ),
+		'/traffic': __( 'Traffic', { context: 'Navigation item.' } ),
+		'/writing': __( 'Writing', { context: 'Navigation item.' } ),
+		'/sharing': __( 'Sharing', { context: 'Navigation item.' } ),
+	};
+
+	getPathName = path => {
+		if ( ! path ) {
+			return this.pathNames[ this.props.location.pathname ];
+		}
+		return this.pathNames[ path ];
+	};
+
 	componentWillMount() {
 		this.props.setInitialState();
 		restApi.setApiRoot( this.props.apiRoot );
@@ -60,11 +79,13 @@ class Main extends React.Component {
 		// Handles refresh, closing and navigating away from Jetpack's Admin Page
 		window.addEventListener( 'beforeunload', this.onBeforeUnload );
 		// Handles transition between routes handled by react-router
-		this.props.router.listenBefore( this.routerWillLeave );
+		// this.props.router.listenBefore( this.routerWillLeave );
 
 		// Track initial page view
 		this.props.isSiteConnected &&
-			analytics.tracks.recordEvent( 'jetpack_wpa_page_view', { path: this.props.route.path } );
+			analytics.tracks.recordEvent( 'jetpack_wpa_page_view', {
+				path: this.props.location.pathname,
+			} );
 	}
 
 	/*
@@ -113,7 +134,7 @@ class Main extends React.Component {
 
 	shouldComponentUpdate( nextProps ) {
 		// If user triggers Skip to main content or Skip to toolbar with keyboard navigation, stay in the same tab.
-		if ( includes( [ '/wpbody-content', '/wp-toolbar' ], nextProps.route.path ) ) {
+		if ( includes( [ '/wpbody-content', '/wp-toolbar' ], nextProps.location.pathname ) ) {
 			return false;
 		}
 
@@ -121,7 +142,7 @@ class Main extends React.Component {
 			nextProps.siteConnectionStatus !== this.props.siteConnectionStatus ||
 			nextProps.jumpStartStatus !== this.props.jumpStartStatus ||
 			nextProps.isLinked !== this.props.isLinked ||
-			nextProps.route.path !== this.props.route.path ||
+			nextProps.location.pathname !== this.props.location.pathname ||
 			nextProps.searchTerm !== this.props.searchTerm ||
 			nextProps.newPlanActivated !== this.props.newPlanActivated ||
 			nextProps.rewindStatus !== this.props.rewindStatus
@@ -130,9 +151,11 @@ class Main extends React.Component {
 
 	componentDidUpdate( prevProps ) {
 		// Track page view on change only
-		prevProps.route.path !== this.props.route.path &&
+		prevProps.location.pathname !== this.props.location.pathname &&
 			this.props.isSiteConnected &&
-			analytics.tracks.recordEvent( 'jetpack_wpa_page_view', { path: this.props.route.path } );
+			analytics.tracks.recordEvent( 'jetpack_wpa_page_view', {
+				path: this.props.location.pathname,
+			} );
 
 		// Not taking into account development mode here because changing the connection
 		// status without reloading is possible only by disconnecting a live site not
@@ -174,13 +197,17 @@ class Main extends React.Component {
 
 		const settingsNav = (
 			<NavigationSettings
-				route={ this.props.route }
+				getPathName={ this.getPathName }
+				path={ this.props.location.pathname }
+				search={ this.props.location.search }
 				siteRawUrl={ this.props.siteRawUrl }
 				siteAdminUrl={ this.props.siteAdminUrl }
 			/>
 		);
 		let pageComponent,
-			navComponent = <Navigation route={ this.props.route } />;
+			navComponent = (
+				<Navigation path={ this.props.location.pathname } getPathName={ this.getPathName } />
+			);
 
 		switch ( route ) {
 			case '/dashboard':
@@ -223,7 +250,7 @@ class Main extends React.Component {
 				navComponent = settingsNav;
 				pageComponent = (
 					<SearchableSettings
-						route={ this.props.route }
+						path={ this.props.location.pathname }
 						siteAdminUrl={ this.props.siteAdminUrl }
 						siteRawUrl={ this.props.siteRawUrl }
 						searchTerm={ this.props.searchTerm }
@@ -234,8 +261,7 @@ class Main extends React.Component {
 
 			default:
 				// If no route found, kick them to the dashboard and do some url/history trickery
-				const history = createHistory();
-				history.replace( window.location.pathname + '?page=jetpack#/dashboard' );
+				this.props.history.replace( window.location.pathname + '?page=jetpack#/dashboard' );
 				pageComponent = (
 					<AtAGlance
 						siteRawUrl={ this.props.siteRawUrl }
@@ -262,15 +288,16 @@ class Main extends React.Component {
 	};
 
 	render() {
+		// console.log( this.props );
 		return (
 			<div>
-				<Masthead route={ this.props.route } />
+				<Masthead path={ this.props.location.pathname } />
 				<div className="jp-lower">
 					{ this.props.isSiteConnected && <QueryRewindStatus /> }
 					<AdminNotices />
 					<JetpackNotices />
-					{ this.renderMainContent( this.props.route.path ) }
-					{ <SupportCard path={ this.props.route.path } /> }
+					{ this.renderMainContent( this.props.location.pathname ) }
+					{ <SupportCard path={ this.props.location.pathname } /> }
 					{ <AppsCard /> }
 				</div>
 				<Footer siteAdminUrl={ this.props.siteAdminUrl } />
