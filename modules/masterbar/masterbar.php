@@ -23,6 +23,10 @@ class A8C_WPCOM_Masterbar {
 	private $user_site_count;
 
 	function __construct() {
+		if ( Jetpack_AMP_Support::is_amp_request() ) {
+			return;
+		}
+
 		$this->locale  = $this->get_locale();
 		$this->user_id = get_current_user_id();
 
@@ -509,7 +513,7 @@ class A8C_WPCOM_Masterbar {
 				'class' => 'mb-icon user-info-item',
 			),
 		) );
-		
+
 		$help_link = 'https://jetpack.com/support/';
 
 		if ( jetpack_is_atomic_site() ) {
