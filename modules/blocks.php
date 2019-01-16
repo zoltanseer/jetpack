@@ -7,6 +7,13 @@
  */
 
 jetpack_register_block(
+	'chart',
+	array(
+		'render_callback' => 'jetpack_chart_block_load_assets',
+	)
+);
+
+jetpack_register_block(
 	'map',
 	array(
 		'render_callback' => 'jetpack_map_block_load_assets',
@@ -79,4 +86,21 @@ function jetpack_map_block_load_assets( $attr, $content ) {
 
 	Jetpack_Gutenberg::load_assets_as_required( 'map', $dependencies );
 	return preg_replace( '/<div /', '<div data-api-key="'. esc_attr( $api_key ) .'" ', $content, 1 );
+}
+
+/**
+ * Chart block registration/dependency declaration.
+ *
+ * @param array  $attr - Array containing the chart block attributes.
+ * @param string $content - String containing the chart block content.
+ *
+ * @return string
+ */
+function jetpack_chart_block_load_assets( $attr, $content ) {
+	$dependencies = array(
+		'wp-element',
+		'wp-i18n',
+	);
+	Jetpack_Gutenberg::load_assets_as_required( 'chart', $dependencies );
+	return $content;
 }
