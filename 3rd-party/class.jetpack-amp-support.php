@@ -52,16 +52,18 @@ class Jetpack_AMP_Support {
 	}
 
 	static function is_amp_request() {
-		$is_amp_request = ( function_exists( 'is_amp_endpoint' ) && is_amp_endpoint() );
+		if ( did_action( 'wp' ) ) {
+			$is_amp_request = ( function_exists( 'is_amp_endpoint' ) && is_amp_endpoint() );
 
-		/**
-		 * Returns true if the current request should return valid AMP content.
-		 *
-		 * @since 6.2.0
-		 *
-		 * @param boolean $is_amp_request Is this request supposed to return valid AMP content?
-		 */
-		return apply_filters( 'jetpack_is_amp_request', $is_amp_request );
+			/**
+			 * Returns true if the current request should return valid AMP content.
+			 *
+			 * @since 6.2.0
+			 *
+			 * @param boolean $is_amp_request Is this request supposed to return valid AMP content?
+			 */
+			return apply_filters( 'jetpack_is_amp_request', $is_amp_request );
+		}
 	}
 
 	/**
