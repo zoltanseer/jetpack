@@ -171,5 +171,16 @@ jetpack_register_block(
  */
 function jetpack_visited_block_render( $attributes, $content ) {
 	Jetpack_Gutenberg::load_assets_as_required( 'visited' );
-	return $content;
+
+	$count = intval( $_COOKIE[ 'wp-visit-tracking' ] );
+	$criteria = $attributes['criteria'] ?? null;
+	$threshold = intval( $attributes['threshold'] ) ?? 0;
+
+	if (
+		( $criteria === 'after-visits' && $count >= $threshold ) ||
+		( $criteria === 'before-visits' && $count <= $threshold )
+	) {
+		return $content;
+	}
+	return null;
 }
