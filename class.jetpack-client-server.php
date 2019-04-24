@@ -124,6 +124,13 @@ class Jetpack_Client_Server {
 
 		Jetpack::update_user_token( $current_user_id, sprintf( '%s.%d', $token, $current_user_id ), $is_master_user );
 
+		/**
+		 * Fires after user has successfully received an auth token.
+		 *
+		 * @since 3.9.0
+		 */
+		do_action( 'jetpack_user_authorized' );
+
 		if ( ! $is_master_user ) {
 			Jetpack::state( 'message', 'linked' );
 			// Don't activate anything since we are just connecting a user.
@@ -269,13 +276,6 @@ class Jetpack_Client_Server {
 		if ( ! current_user_can( $cap ) ) {
 			return new Jetpack_Error( 'scope', 'current_user_cannot', $code );
 		}
-
-		/**
-		 * Fires after user has successfully received an auth token.
-		 *
-		 * @since 3.9.0
-		 */
-		do_action( 'jetpack_user_authorized' );
 
 		return (string) $json->access_token;
 	}
