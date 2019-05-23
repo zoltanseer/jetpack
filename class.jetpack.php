@@ -6342,7 +6342,9 @@ p {
 	}
 
 	/**
-	 * Throws warnings for deprecated hooks to be removed from Jetpack
+	 * Throws warnings for deprecated hooks to be removed from Jetpack that cannot remain in the original place in the code.
+	 *
+	 * @todo Convert these to use apply_filters_deprecated and do_action_deprecated and remove custom code.
 	 */
 	public function deprecated_hooks() {
 		global $wp_filter;
@@ -6388,19 +6390,13 @@ p {
 			'jetpack_updated_theme'                                  => 'jetpack_updated_themes',
 			'jetpack_lazy_images_skip_image_with_atttributes'        => 'jetpack_lazy_images_skip_image_with_attributes',
 			'jetpack_enable_site_verification'                       => null,
-			'can_display_jetpack_manage_notice'                      => null,
-			// Removed in Jetpack 7.3.0
-			'atd_load_scripts'                                       => null,
-			'atd_http_post_timeout'                                  => null,
-			'atd_http_post_error'                                    => null,
-			'atd_service_domain'                                     => null,
 		);
 
 		// This is a silly loop depth. Better way?
-		foreach( $deprecated_list AS $hook => $hook_alt ) {
+		foreach ( $deprecated_list as $hook => $hook_alt ) {
 			if ( has_action( $hook ) ) {
-				foreach( $wp_filter[ $hook ] AS $func => $values ) {
-					foreach( $values AS $hooked ) {
+				foreach ( $wp_filter[ $hook ] as $func => $values ) {
+					foreach ( $values as $hooked ) {
 						if ( is_callable( $hooked['function'] ) ) {
 							$function_name = 'an anonymous function';
 						} else {
@@ -6410,6 +6406,40 @@ p {
 					}
 				}
 			}
+		}
+
+		$filter_deprecated_list = array(
+			'can_display_jetpack_manage_notice' => array(
+				'replacement' => false,
+				'version'     => 'jetpack-7.3.0',
+			),
+			'atd_http_post_timeout'             => array(
+				'replacement' => false,
+				'version'     => 'jetpack-7.3.0',
+			),
+			'atd_service_domain'                => array(
+				'replacement' => false,
+				'version'     => 'jetpack-7.3.0',
+			),
+			'atd_load_scripts'                  => array(
+				'replacement' => false,
+				'version'     => 'jetpack-7.3.0',
+			),
+		);
+
+		foreach ( $filter_deprecated_list as $tag => $args ) {
+			apply_filters_deprecated( $tag, null, $args['version'], $args['replacement'] );
+		}
+
+		$action_deprecated_list = array(
+			'atd_http_post_error' => array(
+				'replacement' => false,
+				'version'     => 'jetpack-7.3.0',
+			),
+		);
+
+		foreach ( $action_deprecated_list as $tag => $args ) {
+			do_action_deprecated( $tag, null, $args['version'], $args['replacement'] );
 		}
 	}
 
