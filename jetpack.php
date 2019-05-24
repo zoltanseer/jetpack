@@ -5,7 +5,7 @@
  * Plugin URI: http://wordpress.org/extend/plugins/jetpack/
  * Description: Bring the power of the WordPress.com cloud to your self-hosted WordPress. Jetpack enables you to connect your blog to a WordPress.com account to use the powerful features normally only available to WordPress.com users.
  * Author: Automattic
- * Version: 1.2.3
+ * Version: 1.2.4
  * Author URI: http://jetpack.me
  * License: GPL2+
  * Text Domain: jetpack
@@ -17,7 +17,7 @@ define( 'JETPACK__API_VERSION', 1 );
 define( 'JETPACK__MINIMUM_WP_VERSION', '3.1' );
 defined( 'JETPACK_CLIENT__AUTH_LOCATION' ) or define( 'JETPACK_CLIENT__AUTH_LOCATION', 'header' );
 defined( 'JETPACK_CLIENT__HTTPS' ) or define( 'JETPACK_CLIENT__HTTPS', 'AUTO' );
-define( 'JETPACK__VERSION', '1.2.3' );
+define( 'JETPACK__VERSION', '1.2.4' );
 
 /*
 Options:
@@ -1478,52 +1478,6 @@ p {
 		}
 
 		$message_code = Jetpack::state( 'message' );
-
-		$active_state = Jetpack::state( 'activated_modules' );
-		if ( !empty( $active_state ) ) {
-			$available = Jetpack::get_available_modules();
-			$active_state = explode( ',', $active_state );
-			$active_state = array_intersect( $active_state, $available );
-			if ( count( $active_state ) ) {
-				foreach ( $active_state as $mod ) {
-					$this->stat( 'module-activated', $mod );
-				}
-			} else {
-				$active_state = false;
-			}
-		}
-
-		switch ( $message_code ) {
-		case 'modules_activated' :
-			$this->message = sprintf(
-				__( 'Welcome to <strong>Jetpack %s</strong>!', 'jetpack' ),
-				JETPACK__VERSION
-			);
-
-			if ( $active_state ) {
-				$titles = array();
-				foreach ( $active_state as $mod ) {
-					if ( $mod_headers = Jetpack::get_module( $mod ) ) {
-						$titles[] = '<strong>' . preg_replace( '/\s+(?![^<>]++>)/', '&nbsp;', $mod_headers['name'] ) . '</strong>';
-					}
-				}
-				if ( $titles ) {
-					$this->message .= '<br /><br />' . wp_sprintf( __( 'The following new modules have been activated: %l.', 'jetpack' ), $titles );
-				}
-			}
-
-			if ( $reactive_state = Jetpack::state( 'reactivated_modules' ) ) {
-				$titles = array();
-				foreach ( explode( ',',  $reactive_state ) as $mod ) {
-					if ( $mod_headers = Jetpack::get_module( $mod ) ) {
-						$titles[] = '<strong>' . preg_replace( '/\s+(?![^<>]++>)/', '&nbsp;', $mod_headers['name'] ) . '</strong>';
-					}
-				}
-				if ( $titles ) {
-					$this->message .= '<br /><br />' . wp_sprintf( __( 'The following modules have been updated: %l.', 'jetpack' ), $titles );
-				}
-			}
-			break;
 
 		$active_state = Jetpack::state( 'activated_modules' );
 		if ( !empty( $active_state ) ) {
