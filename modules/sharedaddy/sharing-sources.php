@@ -874,6 +874,7 @@ class Share_Reddit extends Sharing_Source {
 		wp_redirect( $reddit_url );
 		die();
 	}
+}
 
 class Share_LinkedIn extends Sharing_Source {
 	public $shortname = 'linkedin';
@@ -892,12 +893,9 @@ class Share_LinkedIn extends Sharing_Source {
 		return __( 'LinkedIn', 'jetpack' );
 	}
 
-		$related = $this->get_related_accounts( $post );
-		if ( ! empty( $related ) && $related !== $via ) {
-			$related = 'data-related="' . esc_attr( $related ) . '"';
-		} else {
-			$related = '';
-		}
+	public function get_name() {
+		return __( 'Reddit', 'jetpack' );
+	}
 
 	public function get_display( $post ) {
 		$display = '';
@@ -1263,8 +1261,6 @@ class Share_Custom extends Sharing_Advanced_Source {
 	public function __construct( $id, array $settings ) {
 		parent::__construct( $id, $settings );
 		
-		$opts = $this->get_options();
-
 		$opts = $this->get_options();
 
 		$opts = $this->get_options();
