@@ -318,8 +318,6 @@ AtD.suggest = function(element) {
 
 	jQuery(suggest).css({ left: (pos.left + width) + 'px', top: pos.top + 'px' });
 
-	jQuery(suggest).css({ left: (pos.left + width) + 'px', top: pos.top + 'px' });
-
 	jQuery(suggest).fadeIn(200);
 
 	/* bind events to make the menu disappear when the user clicks outside of it */
