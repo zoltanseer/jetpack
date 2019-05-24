@@ -64,7 +64,13 @@ function stats_load() {
 		add_action( 'admin_init', 'stats_merged_widget_admin_init' );
 	}
 
-	add_filter( 'pre_option_db_version', 'stats_ignore_db_version' );
+	// Add an icon to see stats in WordPress.com for a particular post
+	add_action( 'admin_print_styles-edit.php', 'jetpack_stats_load_admin_css' );
+	add_filter( 'manage_posts_columns', 'jetpack_stats_post_table' );
+	add_filter( 'manage_pages_columns', 'jetpack_stats_post_table' );
+	add_action( 'manage_posts_custom_column', 'jetpack_stats_post_table_cell', 10, 2 );
+	add_action( 'manage_pages_custom_column', 'jetpack_stats_post_table_cell', 10, 2 );
+}
 
 	add_filter( 'pre_option_db_version', 'stats_ignore_db_version' );
 
@@ -99,6 +105,33 @@ function stats_merged_widget_admin_init() {
  */
 function stats_enqueue_dashboard_head() {
 	add_action( 'admin_head', 'stats_dashboard_head' );
+}
+
+/**
+ * Checks if filter is set and dnt is enabled.
+ *
+ * @return bool
+ */
+function jetpack_is_dnt_enabled() {
+	/**
+	 * Filter the option which decides honor DNT or not.
+	 *
+	 * @module stats
+	 * @since 6.1.0
+	 *
+	 * @param bool false If config honors DNT and client doesn't want to tracked, false if not.
+	 */
+	if ( false === apply_filters( 'jetpack_honor_dnt_header_for_stats', false ) ) {
+		return false;
+	}
+
+	foreach ( $_SERVER as $name => $value ) {
+		if ( 'http_dnt' == strtolower( $name ) && 1 == $value ) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 /**
@@ -155,7 +188,7 @@ function stats_map_meta_caps( $caps, $cap, $user_id ) {
 function stats_template_redirect() {
 	global $current_user, $stats_footer;
 
-	if ( is_feed() || is_robots() || is_trackback() || is_preview() ) {
+	if ( is_feed() || is_robots() || is_trackback() || is_preview() || jetpack_is_dnt_enabled() ) {
 		return;
 	}
 
@@ -868,6 +901,10 @@ function stats_admin_bar_head() {
 		return;
 
 	if ( ! current_user_can( 'view_stats' ) )
+		return;
+	}
+
+	if ( function_exists( 'is_admin_bar_showing' ) && ! is_admin_bar_showing() ) {
 		return;
 	}
 
