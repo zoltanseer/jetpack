@@ -279,26 +279,6 @@ class Sharing_Service {
 			$this->global['sharing_label'] = $this->default_sharing_label;
 		}
 
-		if ( ! isset( $this->global['show'] ) ) {
-			$this->global['show'] = array( 'post', 'page' );
-		} elseif ( is_scalar( $this->global['show'] ) ) {
-			switch ( $this->global['show'] ) {
-			case 'posts' :
-				$this->global['show'] = array( 'post', 'page' );
-				break;
-			case 'index' :
-				$this->global['show'] = array( 'index' );
-				break;
-			case 'posts-index' :
-				$this->global['show'] = array( 'post', 'page', 'index' );
-				break;
-			}
-		}
-
-		if ( false === $this->global['sharing_label'] ) {
-			$this->global['sharing_label'] = $this->default_sharing_label;
-		}
-
 		return $this->global;
 	}
 
