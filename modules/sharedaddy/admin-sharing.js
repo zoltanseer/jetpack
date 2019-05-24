@@ -135,6 +135,9 @@
 			$( '#live-preview div.sharedaddy' ).removeClass( 'sd-social-icon' );
 			$( '#live-preview li.advanced' ).removeClass( 'no-icon' );
 
+			$( '#live-preview div.sharedaddy' ).removeClass( 'sd-social-icon' );
+			$( '#live-preview li.advanced' ).removeClass( 'no-icon' );
+
 			// Button style
 			if ( 'icon' == button_style ) {
 				$( '#live-preview ul.preview div span' ).html( '&nbsp;' ).parent().addClass( 'no-text' ); // Remove text label
