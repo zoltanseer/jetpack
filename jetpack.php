@@ -5,7 +5,7 @@
  * Plugin URI: http://wordpress.org/extend/plugins/jetpack/
  * Description: Bring the power of the WordPress.com cloud to your self-hosted WordPress. Jetpack enables you to connect your blog to a WordPress.com account to use the powerful features normally only available to WordPress.com users.
  * Author: Automattic
- * Version: 1.3.3
+ * Version: 1.3.4
  * Author URI: http://jetpack.me
  * License: GPL2+
  * Text Domain: jetpack
@@ -17,7 +17,7 @@ define( 'JETPACK__API_VERSION', 1 );
 define( 'JETPACK__MINIMUM_WP_VERSION', '3.2' );
 defined( 'JETPACK_CLIENT__AUTH_LOCATION' ) or define( 'JETPACK_CLIENT__AUTH_LOCATION', 'header' );
 defined( 'JETPACK_CLIENT__HTTPS' ) or define( 'JETPACK_CLIENT__HTTPS', 'AUTO' );
-define( 'JETPACK__VERSION', '1.3.3' );
+define( 'JETPACK__VERSION', '1.3.4' );
 
 /*
 Options:
@@ -97,13 +97,6 @@ class Jetpack {
 	 * Jetpack_Sync object
 	 */
 	var $sync;
-
-	/**
-	 * What to show as the top level menu item page: Stats or Jetpack
-	 *
-	 * @var string
-	 */
-	var $top_level;
 
 	/**
 	 * Singleton
@@ -1178,57 +1171,31 @@ p {
 		) {
 			$new_modules_count_i18n = number_format_i18n( $new_modules_count );
 			$span_title = esc_attr( sprintf( _n( 'One New Jetpack Module', '%s New Jetpack Modules', $new_modules_count, 'jetpack' ), $new_modules_count_i18n ) );
-			$title = sprintf(
-				_x( 'Jetpack + Stats %1$s', '1: A number showing how many new features there are after upgrading Jetpack', 'jetpack' ),
-				"<span class='update-plugins count-{$new_modules_count}' title='$span_title'><span class='update-count'>$new_modules_count_i18n</span></span>"
-			);
+			$title = sprintf( 'Jetpack %s', "<span class='update-plugins count-{$new_modules_count}' title='$span_title'><span class='update-count'>$new_modules_count_i18n</span></span>" );
 		} else {
-			$title = __( 'Jetpack + Stats', 'jetpack' );
+			$title = __( 'Jetpack', 'jetpack' );
 		}
 
-		if ( Jetpack::is_active() && in_array( 'stats', Jetpack::get_active_modules() ) ) {
-			add_menu_page( __( 'Jetpack + Stats', 'jetpack' ), $title, 'view_stats', 'stats', 'stats_reports_page', '' );
-			$stats_hook = add_submenu_page( 'stats', __( 'Site Stats', 'jetpack' ), __( 'Site Stats', 'jetpack' ), 'view_stats', 'stats', 'stats_reports_page' );
-			add_action( "load-$stats_hook", 'stats_reports_load' );
+		$hook = add_menu_page( 'Jetpack', $title, 'manage_options', 'jetpack', array( $this, 'admin_page' ), '' );
 
-			$jetpack_hook = add_submenu_page( 'stats', 'Jetpack Management', 'Manage', 'manage_options', 'jetpack', array( $this, 'admin_page' ) );
+		add_action( "load-$hook", array( $this, 'admin_page_load' ) );
 
-			$this->top_level = 'stats';
-		} else {
-			$jetpack_hook = add_menu_page( 'Jetpack', $title, 'manage_options', 'jetpack', array( $this, 'admin_page' ), '' );
-
-			$this->top_level = 'jetpack';
-		}
-
-		add_action( "load-$jetpack_hook", array( $this, 'admin_page_load' ) );
 		if ( version_compare( $GLOBALS['wp_version'], '3.3', '<' ) ) {
 			if ( isset( $_GET['page'] ) && 'jetpack' == $_GET['page'] ) {
-				add_contextual_help( $jetpack_hook, $this->jetpack_help() );
+				add_contextual_help( $hook, $this->jetpack_help() );
 			}
 		} else {
-			add_action( "load-$jetpack_hook", array( $this, 'admin_help' ) );
+			add_action( "load-$hook", array( $this, 'admin_help' ) );
 		}
-		add_action( "admin_head-$jetpack_hook", array( $this, 'admin_head' ) );
+		add_action( "admin_head-$hook", array( $this, 'admin_head' ) );
 		add_filter( 'custom_menu_order', array( $this, 'admin_menu_order' ) );
 		add_filter( 'menu_order', array( $this, 'jetpack_menu_order' ) );
 
-		add_action( "admin_print_styles-$jetpack_hook", array( $this, 'admin_styles' ) );
+		add_action( "admin_print_styles-$hook", array( $this, 'admin_styles' ) );
 
 		add_action( "admin_print_scripts-$jetpack_hook", array( $this, 'admin_scripts' ) );
 
 		do_action( 'jetpack_admin_menu' );
-	}
-
-	function fix_top_level_admin_menu() {
-		global $submenu;
-		if ( 'stats' != $this->top_level ) {
-			return;
-		}
-
-		if ( isset( $submenu['jetpack'] ) ) {
-			$submenu['stats'] = array_merge( $submenu['stats'], $submenu['jetpack'] );
-			unset( $submenu['jetpack'] );
-		}
 	}
 
 	/**
