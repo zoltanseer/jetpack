@@ -167,14 +167,6 @@ if ( defined( 'RECAPTCHA_PRIVATE_KEY' ) ) {
 	add_filter( 'sharing_email_check', 'sharing_email_check', 10, 3 );
 }
 
-function sharing_email_check( $true, $post, $data ) {
-	require_once plugin_dir_path( __FILE__ ).'recaptchalib.php';
-
-	$recaptcha_result = recaptcha_check_answer( RECAPTCHA_PRIVATE_KEY, $_SERVER["REMOTE_ADDR"], $data["recaptcha_challenge_field"], $data["recaptcha_response_field"] );
-
-	return $recaptcha_result->is_valid;
-}
-
 add_action( 'init', 'sharing_init' );
 add_action( 'admin_init', 'sharing_add_meta_box' );
 add_action( 'save_post', 'sharing_meta_box_save' );
