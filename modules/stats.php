@@ -65,22 +65,6 @@ function stats_load() {
 	}
 
 /**
- * Delay conditional for current_user_can to after init.
- *
- * @access public
- * @return void
- */
-function stats_merged_widget_admin_init() {
-	if ( current_user_can( 'view_stats' ) ) {
-		add_action( 'load-index.php', 'stats_enqueue_dashboard_head' );
-		add_action( 'wp_dashboard_setup', 'stats_register_widget_control_callback' ); // Hacky but works.
-		add_action( 'jetpack_dashboard_widget', 'stats_jetpack_dashboard_widget' );
-	}
-
-	return $caps;
-}
-
-/**
  * Enqueue Stats Dashboard
  *
  * @access public
@@ -88,26 +72,6 @@ function stats_merged_widget_admin_init() {
  */
 function stats_enqueue_dashboard_head() {
 	add_action( 'admin_head', 'stats_dashboard_head' );
-}
-
-/**
- * Prevent sparkline img requests being redirected to upgrade.php.
- * See wp-admin/admin.php where it checks $wp_db_version.
- *
- * @access public
- * @param mixed $version Version.
- * @return string $version.
- */
-function stats_ignore_db_version( $version ) {
-	if (
-		is_admin() &&
-		isset( $_GET['page'] ) && 'stats' === $_GET['page'] &&
-		isset( $_GET['chart'] ) && strpos($_GET['chart'], 'admin-bar-hours') === 0
-	) {
-		global $wp_db_version;
-		return $wp_db_version;
-	}
-	return $version;
 }
 
 	add_filter( 'pre_option_db_version', 'stats_ignore_db_version' );
@@ -132,8 +96,7 @@ function stats_merged_widget_admin_init() {
 		add_action( 'wp_dashboard_setup', 'stats_register_widget_control_callback' ); // Hacky but works.
 		add_action( 'jetpack_dashboard_widget', 'stats_jetpack_dashboard_widget' );
 	}
-
-	return $caps;
+	return $version;
 }
 
 /**
@@ -542,6 +505,10 @@ if ( -1 == document.location.href.indexOf( 'noheader' ) ) {
 </script>
 <?php
 }
+</style>
+<?php
+}
+
 
 /**
  * Stats Report Page.
@@ -902,6 +869,10 @@ function stats_admin_bar_head() {
 
 	if ( ! current_user_can( 'view_stats' ) )
 		return;
+
+	if ( function_exists( 'is_admin_bar_showing' ) && ! is_admin_bar_showing() ) {
+		return;
+	}
 
 	if ( function_exists( 'is_admin_bar_showing' ) && ! is_admin_bar_showing() ) {
 		return;

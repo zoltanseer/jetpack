@@ -22,6 +22,29 @@ function sharing_email_send_post( $data ) {
 	/** This filter is documented in core/src/wp-includes/pluggable.php */
 	$from_email = apply_filters( 'wp_mail_from', 'wordpress@' . $sitename );
 
+	if ( ! empty( $data['name'] ) ) {
+		$s_name = (string) $data['name'];
+		$name_needs_encoding_regex =
+			'/[' .
+				// SpamAssasin's list of characters which "need MIME" encoding
+				'\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff' .
+				// Our list of "unsafe" characters
+				'<\r\n' .
+			']/';
+
+		$needs_encoding =
+			// If it contains any blacklisted chars,
+			preg_match( $name_needs_encoding_regex, $s_name ) ||
+			// Or if we can't use `mb_convert_encoding`
+			! function_exists( 'mb_convert_encoding' ) ||
+			// Or if it's not already ASCII
+			mb_convert_encoding( $data['name'], 'ASCII' ) !== $s_name;
+
+		if ( $needs_encoding ) {
+			$data['name'] = sprintf( '=?UTF-8?B?%s?=', base64_encode( $data['name'] ) );
+		}
+	}
+
 	$headers[] = sprintf( 'From: %1$s <%2$s>', $data['name'], $from_email );
 	$headers[] = sprintf( 'Reply-To: %1$s <%2$s>', $data['name'], $data['source'] );
 
@@ -180,6 +203,9 @@ function sharing_meta_box_protected( $protected, $meta_key, $meta_type ) {
   	return $post_id;
 }
 
+  	return $post_id;
+}
+
 function sharing_meta_box_protected( $protected, $meta_key, $meta_type ) {
 	if ( 'sharing_disabled' == $meta_key )
 		$protected = true;
@@ -259,22 +285,6 @@ function sharing_email_check( $true, $post, $data ) {
 	$result    = $recaptcha->verify( $response, $_SERVER['REMOTE_ADDR'] );
 
 	return ( true === $result );
-}
-
-add_action( 'init', 'sharing_init' );
-add_action( 'add_meta_boxes', 'sharing_add_meta_box' );
-add_action( 'save_post', 'sharing_meta_box_save' );
-add_action( 'sharing_email_send_post', 'sharing_email_send_post' );
-add_filter( 'sharing_email_can_send', 'sharing_email_check_for_spam_via_akismet' );
-add_action( 'sharing_global_options', 'sharing_global_resources', 30 );
-add_action( 'sharing_admin_update', 'sharing_global_resources_save' );
-add_filter( 'sharing_services', 'sharing_restrict_to_single' );
-add_action( 'plugin_action_links_'.basename( dirname( __FILE__ ) ).'/'.basename( __FILE__ ), 'sharing_plugin_settings', 10, 4 );
-add_filter( 'plugin_row_meta', 'sharing_add_plugin_settings', 10, 2 );
-
-if ( defined( 'RECAPTCHA_PUBLIC_KEY' ) && defined( 'RECAPTCHA_PRIVATE_KEY' ) ) {
-	add_action( 'sharing_email_dialog', 'sharing_email_dialog' );
-	add_filter( 'sharing_email_check', 'sharing_email_check', 10, 3 );
 }
 
 add_action( 'init', 'sharing_init' );
