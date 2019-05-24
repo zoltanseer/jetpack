@@ -5,7 +5,7 @@
  * Plugin URI: http://wordpress.org/extend/plugins/jetpack/
  * Description: Bring the power of the WordPress.com cloud to your self-hosted WordPress. Jetpack enables you to connect your blog to a WordPress.com account to use the powerful features normally only available to WordPress.com users.
  * Author: Automattic
- * Version: 1.4.1
+ * Version: 1.4.2
  * Author URI: http://jetpack.me
  * License: GPL2+
  * Text Domain: jetpack
@@ -17,7 +17,7 @@ define( 'JETPACK__API_VERSION', 1 );
 define( 'JETPACK__MINIMUM_WP_VERSION', '3.2' );
 defined( 'JETPACK_CLIENT__AUTH_LOCATION' ) or define( 'JETPACK_CLIENT__AUTH_LOCATION', 'header' );
 defined( 'JETPACK_CLIENT__HTTPS' ) or define( 'JETPACK_CLIENT__HTTPS', 'AUTO' );
-define( 'JETPACK__VERSION', '1.4.1' );
+define( 'JETPACK__VERSION', '1.4.2' );
 define( 'JETPACK__PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 /*
 Options:
@@ -70,11 +70,6 @@ class Jetpack {
 	);
 
 	/**
-	 * WP < 3.2 only.  3.2+ has an API.
-	 */
-	var $use_ssl = array();
-
-	/**
 	 * Message to display in admin_notice
 	 * @var string
 	 */
@@ -102,14 +97,14 @@ class Jetpack {
 	 * Singleton
 	 * @static
 	 */
-	function &init() {
-		static $instance = array();
+	function init() {
+		static $instance = false;
 
 		if ( !$instance ) {
 			load_plugin_textdomain( 'jetpack', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
-			$instance[0] =& new Jetpack;
+			$instance = new Jetpack;
 
-			$instance[0]->plugin_upgrade();
+			$instance->plugin_upgrade();
 		}
 
 		return $instance[0];
@@ -148,10 +143,42 @@ class Jetpack {
 	}
 
 	/**
+	 * Must never be called statically
+	 */
+	function plugin_upgrade() {
+		// Upgrade: 1.1 -> 1.2
+		if ( get_option( 'jetpack_id' ) ) {
+			// Move individual jetpack options to single array of options
+			$options = array();
+			foreach ( Jetpack::get_option_names() as $option ) {
+				if ( false !== $value = get_option( "jetpack_$option" ) ) {
+					$options[$option] = $value;
+				}
+			}
+
+			if ( $options ) {
+				Jetpack::update_options( $options );
+
+				foreach ( array_keys( $options ) as $option ) {
+					delete_option( "jetpack_$option" );
+				}
+			}
+
+			// Add missing version and old_version options
+			if ( !$version = Jetpack::get_option( 'version' ) ) {
+				$version = $old_version = '1.1:' . time();
+				Jetpack::update_options( compact( 'version', 'old_version' ) );
+			}
+		}
+
+		// Future: switch on version? If so, think twice before updating version/old_version.
+	}
+
+	/**
 	 * Constructor.  Initializes WordPress hooks
 	 */
 	function Jetpack() {
-		$this->sync =& new Jetpack_Sync;
+		$this->sync = new Jetpack_Sync;
 
 		if ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST && isset( $_GET['for'] ) && 'jetpack' == $_GET['for'] ) {
 			require_once dirname( __FILE__ ) . '/class.jetpack-xmlrpc-server.php';
@@ -184,10 +211,6 @@ class Jetpack {
 		add_action( 'admin_menu', array( $this, 'fix_top_level_admin_menu' ), 1000 );
 		add_action( 'admin_init', array( $this, 'admin_init' ) );
 		add_action( 'admin_init', array( $this, 'dismiss_jetpack_notice' ) );
-
-		// Only used in WordPress < 3.2
-		add_action( 'http_transport_post_debug', array( $this, 'http_transport_detector' ) );
-		add_action( 'http_transport_get_debug',  array( $this, 'http_transport_detector' ) );
 
 		add_action( 'wp_ajax_jetpack-check-news-subscription', array( $this, 'check_news_subscription' ) );
 		add_action( 'wp_ajax_jetpack-subscribe-to-news', array( $this, 'subscribe_to_news' ) );
@@ -652,10 +675,6 @@ class Jetpack {
 			switch ( $module ) {
 			case 'comments' :
 				continue;
-			case 'sharedaddy' :
-				if ( version_compare( PHP_VERSION, '5', '<' ) ) {
-					continue;
-				} // else no break
 			default :
 				$return[] = $module;
 			}
@@ -876,10 +895,6 @@ class Jetpack {
 		Jetpack::state( 'module', $module );
 		Jetpack::state( 'error', 'module_activation_failed' ); // we'll override this later if the plugin can be included without fatal error
 		wp_safe_redirect( Jetpack::admin_url() );
-
-		if ( 'sharedaddy' == $module && version_compare( PHP_VERSION, '5', '<' ) ) {
-			exit;
-		}
 
 		Jetpack::catch_errors( true );
 		ob_start();
@@ -1142,12 +1157,12 @@ p {
 			$throw = false;
 
 			// Try and make sure it really was the stats plugin
-			if ( version_compare( PHP_VERSION, '5', '<' ) || !class_exists( 'ReflectionFunction' ) ) {
+			if ( !class_exists( 'ReflectionFunction' ) ) {
 				if ( 'stats.php' == basename( $plugin ) ) {
 					$throw = true;
 				}
 			} else {
-				$reflection =& new ReflectionFunction( 'stats_get_api_key' );
+				$reflection = new ReflectionFunction( 'stats_get_api_key' );
 				if ( basename( $plugin ) == basename( $reflection->getFileName() ) ) {
 					$throw = true;
 				}
@@ -1415,6 +1430,43 @@ p {
 		);
 	}
 
+	/*
+	 * Registration flow:
+	 * 1 - ::admin_page_load() action=register
+	 * 2 - ::try_registration()
+	 * 3 - ::register()
+	 *     - Creates jetpack_register option containing two secrets and a timestamp
+	 *     - Calls https://jetpack.wordpress.com/jetpack.register/1/ with
+	 *       siteurl, home, gmt_offset, timezone_string, site_name, secret_1, secret_2, site_lang, timeout, stats_id
+	 *     - That request to jetpack.wordpress.com does not immediately respond.  It first makes a request BACK to this site's
+	 *       xmlrpc.php?for=jetpack: RPC method: jetpack.verifyRegistration, Parameters: secret_1
+	 *     - The XML-RPC request verifies secret_1, deletes both secrets and responds with: secret_2
+	 *     - https://jetpack.wordpress.com/jetpack.register/1/ verifies that XML-RPC response (secret_2) then finally responds itself with
+	 *       jetpack_id, jetpack_secret
+	 *     - ::register() then stores jetpack_options: id => jetpack_id, blog_token => jetpack_secret
+	 * 4 - redirect to https://jetpack.wordpress.com/jetpack.authorize/1/
+	 * 5 - user logs in with WP.com account
+	 * 6 - redirect to this site's wp-admin/index.php?page=jetpack&action=authorize with
+	 *     code <-- OAuth2 style authorization code    
+	 * 7 - ::admin_page_load() action=authorize
+	 * 8 - Jetpack_Client_Server::authorize()
+	 * 9 - Jetpack_Client_Server::get_token()
+	 * 10- GET https://jetpack.wordpress.com/jetpack.token/1/ with
+	 *     client_id, client_secret, grant_type, code, redirect_uri:action=authorize, state, scope, user_email
+	 * 11- which responds with
+	 *     access_token, token_type, scope
+	 * 12- Jetpack_Client_Server::authorize() stores jetpack_options: user_token => access_token.$user_id
+	 * 13- Jetpack::activate_default_modules()
+	 *     Deactivates deprecated plugins
+	 *     Activates all default modules
+	 *     Catches errors: redirects to wp-admin/index.php?page=jetpack state:error=something
+	 * 14- redirect to this site's wp-admin/index.php?page=jetpack with state:message=authorized
+	 *     Done!
+	 */
+
+	/**
+	 * Handles the page load events for the Jetpack admin page
+	 */
 	function admin_page_load() {
 		$error = false;
 
@@ -1501,13 +1553,9 @@ p {
 		case 'module_activation_failed' :
 			$module = Jetpack::state( 'module' );
 			if ( !empty( $module ) && $mod = Jetpack::get_module( $module ) ) {
-				if ( 'sharedaddy' == $module && version_compare( PHP_VERSION, '5', '<' ) ) {
-					$this->error = sprintf( __( 'The %1$s module requires <strong>PHP version %2$s</strong> or higher.', 'jetpack' ), '<strong>' . $mod['name'] . '</strong>', '5' );
-				} else {
-					$this->error = sprintf( __( '%s could not be activated because it triggered a <strong>fatal error</strong>. Perhaps there is a conflict with another plugin you have installed?', 'jetpack' ), $mod['name'] );
-					if ( isset( $this->plugins_to_deactivate[$module] ) ) {
-						$this->error .= ' ' . sprintf( __( 'Do you still have the %s plugin installed?', 'jetpack' ), $this->plugins_to_deactivate[$module][1] );
-					}
+				$this->error = sprintf( __( '%s could not be activated because it triggered a <strong>fatal error</strong>. Perhaps there is a conflict with another plugin you have installed?', 'jetpack' ), $mod['name'] );
+				if ( isset( $this->plugins_to_deactivate[$module] ) ) {
+					$this->error .= ' ' . sprintf( __( 'Do you still have the %s plugin installed?', 'jetpack' ), $this->plugins_to_deactivate[$module][1] );
 				}
 			} else {
 				$this->error  = __( 'Module could not be activated because it triggered a <strong>fatal error</strong>. Perhaps there is a conflict with another plugin you have installed?', 'jetpack' );
@@ -2219,40 +2267,6 @@ p {
 	}
 
 	/**
-	 * Determines which WP_Http transport will be used for wp_remote_request() calls.
-	 * Detect if that transport has SSL capability on this host.
-	 *
-	 * Attached to http_transport_post_debug and http_transport_post_debug.
-	 *
-	 * Supports POST, GET, probably HEAD.  Does not currently support PUT, etc.
-	 *
-	 * Only used in WordPress < 3.2
-	 */
-	function http_transport_detector( $transport ) {
-		$method = 'http_transport_post_debug' == current_filter() ? 'POST' : 'GET';
-
-		$transport = strtolower( get_class( array_pop( array_values( $transport ) ) ) );
-
-		switch ( $transport ) {
-		// The HTTP and cURL extensions both use cURL and so use cURL's linked OpenSSL for SSL connections.
-		case 'wp_http_exthttp' :
-		case 'wp_http_curl' :
-			if ( is_callable( 'curl_version' ) && $curl_version = curl_version() ) {
-				$use_ssl =
-					( isset( $curl_version['ssl_version_number'] ) && $curl_version['ssl_version_number'] > 0 )
-					||
-					( defined( 'CURL_VERSION_SSL' ) && isset( $curl_version['features'] ) && ( CURL_VERSION_SSL & $curl_version['features'] ) ); // bitwise
-				break;
-			} // else no break
-		// Everything else uses PHP's linked OpenSSL for SSL connections.
-		default :
-			$use_ssl = extension_loaded( 'openssl' );
-		}
-
-		$this->use_ssl[$method] = (bool) $use_ssl;
-	}
-
-	/**
 	 * Some hosts disable the OpenSSL extension and so cannot make outgoing HTTPS requsets
 	 */
 	function fix_url_for_bad_hosts( $url, &$args ) {
@@ -2270,31 +2284,9 @@ p {
 
 		$jetpack = Jetpack::init();
 
-		if ( version_compare( $GLOBALS['wp_version'], '3.2-something', '<' ) ) {
-			// WordPress < 3.2
-			if ( isset( $args['method'] ) && 'POST' == strtoupper( $args['method'] ) ) {
-				$method = 'POST';
-			} else {
-				$method = 'GET';
-			}
-
-			if ( empty( $jetpack->use_ssl ) ) {
-				if ( function_exists( '_wp_http_get_object' ) ) {
-					_wp_http_get_object();
-				} else {
-					new WP_Http;
-				}
-			}
-
-			// Yay! Your host is good!
-			if ( $jetpack->use_ssl[$method] ) {
-				return $url;
-			}
-		} else {
-			// WordPress >= 3.2
-			if ( wp_http_supports( array( 'ssl' => true ) ) ) {
-				return $url;
-			}
+		// Yay! Your host is good!
+		if ( wp_http_supports( array( 'ssl' => true ) ) ) {
+			return $url;
 		}
 
 		// Boo! Your host is bad and makes Jetpack cry!
@@ -2442,7 +2434,7 @@ p {
 
 		require_once dirname( __FILE__ ) . '/class.jetpack-signature.php';
 
-		$jetpack_signature =& new Jetpack_Signature( $token->secret, (int) Jetpack::get_option( 'time_diff' ) );
+		$jetpack_signature = new Jetpack_Signature( $token->secret, (int) Jetpack::get_option( 'time_diff' ) );
 		$signature = $jetpack_signature->sign_current_request( array( 'body' => $this->HTTP_RAW_POST_DATA ) );
 		if ( !$signature ) {
 			return $user;
@@ -2578,7 +2570,7 @@ p {
 
 		if ( !isset( $clients[$client_blog_id] ) ) {
 			Jetpack::load_xml_rpc_client();
-			$clients[$client_blog_id] =& new Jetpack_IXR_ClientMulticall( array(
+			$clients[$client_blog_id] = new Jetpack_IXR_ClientMulticall( array(
 				'user_id' => get_current_user_id()
 			) );
 			ignore_user_abort( true );
@@ -2588,7 +2580,7 @@ p {
 		$args = func_get_args();
 
 		if ( !empty( $args[0] ) ) {
-			call_user_func_array( array( &$clients[$client_blog_id], 'addCall' ), $args );
+			call_user_func_array( array( $clients[$client_blog_id], 'addCall' ), $args );
 		} elseif ( is_multisite() ) {
 			foreach ( $clients as $client_blog_id => $client ) {
 				if ( !$client_blog_id || empty( $client->calls ) ) {
@@ -2676,7 +2668,7 @@ class Jetpack_Client {
 		require_once dirname( __FILE__ ) . '/class.jetpack-signature.php';
 
 		$time_diff = (int) Jetpack::get_option( 'time_diff' );
-		$jetpack_signature =& new Jetpack_Signature( $token->secret, $time_diff );
+		$jetpack_signature = new Jetpack_Signature( $token->secret, $time_diff );
 
 		$timestamp = time() + $time_diff;
 		$nonce = wp_generate_password( 10, false );

@@ -17,8 +17,8 @@ class Jetpack_XMLRPC_Server {
 	/**
 	 * Since we're not extending wp_xmlrpc_server via wp_xmlrpc_server_class, store it as a reference.
 	 */
-	function Jetpack_XMLRPC_Server( &$wp_xmlrpc_server ) {
-		$this->wp_xmlrpc_server =& $wp_xmlrpc_server;
+	function Jetpack_XMLRPC_Server( $wp_xmlrpc_server ) {
+		$this->wp_xmlrpc_server = $wp_xmlrpc_server;
 	}
 
 	/**
