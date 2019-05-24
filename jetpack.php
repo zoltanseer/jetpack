@@ -5,7 +5,7 @@
  * Plugin URI: http://jetpack.com
  * Description: Bring the power of the WordPress.com cloud to your self-hosted WordPress. Jetpack enables you to connect your blog to a WordPress.com account to use the powerful features normally only available to WordPress.com users.
  * Author: Automattic
- * Version: 4.0
+ * Version: 4.0.1
  * Author URI: http://jetpack.com
  * License: GPL2+
  * Text Domain: jetpack
@@ -14,7 +14,7 @@
 
 define( 'JETPACK__MINIMUM_WP_VERSION', '4.4' );
 
-define( 'JETPACK__VERSION',            '4.0.0' );
+define( 'JETPACK__VERSION',            '4.0.1' );
 define( 'JETPACK_MASTER_USER',         true );
 define( 'JETPACK__API_VERSION',        1 );
 define( 'JETPACK__PLUGIN_DIR',         plugin_dir_path( __FILE__ ) );
@@ -67,6 +67,17 @@ add_action( 'init', array( 'Jetpack', 'init' ) );
 add_action( 'plugins_loaded', array( 'Jetpack', 'load_modules' ), 100 );
 add_filter( 'jetpack_static_url', array( 'Jetpack', 'staticize_subdomain' ) );
 add_filter( 'is_jetpack_site', '__return_true' );
+
+/*
+ * Returns the location of Jetpack's lib directory. This filter is applied
+ * in require_lib().
+ *
+ * @filter require_lib_dir
+ */
+function jetpack_require_lib_dir() {
+	return JETPACK__PLUGIN_DIR . '_inc/lib';
+}
+add_filter( 'jetpack_require_lib_dir', 'jetpack_require_lib_dir' );
 
 /**
  * Add an easy way to photon-ize a URL that is safe to call even if Jetpack isn't active.
