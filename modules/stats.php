@@ -71,24 +71,7 @@ function stats_load() {
 		add_action( 'admin_init', 'stats_merged_widget_admin_init' );
 	}
 
-function stats_enqueue_dashboard_head() {
-	add_action( 'admin_head', 'stats_dashboard_head' );
-}
-
-/**
- * Prevent sparkline img requests being redirected to upgrade.php.
- * See wp-admin/admin.php where it checks $wp_db_version.
- */
-function stats_ignore_db_version( $version ) {
-	if (
-		is_admin() &&
-		isset( $_GET['page'] ) && $_GET['page'] == 'stats' &&
-		isset( $_GET['chart'] ) && strpos($_GET['chart'], 'admin-bar-hours') === 0
-	) {
-		global $wp_db_version;
-		return $wp_db_version;
-	}
-	return $version;
+	add_filter( 'pre_option_db_version', 'stats_ignore_db_version' );
 }
 
 
@@ -181,6 +164,36 @@ END;
 	if ( isset( $options['hide_smile'] ) && $options['hide_smile'] ) {
 		$stats_footer .= "\n<style type='text/css'>img#wpstats{display:none}</style>";
 	}
+}
+
+function stats_build_view_data() {
+	global $wp_the_query;
+
+	$blog = Jetpack_Options::get_option( 'id' );
+	$tz = get_option( 'gmt_offset' );
+	$v = 'ext';
+	$blog_url = parse_url( site_url() );
+	$srv = $blog_url['host'];
+	$j = sprintf( '%s:%s', JETPACK__API_VERSION, JETPACK__VERSION );
+	if ( $wp_the_query->is_single || $wp_the_query->is_page || $wp_the_query->is_posts_page ) {
+		// Store and reset the queried_object and queried_object_id
+		// Otherwise, redirect_canonical() will redirect to home_url( '/' ) for show_on_front = page sites where home_url() is not all lowercase.
+		// Repro:
+		// 1. Set home_url = http://ExamPle.com/
+		// 2. Set show_on_front = page
+		// 3. Set page_on_front = something
+		// 4. Visit http://example.com/
+
+		$queried_object = ( isset( $wp_the_query->queried_object ) ) ? $wp_the_query->queried_object : null;
+		$queried_object_id = ( isset( $wp_the_query->queried_object_id ) ) ? $wp_the_query->queried_object_id : null;
+		$post = $wp_the_query->get_queried_object_id();
+		$wp_the_query->queried_object = $queried_object;
+		$wp_the_query->queried_object_id = $queried_object_id;
+	} else {
+		$post = '0';
+	}
+
+	return compact( 'v', 'j', 'blog', 'post', 'tz', 'srv' );
 }
 
 function stats_build_view_data() {
