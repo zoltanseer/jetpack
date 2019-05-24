@@ -64,15 +64,7 @@ function stats_load() {
 		add_action( 'admin_init', 'stats_merged_widget_admin_init' );
 	}
 
-/**
- * Enqueue Stats Dashboard
- *
- * @access public
- * @return void
- */
-function stats_enqueue_dashboard_head() {
-	add_action( 'admin_head', 'stats_dashboard_head' );
-}
+	add_filter( 'pre_option_db_version', 'stats_ignore_db_version' );
 
 	add_filter( 'pre_option_db_version', 'stats_ignore_db_version' );
 
@@ -505,10 +497,6 @@ if ( -1 == document.location.href.indexOf( 'noheader' ) ) {
 </script>
 <?php
 }
-</style>
-<?php
-}
-
 
 /**
  * Stats Report Page.
@@ -869,6 +857,10 @@ function stats_admin_bar_head() {
 
 	if ( ! current_user_can( 'view_stats' ) )
 		return;
+
+	if ( function_exists( 'is_admin_bar_showing' ) && ! is_admin_bar_showing() ) {
+		return;
+	}
 
 	if ( function_exists( 'is_admin_bar_showing' ) && ! is_admin_bar_showing() ) {
 		return;
