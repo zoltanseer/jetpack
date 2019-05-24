@@ -166,6 +166,40 @@ if ( ! function_exists( 'jetpack_shortcode_get_videopress_id' ) ) {
 			return 0;
 		}
 	}
+
+	return join( $textarr );
+}
+
+if ( ! function_exists( 'jetpack_shortcode_get_wpvideo_id' ) ) {
+	/**
+	 * Get VideoPress ID from wpvideo shortcode attributes.
+	 *
+	 * @param array $atts Shortcode attributes.
+	 * @return int  $id   VideoPress ID.
+	 */
+	function jetpack_shortcode_get_wpvideo_id( $atts ) {
+		if ( isset( $atts[0] ) ) {
+			return $atts[0];
+		} else {
+			return 0;
+		}
+	}
+}
+
+if ( ! function_exists( 'jetpack_shortcode_get_videopress_id' ) ) {
+	/**
+	 * Get VideoPress ID from videopress shortcode attributes.
+	 *
+	 * @param array $atts Shortcode attributes.
+	 * @return int  $id   VideoPress ID.
+	 */
+	function jetpack_shortcode_get_videopress_id( $atts ) {
+		if ( isset( $atts[0] ) ) {
+			return $atts[0];
+		} else {
+			return 0;
+		}
+	}
 }
 
 /**
@@ -191,6 +225,39 @@ function wpcom_shortcodereverse_parseattr( $attrs ) {
 	$attrs['height'] = ( is_numeric( $attrs['height'] ) ) ? abs( intval( $attrs['height'] ) ) : $defaults['height'];
 
 	return $attrs;
+}
+
+/**
+ * Common element attributes parsing and sanitizing for src, width and height.
+ *
+ * @since 4.5.0
+ *
+ * @param array $attrs  With original values.
+ *
+ * @return array $attrs With sanitized values.
+ */
+function wpcom_shortcodereverse_parseattr( $attrs ) {
+	$defaults = array(
+		'src'    => false,
+		'width'  => false,
+		'height' => false,
+	);
+
+	$attrs = shortcode_atts( $defaults, $attrs );
+
+	$attrs['src']    = strip_tags( $attrs['src'] ); // For sanity
+	$attrs['width']  = ( is_numeric( $attrs['width'] ) ) ? abs( intval( $attrs['width'] ) ) : $defaults['width'];
+	$attrs['height'] = ( is_numeric( $attrs['height'] ) ) ? abs( intval( $attrs['height'] ) ) : $defaults['height'];
+
+	return $attrs;
+}
+
+/**
+ * When an embed service goes away, we can use this handler
+ * to output a link for history's sake.
+ */
+function jetpack_deprecated_embed_handler( $matches, $attr, $url ) {
+	return sprintf( '<a href="%s">%s</a>', esc_url( $url ), esc_html( esc_url( $url ) ) );
 }
 
 jetpack_load_shortcodes();

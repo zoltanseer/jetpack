@@ -450,6 +450,9 @@
 			$( '#live-preview div.sharedaddy' ).removeClass( 'sd-social-icon' );
 			$( '#live-preview li.advanced' ).removeClass( 'no-icon' );
 
+			$( '#live-preview div.sharedaddy' ).removeClass( 'sd-social-icon' );
+			$( '#live-preview li.advanced' ).removeClass( 'no-icon' );
+
 			// Button style
 			if ( 'icon' === button_style ) {
 				$( '#live-preview ul.preview div span, .sharing-hidden .inner ul div span' ).html( '&nbsp;' ).parent().addClass( 'no-text' );
@@ -461,7 +464,8 @@
 						!$( this ).hasClass( 'preview-print' ) &&
 						!$( this ).hasClass( 'preview-telegram' ) &&
 						!$( this ).hasClass( 'preview-jetpack-whatsapp' ) &&
-						!$( this ).hasClass( 'share-custom' ) ) {
+						!$( this ).hasClass( 'share-custom' ) &&
+						!$( this ).hasClass( 'share-deprecated' ) ) {
 						$( this ).find( '.option a span' ).html( '' ).parent().removeClass( 'sd-button' ).parent().attr( 'class', 'option option-smart-on' );
 					}
 				} );
