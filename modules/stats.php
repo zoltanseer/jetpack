@@ -64,13 +64,7 @@ function stats_load() {
 		add_action( 'admin_init', 'stats_merged_widget_admin_init' );
 	}
 
-	// Add an icon to see stats in WordPress.com for a particular post
-	add_action( 'admin_print_styles-edit.php', 'jetpack_stats_load_admin_css' );
-	add_filter( 'manage_posts_columns', 'jetpack_stats_post_table' );
-	add_filter( 'manage_pages_columns', 'jetpack_stats_post_table' );
-	add_action( 'manage_posts_custom_column', 'jetpack_stats_post_table_cell', 10, 2 );
-	add_action( 'manage_pages_custom_column', 'jetpack_stats_post_table_cell', 10, 2 );
-}
+	add_filter( 'pre_option_db_version', 'stats_ignore_db_version' );
 
 	add_filter( 'pre_option_db_version', 'stats_ignore_db_version' );
 
@@ -872,13 +866,8 @@ function stats_hide_smile_css() {
 function stats_admin_bar_head() {
 	if ( ! stats_get_option( 'admin_bar' ) )
 		return;
-	}
 
 	if ( ! current_user_can( 'view_stats' ) )
-		return;
-	}
-
-	if ( function_exists( 'is_admin_bar_showing' ) && ! is_admin_bar_showing() ) {
 		return;
 	}
 
@@ -1272,6 +1261,9 @@ jQuery( function($) {
 #stats-info #top-posts, #stats-info #top-search {
 	float: left;
 	width: 50%;
+}
+#stats-info #top-posts {
+	padding-right: 3%;
 }
 #top-posts .stats-section-inner p {
 	white-space: nowrap;
