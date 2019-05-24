@@ -211,13 +211,6 @@ function sharing_meta_box_protected( $protected, $meta_key, $meta_type ) {
 	if ( 'sharing_disabled' == $meta_key )
 		$protected = true;
 
-  	return $post_id;
-}
-
-function sharing_meta_box_protected( $protected, $meta_key, $meta_type ) {
-	if ( 'sharing_disabled' == $meta_key )
-		$protected = true;
-
 	return $protected;
 }
 
@@ -300,16 +293,6 @@ add_filter( 'plugin_row_meta', 'sharing_add_plugin_settings', 10, 2 );
 if ( defined( 'RECAPTCHA_PUBLIC_KEY' ) && defined( 'RECAPTCHA_PRIVATE_KEY' ) ) {
 	add_action( 'sharing_email_dialog', 'sharing_email_dialog' );
 	add_filter( 'sharing_email_check', 'sharing_email_check', 10, 3 );
-}
-
-function sharing_email_check( $true, $post, $data ) {
-	require_once plugin_dir_path( __FILE__ ) . 'recaptcha.php';
-
-	$recaptcha = new Jetpack_ReCaptcha( RECAPTCHA_PUBLIC_KEY, RECAPTCHA_PRIVATE_KEY );
-	$response  = ! empty( $_POST['g-recaptcha-response'] ) ? $_POST['g-recaptcha-response'] : '';
-	$result    = $recaptcha->verify( $response, $_SERVER['REMOTE_ADDR'] );
-
-	return ( true === $result );
 }
 
 add_action( 'init', 'sharing_init' );
