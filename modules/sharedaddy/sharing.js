@@ -66,6 +66,7 @@ if ( sharing_js_options && sharing_js_options.counts ) {
 				jQuery.ajax({
 					dataType: 'jsonp',
 					url: 'https://public-api.wordpress.com/rest/v1.1/sites/' + window.WPCOM_site_ID + '/sharing-buttons/facebook/' + path_ending,
+					jsonpCallback: 'WPCOMSharing.update_facebook_count',
 					data: { post_ID: facebookPostIds },
 					success: WPCOMSharing.update_facebook_count,
 					cache: true
@@ -668,6 +669,14 @@ if ( sharing_js_options && sharing_js_options.counts ) {
 					key = '';
 					if ( $( '#recaptcha_public_key' ).length > 0 )
 						key = $( '#recaptcha_public_key' ).val();
+
+					// Update the recaptcha
+					Recaptcha.create( key, 'sharing_recaptcha', { lang : sharing_js_options.lang } );
+
+					key = '';
+					if ( $( '#recaptcha_public_key' ).length > 0 ) {
+						key = $( '#recaptcha_public_key' ).val();
+					}
 
 					// Update the recaptcha
 					Recaptcha.create( key, 'sharing_recaptcha', { lang : sharing_js_options.lang } );
