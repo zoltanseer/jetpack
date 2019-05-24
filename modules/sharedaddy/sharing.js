@@ -72,7 +72,7 @@ if ( sharing_js_options && sharing_js_options.counts ) {
 			}
 
 			for ( url in data ) {
-				if ( ! data.hasOwnProperty( url ) || ! data[ url ].share.share_count ) {
+				if ( ! data.hasOwnProperty( url ) || ! data[ url ].share || ! data[ url ].share.share_count ) {
 					continue;
 				}
 
@@ -699,6 +699,11 @@ var updateLinkedInCount = function( data ) {
 
 					// Update the recaptcha
 					Recaptcha.create( key, 'sharing_recaptcha', { lang : sharing_js_options.lang } );
+
+					// Reset reCATPCHA if exists.
+					if ( 'object' === typeof grecaptcha && 'function' === typeof grecaptcha.reset ) {
+						grecaptcha.reset();
+					}
 
 					// Reset reCATPCHA if exists.
 					if ( 'object' === typeof grecaptcha && 'function' === typeof grecaptcha.reset ) {
