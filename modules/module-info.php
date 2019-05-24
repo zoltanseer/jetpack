@@ -232,15 +232,6 @@ function latex_more_info() { ?>
 			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/beautifulmath.jpg' ) ?>" alt="<?php esc_attr_e( 'LaTeX', 'jetpack' ) ?>" width="300" height="150" />
 		</a>
 	</div>
-	<p><?php esc_html_e( 'Share your posts with Twitter, Facebook, and a host of other services. You can configure services to appear as icons, text, or both. Some services have additional options to display smart buttons, such as Twitter, which will update the number of times the post has been shared.', 'jetpack' ); ?></p>
-
-	<p><?php
-		if ( is_multisite() ) {
-			esc_html_e( 'The following services are included: Twitter, Facebook, Reddit, PressThis, Digg, LinkedIn, Google +1, Print, and Email.' , 'jetpack' );
-		} else {
-			esc_html_e( 'The following services are included: Twitter, Facebook, Reddit, Digg, LinkedIn, Google +1, Print, and Email.' , 'jetpack' );
-		}
-	?></p>
 
 	<p><?php printf( esc_html__( '%s is a powerful markup language for writing complex mathematical equations, formulas, etc.', 'jetpack' ), '<a href="http://www.latex-project.org/" target="_blank"><img src="//s0.wp.com/latex.php?latex=%5CLaTeX&amp;bg=transparent&amp;fg=000&amp;s=-1" alt="LaTeX logo" title="LaTeX" style="vertical-align: -25%" /></a>' ); ?></p>
 	<p><?php printf( esc_html__( 'Jetpack combines the power of %s and the simplicity of WordPress to give you the ultimate in math blogging platforms.', 'jetpack' ), '<img src="//s0.wp.com/latex.php?latex=%5CLaTeX&amp;bg=transparent&amp;fg=000&amp;s=-1" alt="LaTeX logo" title="LaTeX" style="vertical-align: -25%" />' ); ?></p>
@@ -357,6 +348,71 @@ function jetpack_subscriptions_more_info() { ?>
 			esc_html_e( 'The following services are included: Twitter, Facebook, Reddit, Digg, LinkedIn, Google +1, Print, and Email.' , 'jetpack' );
 		}
 	?></p>
+
+	<p><?php esc_html_e( 'Easily allow any visitor to subscribe to all of your posts via email through a widget in your blog&#8217;s sidebar.  Every time you publish a post, WordPress.com will send a notification to all your subscribers.', 'jetpack' ); ?></p>
+	<p><?php esc_html_e( 'When leaving comments, your visitors can also subscribe to a post&#8217;s comments to keep up with the conversation.', 'jetpack' ); ?></p>
+
+	<p><?php printf(
+		__( 'To use the Subscriptions widget, go to Appearance &#8594; <a href="%s">Widgets</a>. Drag the widget labeled &#8220;Blog Subscriptions (Jetpack)&#8221; into one of your sidebars and configure away.', 'jetpack' ),
+		admin_url( 'widgets.php' )
+	); ?></p>
+	<p><?php printf(
+		__( 'You can also make changes to your Subscription settings at the bottom of the <a href="%s">Discussion Settings</a> page.', 'jetpack' ),
+		admin_url( 'options-discussion.php#jetpack-subscriptions-settings' )
+	); ?></p>
+	<p><?php printf(
+		__( 'To customize the emails sent from your blog to your followers, check the settings at the bottom of the <a href="%s">Reading Settings</a> page.', 'jetpack' ),
+		admin_url( 'options-reading.php#follower-settings' )
+	); ?></p>
+<?php
+}
+add_action( 'jetpack_module_more_info_subscriptions', 'jetpack_subscriptions_more_info' );
+
+/**
+ * Enhanced Distribution
+ */
+function jetpack_enhanced_distribution_more_link() {
+	echo '<a class="button-secondary more-info-link" href="http://en.wordpress.com/firehose/">' . esc_html__( 'Learn More', 'jetpack' ) . '</a>';
+}
+add_action( 'jetpack_learn_more_button_enhanced-distribution', 'jetpack_enhanced_distribution_more_link' );
+
+function jetpack_enhanced_distribution_more_info() { ?>
+	<p><?php esc_html_e( 'Jetpack will automatically take the great published content from your blog or website and share it instantly with third party services like search engines, increasing your reach and traffic.', 'jetpack' ); ?></p>
+<?php
+}
+add_action( 'jetpack_module_more_info_enhanced-distribution', 'jetpack_enhanced_distribution_more_info' );
+
+
+/**
+ * Protect
+ */
+function jetpack_protect_more_link() {
+	echo '<a class="button-secondary more-info-link" href="http://jetpack.me/support/protect/">' . esc_html__( 'Learn More', 'jetpack' ) . '</a>';
+}
+add_action( 'jetpack_learn_more_button_protect', 'jetpack_protect_more_link' );
+
+function jetpack_protect_more_info() { ?>
+	<p><?php esc_html_e( 'Protect is a cloud-powered brute force attack prevention tool. We leverage the millions of WordPress sites to identify and block malicious IPs.
+
+Protect tracks failed login attempts across all Jetpack-connected sites using the Protect module.  If any single IP has too many failed attempts in a short period of time, they are blocked from logging in to any site with this plugin installed.
+
+Protect is derived from BruteProtect, and will disable BruteProtect on your site if it is currently enabled.', 'jetpack' ); ?></p><?php
+}
+
+add_action( 'jetpack_module_more_info_protect', 'jetpack_protect_more_info' );
+
+/**
+ * JSON API
+ */
+function jetpack_json_api_more_link() {
+	echo '<a class="button-secondary more-info-link" href="http://jetpack.me/support/json-api/">' . esc_html__( 'Learn More', 'jetpack' ) . '</a>';
+}
+add_action( 'jetpack_learn_more_button_json-api', 'jetpack_json_api_more_link' );
+
+function jetpack_json_api_more_info() { ?>
+	<p><?php esc_html_e( 'Jetpack will allow you to authorize applications and services to securely connect to your blog and allow them to use your content in new ways and offer you new functionality.', 'jetpack' ); ?>
+
+	<p><?php _e( "Developers can use WordPress.com's <a href='http://developer.wordpress.com/docs/oauth2/'>OAuth2</a> authentication system and <a href='http://developer.wordpress.com/docs/api/'>WordPress.com REST API</a> to manage and access your site's content.", 'jetpack' ); ?></p>
 
 	<p><?php esc_html_e( 'Easily allow any visitor to subscribe to all of your posts via email through a widget in your blog&#8217;s sidebar.  Every time you publish a post, WordPress.com will send a notification to all your subscribers.', 'jetpack' ); ?></p>
 	<p><?php esc_html_e( 'When leaving comments, your visitors can also subscribe to a post&#8217;s comments to keep up with the conversation.', 'jetpack' ); ?></p>
