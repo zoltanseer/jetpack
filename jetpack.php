@@ -5,7 +5,7 @@
  * Plugin URI: http://wordpress.org/extend/plugins/jetpack/
  * Description: Bring the power of the WordPress.com cloud to your self-hosted WordPress. Jetpack enables you to connect your blog to a WordPress.com account to use the powerful features normally only available to WordPress.com users.
  * Author: Automattic
- * Version: 1.9
+ * Version: 1.9.1
  * Author URI: http://jetpack.me
  * License: GPL2+
  * Text Domain: jetpack
@@ -17,7 +17,7 @@ define( 'JETPACK__API_VERSION', 1 );
 define( 'JETPACK__MINIMUM_WP_VERSION', '3.2' );
 defined( 'JETPACK_CLIENT__AUTH_LOCATION' ) or define( 'JETPACK_CLIENT__AUTH_LOCATION', 'header' );
 defined( 'JETPACK_CLIENT__HTTPS' ) or define( 'JETPACK_CLIENT__HTTPS', 'AUTO' );
-define( 'JETPACK__VERSION', '1.9' );
+define( 'JETPACK__VERSION', '1.9.1' );
 define( 'JETPACK__PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 defined( 'JETPACK__GLOTPRESS_LOCALES_PATH' ) or define( 'JETPACK__GLOTPRESS_LOCALES_PATH', JETPACK__PLUGIN_DIR . 'locales.php' );
 
@@ -124,7 +124,9 @@ class Jetpack {
 			$instance->plugin_upgrade();
 		}
 
-		// Future: switch on version? If so, think twice before updating version/old_version.
+		if ( version_compare( $version, '1.9', '<' ) && version_compare( '1.9-something', JETPACK__VERSION, '<' ) ) {
+			add_action( 'jetpack_modules_loaded', array( $this->sync, 'sync_all_registered_options' ), 1000 );
+		}
 	}
 
 	/**
@@ -1888,7 +1890,6 @@ p {
 				$this->message = sprintf( __( '<strong>%s Activated!</strong> You can deactivate at any time by clicking Learn More and then Deactivate on the module card.', 'jetpack' ), $module['name'] );
 				$this->stat( 'module-activated', Jetpack::state( 'module' ) );
 			}
-			break;
 
 		case 'module_deactivated' :
 			$modules = Jetpack::state( 'module' );
@@ -3057,6 +3058,7 @@ p {
 		if ( !preg_match( '/.?(?:wordpress|wp)\.com$/', $host ) ) {
 			return $url;
 		}
+	}
 
 		if ( is_ssl() ) {
 			return preg_replace( '|https?://[^/]++/|', 'https://s-ssl.wordpress.com/', $url );
@@ -4001,7 +4003,6 @@ class Jetpack_Sync {
 	}
 
 	function get_post_sync_operation( $new_status, $old_status, $post, $module_conditions ) {
-		$delete = false;
 		$delete_on_behalf_of = array();
 		$submit_on_behalf_of = array();
 		$delete_stati = array( 'delete' );
@@ -4014,7 +4015,6 @@ class Jetpack_Sync {
 			$deleted_post = in_array( $new_status, $delete_stati );
 
 			if ( $deleted_post ) {
-				$delete = true;
 				$delete_on_behalf_of[] = $module;
 			} else {
 				clean_post_cache( $post->ID );
@@ -4027,7 +4027,6 @@ class Jetpack_Sync {
 			if ( $old_status_in_stati && !$new_status_in_stati ) {
 				// Jetpack no longer needs the post
 				if ( !$deleted_post ) {
-					$delete = true;
 					$delete_on_behalf_of[] = $module;
 				} // else, we've already flagged it above
 				continue;
@@ -4038,19 +4037,18 @@ class Jetpack_Sync {
 			}
 
 			// At this point, we know we want to sync the post, not delete it
-			$delete = false;
 			$submit_on_behalf_of[] = $module;
 		}
 
-		if ( $delete ) {
+		if ( !empty( $submit_on_behalf_of ) ) {
+			return array( 'operation' => 'submit', 'on_behalf_of' => $submit_on_behalf_of );
+		}
+
+		if ( !empty( $delete_on_behalf_of ) ) {
 			return array( 'operation' => 'delete', 'on_behalf_of' => $delete_on_behalf_of );
 		}
 
-		if ( !$submit_on_behalf_of ) {
-			return false;
-		}
-
-		return array( 'operation' => 'submit', 'on_behalf_of' => $submit_on_behalf_of );
+		return false;
 	}
 
 	/**
@@ -4233,7 +4231,6 @@ class Jetpack_Sync {
 			return false;
 		}
 
-		$delete = false;
 		$delete_on_behalf_of = array();
 		$submit_on_behalf_of = array();
 		$delete_stati = array( 'delete' );
@@ -4246,17 +4243,15 @@ class Jetpack_Sync {
 			$deleted_comment = in_array( $new_status, $delete_stati );
 
 			if ( $deleted_comment ) {
-				$delete = true;
 				$delete_on_behalf_of[] = $module;
 			}
 
 			$old_status_in_stati = in_array( $old_status, $conditions['comment_stati'] );
 			$new_status_in_stati = in_array( $new_status, $conditions['comment_stati'] );
-	
+
 			if ( $old_status_in_stati && !$new_status_in_stati ) {
 				// Jetpack no longer needs the comment
 				if ( !$deleted_comment ) {
-					$delete = true;
 					$delete_on_behalf_of[] = $module;
 				} // else, we've already flagged it above
 				continue;
@@ -4267,20 +4262,19 @@ class Jetpack_Sync {
 			}
 	
 			// At this point, we know we want to sync the comment, not delete it
-			$delete = false;
 			$submit_on_behalf_of[] = $module;
 		}
 
-		if ( $delete ) {
+		if ( ! empty( $submit_on_behalf_of ) ) {
+			$this->register_post( $comment->comment_post_ID, array( 'on_behalf_of' => $submit_on_behalf_of ) );
+			return $this->register_comment( $comment->comment_ID, array( 'on_behalf_of' => $submit_on_behalf_of ) );
+		}
+
+		if ( !empty( $delete_on_behalf_of ) ) {
 			return $this->register( 'delete_comment', $comment->comment_ID, array( 'on_behalf_of' => $delete_on_behalf_of ) );
 		}
 
-		if ( !$submit_on_behalf_of ) {
-			return false;
-		}
-
-		$this->register_post( $comment->comment_post_ID, array( 'on_behalf_of' => $submit_on_behalf_of ) );
-		return $this->register_comment( $comment->comment_ID, array( 'on_behalf_of' => $submit_on_behalf_of ) );
+		return false;
 	}
 
 	/**
