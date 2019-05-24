@@ -39,7 +39,7 @@ add_action( 'jetpack_module_more_info_vaultpress', 'vaultpress_jetpack_more_info
 function grofiles_load_more_link() {
 	echo 'https://jetpack.com/support/gravatar-hovercards/';
 }
-add_action( 'jetpack_module_more_info_shortlinks', 'wpme_more_info' );
+add_filter( 'jetpack_learn_more_button_publicize', 'publicize_load_more_link' );
 
 function grofiles_more_info() { ?>
 	<?php esc_html_e(
@@ -64,7 +64,7 @@ function jetpack_shortcodes_more_info() { ?>
 		editor and click “Publish.”'
 		, 'jetpack' );
 }
-add_filter( 'jetpack_learn_more_button_publicize', 'publicize_load_more_link' );
+add_action( 'jetpack_module_more_info_shortcodes', 'jetpack_shortcodes_more_info' );
 
 /**
  * Shortlinks
@@ -233,13 +233,12 @@ function jetpack_enhanced_distribution_more_info() {
 }
 add_action( 'jetpack_module_more_info_enhanced-distribution', 'jetpack_enhanced_distribution_more_info' );
 
-/**
- * Infinite Scroll
- */
-function jetpack_infinite_scroll_more_button() {
-	echo 'https://jetpack.com/support/infinite-scroll';
+function jetpack_protect_more_info() {
+	esc_html_e(
+		'Most sites will come under attack from automated bots that attempt to log in for malicious purposes.
+		We protect you automatically from unauthorized access by using data from millions of sites.'
+		, 'jetpack' );
 }
-add_action( 'jetpack_learn_more_button_infinite-scroll', 'jetpack_infinite_scroll_more_button' );
 
 /**
  * Protect
@@ -274,13 +273,6 @@ function jetpack_json_api_more_info() {
 }
 add_action( 'jetpack_module_more_info_json-api', 'jetpack_json_api_more_info' );
 
-/**
- * Tiled Galleries
- */
-function jetpack_tiled_gallery_more_link() {
-	echo 'https://jetpack.com/support/tiled-galleries/';
-}
-add_action( 'jetpack_learn_more_button_tiled-gallery', 'jetpack_tiled_gallery_more_link' );
 
 /**
  * Contact Form

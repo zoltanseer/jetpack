@@ -1,6 +1,6 @@
 <?php
 
-if ( !class_exists( 'PolldaddyShortcode' ) ) {
+if ( ! class_exists( 'PolldaddyShortcode' ) ) {
 	/**
 * Class wrapper for polldaddy shortcodes
 */
@@ -82,7 +82,7 @@ CONTAINER;
 	 */
 	function polldaddy_embed_to_shortcode( $content ) {
 
-		if ( false === strpos( $content, 'polldaddy.com/p/' ) ) {
+		if ( ! is_string( $content ) || false === strpos( $content, 'polldaddy.com/p/' ) ) {
 			return $content;
 		}
 
@@ -495,14 +495,6 @@ CONTAINER;
 				$script = "<script type='text/javascript' charset='UTF-8' id='polldaddyRatings'><!--//--><![CDATA[//><!--\n";
 				foreach( self::$scripts['rating'] as $rating ) {
 					$script .= "PDRTJS_settings_{$rating['id']}{$rating['item_id']}={$rating['settings']}; if ( typeof PDRTJS_RATING !== 'undefined' ){if ( typeof PDRTJS_{$rating['id']}{$rating['item_id']} == 'undefined' ){PDRTJS_{$rating['id']}{$rating['item_id']} = new PDRTJS_RATING( PDRTJS_settings_{$rating['id']}{$rating['item_id']} );}}";
-				}
-				$script .= "\n//--><!]]></script><script type='text/javascript' charset='UTF-8' src='{$rating_js_file}'></script>";
-
-			}
-
-			if ( isset( self::$scripts['poll'] ) ) {
-				foreach( self::$scripts['poll'] as $poll ) {
-					$script .= "<script type='text/javascript' charset='UTF-8' src='{$poll['url']}'></script>";
 				}
 				$script .= "\n//--><!]]></script><script type='text/javascript' charset='UTF-8' src='{$rating_js_file}'></script>";
 

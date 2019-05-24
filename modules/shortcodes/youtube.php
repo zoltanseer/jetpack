@@ -28,8 +28,9 @@
 // <iframe class="youtube-player" type="text/html" width="640" height="385" src="http://www.youtube.com/embed/VIDEO_ID" frameborder="0"></iframe>
 
 function youtube_embed_to_short_code( $content ) {
-	if ( false === strpos( $content, 'youtube.com' ) )
+	if ( ! is_string( $content ) || false === strpos( $content, 'youtube.com' ) ) {
 		return $content;
+	}
 
 	//older codes
 	$regexp = '!<object width="\d+" height="\d+"><param name="movie" value="https?://www\.youtube\.com/v/([^"]+)"></param>(?:<param name="\w+" value="[^"]*"></param>)*<embed src="https?://www\.youtube\.com/v/(.+)" type="application/x-shockwave-flash"(?: \w+="[^"]*")* width="\d+" height="\d+"></embed></object>!i';
@@ -119,6 +120,29 @@ function youtube_link( $content ) {
 function youtube_link_callback( $matches ) {
 	return "\n" . youtube_id( $matches[0] ) . "\n";
 }
+
+/**
+ * Normalizes a YouTube URL to include a v= parameter and a query string free of encoded ampersands.
+ *
+ * @param string $url
+ * @return string The normalized URL
+ */
+if ( ! function_exists( 'youtube_sanitize_url' ) ) :
+function youtube_sanitize_url( $url ) {
+	$url = trim( $url, ' "' );
+	$url = trim( $url );
+	$url = str_replace( array( 'youtu.be/', '/v/', '#!v=', '&amp;', '&#038;', 'playlist' ), array( 'youtu.be/?v=', '/?v=', '?v=', '&', '&', 'videoseries' ), $url );
+
+	// Replace any extra question marks with ampersands - the result of a URL like "http://www.youtube.com/v/9FhMMmqzbD8?fs=1&hl=en_US" being passed in.
+	$query_string_start = strpos( $url, "?" );
+
+	if ( false !== $query_string_start ) {
+		$url = substr( $url, 0, $query_string_start + 1 ) . str_replace( "?", "&", substr( $url, $query_string_start + 1 ) );
+	}
+
+	return $url;
+}
+endif;
 
 /**
  * Normalizes a YouTube URL to include a v= parameter and a query string free of encoded ampersands.
