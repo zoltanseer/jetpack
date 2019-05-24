@@ -504,14 +504,6 @@ CONTAINER;
 				foreach( self::$scripts['poll'] as $poll ) {
 					$script .= "<script type='text/javascript' charset='UTF-8' async src='{$poll['url']}'></script>";
 				}
-				$script .= "\n//--><!]]></script><script type='text/javascript' charset='UTF-8' async src='{$rating_js_file}'></script>";
-
-			}
-
-			if ( isset( self::$scripts['poll'] ) ) {
-				foreach( self::$scripts['poll'] as $poll ) {
-					$script .= "<script type='text/javascript' charset='UTF-8' async src='{$poll['url']}'></script>";
-				}
 				$script .= "\n//--><!]]></script><script type='text/javascript' charset='UTF-8' src='{$rating_js_file}'></script>";
 
 			}
