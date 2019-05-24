@@ -161,39 +161,6 @@ function stats_template_redirect() {
 </script>
 
 END;
-	if ( isset( $options['hide_smile'] ) && $options['hide_smile'] ) {
-		$stats_footer .= "\n<style type='text/css'>img#wpstats{display:none}</style>";
-	}
-}
-
-function stats_build_view_data() {
-	global $wp_the_query;
-
-	$blog = Jetpack_Options::get_option( 'id' );
-	$tz = get_option( 'gmt_offset' );
-	$v = 'ext';
-	$blog_url = parse_url( site_url() );
-	$srv = $blog_url['host'];
-	$j = sprintf( '%s:%s', JETPACK__API_VERSION, JETPACK__VERSION );
-	if ( $wp_the_query->is_single || $wp_the_query->is_page || $wp_the_query->is_posts_page ) {
-		// Store and reset the queried_object and queried_object_id
-		// Otherwise, redirect_canonical() will redirect to home_url( '/' ) for show_on_front = page sites where home_url() is not all lowercase.
-		// Repro:
-		// 1. Set home_url = http://ExamPle.com/
-		// 2. Set show_on_front = page
-		// 3. Set page_on_front = something
-		// 4. Visit http://example.com/
-
-		$queried_object = ( isset( $wp_the_query->queried_object ) ) ? $wp_the_query->queried_object : null;
-		$queried_object_id = ( isset( $wp_the_query->queried_object_id ) ) ? $wp_the_query->queried_object_id : null;
-		$post = $wp_the_query->get_queried_object_id();
-		$wp_the_query->queried_object = $queried_object;
-		$wp_the_query->queried_object_id = $queried_object_id;
-	} else {
-		$post = '0';
-	}
-
-	return compact( 'v', 'j', 'blog', 'post', 'tz', 'srv' );
 }
 
 function stats_build_view_data() {
@@ -426,7 +393,7 @@ function stats_reports_page( $main_chart_only = false ) {
 <p class="hide-if-no-js"><img width="32" height="32" alt="<?php esc_attr_e( 'Loading&hellip;', 'jetpack' ); ?>" src="<?php
 /** This filter is documented in modules/shortcodes/audio.php */
 echo esc_url( apply_filters( 'jetpack_static_url', "{$http}://en.wordpress.com/i/loading/loading-64.gif" ) ); ?>" /></p>
-<p style="font-size: 11pt; margin: 0;"><a href="https://wordpress.com/stats/<?php echo $domain; ?>"><?php esc_html_e( 'View stats on WordPress.com right now', 'jetpack' ); ?></a></p>
+<p style="font-size: 11pt; margin: 0;"><a href="https://wordpress.com/stats/<?php echo $domain; ?>" target="_blank"><?php esc_html_e( 'View stats on WordPress.com right now', 'jetpack' ); ?></a></p>
 <p class="hide-if-js"><?php esc_html_e( 'Your Site Stats work better with JavaScript enabled.', 'jetpack' ); ?><br />
 <a href="<?php echo esc_url( $nojs_url ); ?>"><?php esc_html_e( 'View Site Stats without JavaScript', 'jetpack' ); ?></a>.</p>
 </div>
@@ -871,7 +838,7 @@ function stats_dashboard_widget_control() {
 
 function stats_jetpack_dashboard_widget() {
 	?>
-	<form id="stats_dashboard_widget_control" action="<?php esc_url( admin_url() ); ?>" method="post">
+	<form id="stats_dashboard_widget_control" action="<?php echo esc_url( admin_url() ); ?>" method="post">
 		<?php stats_dashboard_widget_control(); ?>
 		<?php wp_nonce_field( 'edit-dashboard-widget_dashboard_stats', 'dashboard-widget-nonce' ); ?>
 		<input type="hidden" name="widget_id" value="dashboard_stats" />
@@ -1167,7 +1134,7 @@ function stats_print_wp_remote_error( $get, $url ) {
 	}
 ?>
 	<div class="wrap">
-	<p><?php printf( __( 'We were unable to get your stats just now. Please reload this page to try again. If this error persists, please <a href="%1$s">contact support</a>. In your report please include the information below.', 'jetpack' ), 'http://support.wordpress.com/contact/?jetpack=needs-service' ); ?></p>
+	<p><?php printf( __( 'We were unable to get your stats just now. Please reload this page to try again. If this error persists, please <a href="%1$s" target="_blank">contact support</a>. In your report please include the information below.', 'jetpack' ), 'http://support.wordpress.com/contact/?jetpack=needs-service' ); ?></p>
 	<pre>
 	User Agent: "<?php echo esc_html( $_SERVER['HTTP_USER_AGENT'] ); ?>"
 	Page URL: "http<?php echo (is_ssl()?'s':'') . '://' . esc_html( $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] ); ?>"
