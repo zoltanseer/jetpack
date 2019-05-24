@@ -317,6 +317,9 @@ class Share_Email extends Sharing_Source {
 
 class Share_Twitter extends Sharing_Source {
 	var $shortname = 'twitter';
+	// 'https://dev.twitter.com/docs/api/1.1/get/help/configuration' ( 2013/06/24 ) short_url_length is 22
+	var $short_url_length = 24;
+
 	public function __construct( $id, array $settings ) {
 		parent::__construct( $id, $settings );
 
@@ -402,8 +405,8 @@ class Share_Twitter extends Sharing_Source {
 			$sig     = '';
 		}
 
-		$suffix_length = $strlen( " {$post_link}{$sig}" );
 
+		$suffix_length = $this->short_url_length + $strlen( " {$sig}" );
 		// $sig is handled by twitter in their 'via' argument.
 		// $post_link is handled by twitter in their 'url' argument.
 		if ( 140 < $strlen( $post_title ) + $suffix_length ) {
@@ -600,28 +603,14 @@ class Share_LinkedIn extends Sharing_Source {
 
 	public function process_request( $post, array $post_data ) {
 
-		setup_postdata( $post );
-
 		$post_link = $this->get_share_url( $post->ID );
 
-		// http://www.linkedin.com/shareArticle?mini=true&url={articleUrl}&title={articleTitle}&summary={articleSummary}&source={articleSource}
-
-		$encoded_title = rawurlencode( $post->post_title );
-		if( strlen( $encoded_title ) > 200 )
-			$encoded_title = substr( $encoded_title, 0, 197 ) . '...';
-
-		$encoded_summary = rawurlencode( strip_tags( get_the_excerpt() ) );
-		if( strlen( $encoded_summary ) > 256 )
-			$encoded_summary = substr( $encoded_summary, 0, 253 ) . '...';
-
-		$source = get_bloginfo( 'name' );
+		// Using the same URL as the official button, which is *not* LinkedIn's documented sharing link
+		// http://www.linkedin.com/cws/share?url={url}&token=&isFramed=false
 
 		$linkedin_url = add_query_arg( array(
-			'title' => $encoded_title,
 			'url' => rawurlencode( $post_link ),
-			'source' => rawurlencode( $source ),
-			'summary' => $encoded_summary,
-		), 'http://www.linkedin.com/shareArticle?mini=true' );
+		), 'http://www.linkedin.com/cws/share?token=&isFramed=false' );
 
 		// Record stats
 		parent::process_request( $post, $post_data );
@@ -1217,6 +1206,8 @@ class Share_Pinterest extends Sharing_Source {
 				s.src = window.location.protocol + "//assets.pinterest.com/js/pinit.js";
 				var x = document.getElementsByTagName("script")[0];
 				x.parentNode.insertBefore(s, x);
+				// if 'Pin it' button has 'counts' make container wider
+				jQuery(window).load( function(){ jQuery( 'li.share-pinterest a span:visible' ).closest( '.share-pinterest' ).width( '80px' ); } );
 			</script>
 		<?php else : ?>
 			<script type="text/javascript">
@@ -1242,6 +1233,67 @@ class Share_Pinterest extends Sharing_Source {
 			</script>
 		<?php endif;
 	}
+}
+
+class Share_Pocket extends Sharing_Source {
+	var $shortname = 'pocket';
+
+	public function __construct( $id, array $settings ) {
+		parent::__construct( $id, $settings );
+
+		if ( 'official' == $this->button_style )
+			$this->smart = true;
+		else
+			$this->smart = false;
+	}
+
+	public function get_name() {
+		return __( 'Pocket', 'jetpack' );
+	}
+
+	public function process_request( $post, array $post_data ) {
+		// Record stats
+		parent::process_request( $post, $post_data );
+
+		$pocket_url = esc_url_raw( 'https://getpocket.com/save/?url=' . rawurlencode( $this->get_share_url( $post->ID ) ) . '&title=' . rawurlencode( $post->post_title ) );
+		wp_redirect( $pocket_url );
+		exit;
+	}
+
+	public function get_display( $post ) {
+		if ( $this->smart ) {
+			$post_count = 'horizontal';
+
+			$button = '';
+			$button .= '<div class="pocket_button">';
+			$button .= sprintf( '<a href="https://getpocket.com/save" class="pocket-btn" data-lang="%s" data-save-url="%s" data-pocket-count="%s" >%s</a>', 'en', esc_attr( $this->get_share_url( $post->ID ) ), $post_count, esc_attr__( 'Pocket', 'jetpack' ) );
+			$button .= '</div>';
+
+			return $button;
+		} else {
+			return $this->get_link( get_permalink( $post->ID ), _x( 'Pocket', 'share to', 'jetpack' ), __( 'Click to share on Pocket', 'jetpack' ), 'share=pocket' );
+		}
+
+	}
+
+	function display_footer() {
+		if ( $this->smart ) :
+		?>
+		<script>
+		// Don't use Pocket's default JS as it we need to force init new Pocket share buttons loaded via JS.
+		function jetpack_sharing_pocket_init() {
+			jQuery.getScript( 'https://widgets.getpocket.com/v1/j/btn.js?v=1' );
+		}
+		jQuery( document ).on( 'ready', jetpack_sharing_pocket_init );
+		jQuery( document.body ).on( 'post-load', jetpack_sharing_pocket_init );
+		</script>
+		<?php
+		else :
+			$this->js_dialog( $this->shortname, array( 'width' => 450, 'height' => 450 ) );
+		endif;
+
+	}
+
 }
 
 class Share_Pocket extends Sharing_Source {

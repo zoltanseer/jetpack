@@ -948,10 +948,6 @@ p#news-sub {
 	font-size: 14px;
 }
 
-#jetpack-configuration code {
-	font-size: 14px;
-}
-
 .clear {
 	clear: both;
 }
@@ -967,6 +963,10 @@ p#news-sub {
 	min-width: 741px;
 	margin-top: 15px;
 	direction: ltr;
+}
+
+#jetpack-settings .button-primary {
+	color: #fff !important;
 }
 
 #jetpack-settings .button-primary {
