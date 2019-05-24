@@ -71,20 +71,6 @@ function stats_load() {
 		add_action( 'admin_init', 'stats_merged_widget_admin_init' );
 	}
 
-	add_filter( 'pre_option_db_version', 'stats_ignore_db_version' );
-}
-
-/**
- * Delay conditional for current_user_can to after init.
- */
-function stats_merged_widget_admin_init() {
-	if ( current_user_can( 'view_stats' ) ) {
-		add_action( 'load-index.php', 'stats_enqueue_dashboard_head' );
-		add_action( 'wp_dashboard_setup', 'stats_register_widget_control_callback' ); // hacky but works
-		add_action( 'jetpack_dashboard_widget', 'stats_jetpack_dashboard_widget' );
-	}
-}
-
 function stats_enqueue_dashboard_head() {
 	add_action( 'admin_head', 'stats_dashboard_head' );
 }
@@ -118,6 +104,8 @@ function stats_merged_widget_admin_init() {
 		add_action( 'wp_dashboard_setup', 'stats_register_widget_control_callback' ); // hacky but works
 		add_action( 'jetpack_dashboard_widget', 'stats_jetpack_dashboard_widget' );
 	}
+
+	return $caps;
 }
 
 function stats_enqueue_dashboard_head() {
@@ -162,7 +150,7 @@ function stats_map_meta_caps( $caps, $cap, $user_id, $args ) {
 }
 
 function stats_template_redirect() {
-	global $wp_the_query, $current_user, $stats_footer;
+	global $current_user, $stats_footer;
 
 	if ( is_feed() || is_robots() || is_trackback() || is_preview() )
 		return;
@@ -176,6 +164,27 @@ function stats_template_redirect() {
 
 	add_action( 'wp_footer', 'stats_footer', 101 );
 	add_action( 'wp_head', 'stats_add_shutdown_action' );
+
+	$script = set_url_scheme( '//stats.wp.com/e-' . gmdate( 'YW' ) . '.js' );
+	$data = stats_build_view_data();
+	$data_stats_array = stats_array( $data );
+
+	$stats_footer = <<<END
+<script type='text/javascript' src='{$script}' async defer></script>
+<script type='text/javascript'>
+	_stq = window._stq || [];
+	_stq.push([ 'view', {{$data_stats_array}} ]);
+	_stq.push([ 'clickTrackerInit', '{$data['blog']}', '{$data['post']}' ]);
+</script>
+
+END;
+	if ( isset( $options['hide_smile'] ) && $options['hide_smile'] ) {
+		$stats_footer .= "\n<style type='text/css'>img#wpstats{display:none}</style>";
+	}
+}
+
+function stats_build_view_data() {
+	global $wp_the_query;
 
 	$blog = Jetpack_Options::get_option( 'id' );
 	$tz = get_option( 'gmt_offset' );
@@ -201,21 +210,7 @@ function stats_template_redirect() {
 		$post = '0';
 	}
 
-	$script = set_url_scheme( '//stats.wp.com/e-' . gmdate( 'YW' ) . '.js' );
-	$data = stats_array( compact( 'v', 'j', 'blog', 'post', 'tz', 'srv' ) );
-
-	$stats_footer = <<<END
-<script type='text/javascript' src='{$script}' async defer></script>
-<script type='text/javascript'>
-	_stq = window._stq || [];
-	_stq.push([ 'view', {{$data}} ]);
-	_stq.push([ 'clickTrackerInit', '{$blog}', '{$post}' ]);
-</script>
-
-END;
-	if ( isset( $options['hide_smile'] ) && $options['hide_smile'] ) {
-		$stats_footer .= "\n<style type='text/css'>img#wpstats{display:none}</style>";
-	}
+	return compact( 'v', 'j', 'blog', 'post', 'tz', 'srv' );
 }
 
 function stats_add_shutdown_action() {
