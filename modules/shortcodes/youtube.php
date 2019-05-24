@@ -134,52 +134,6 @@ function youtube_sanitize_url( $url ) {
 }
 endif;
 
-/**
- * Normalizes a YouTube URL to include a v= parameter and a query string free of encoded ampersands.
- *
- * @param string $url
- * @return string The normalized URL
- */
-if ( !function_exists( 'youtube_sanitize_url' ) ) :
-function youtube_sanitize_url( $url ) {
-	$url = trim( $url, ' "' );
-	$url = trim( $url );
-	$url = str_replace( array( 'youtu.be/', '/v/', '#!v=', '&amp;', '&#038;', 'playlist' ), array( 'youtu.be/?v=', '/?v=', '?v=', '&', '&', 'videoseries' ), $url );
-
-	// Replace any extra question marks with ampersands - the result of a URL like "http://www.youtube.com/v/9FhMMmqzbD8?fs=1&hl=en_US" being passed in.
-	$query_string_start = strpos( $url, "?" );
-
-	if ( false !== $query_string_start ) {
-		$url = substr( $url, 0, $query_string_start + 1 ) . str_replace( "?", "&", substr( $url, $query_string_start + 1 ) );
-	}
-
-	return $url;
-}
-endif;
-
-/**
- * Normalizes a YouTube URL to include a v= parameter and a query string free of encoded ampersands.
- *
- * @param string $url
- * @return string The normalized URL
- */
-if ( !function_exists( 'youtube_sanitize_url' ) ) :
-function youtube_sanitize_url( $url ) {
-	$url = trim( $url, ' "' );
-	$url = trim( $url );
-	$url = str_replace( array( 'youtu.be/', '/v/', '#!v=', '&amp;', '&#038;', 'playlist' ), array( 'youtu.be/?v=', '/?v=', '?v=', '&', '&', 'videoseries' ), $url );
-
-	// Replace any extra question marks with ampersands - the result of a URL like "http://www.youtube.com/v/9FhMMmqzbD8?fs=1&hl=en_US" being passed in.
-	$query_string_start = strpos( $url, "?" );
-
-	if ( false !== $query_string_start ) {
-		$url = substr( $url, 0, $query_string_start + 1 ) . str_replace( "?", "&", substr( $url, $query_string_start + 1 ) );
-	}
-
-	return $url;
-}
-endif;
-
 /*
  * url can be:
  *    http://www.youtube.com/embed/videoseries?list=PL94269DA08231042B&amp;hl=en_US
@@ -192,53 +146,10 @@ endif;
  */
 
 /**
- * Same as get_youtube_id(), but with the prefix that function should've had.
- */
-function jetpack_shortcode_get_youtube_id( $url ) {
-	return get_youtube_id( $url );
-}
-
-/**
- * @param $url Can be just the $url or the whole $atts array
- * @return bool|mixed The Youtube video ID
- */
-if ( !function_exists( 'get_youtube_id' ) ) :
-function get_youtube_id( $url ) {
-
-	// Do we have an $atts array?  Get first att
-	if ( is_array( $url ) )
-		$url = $url[0];
-
-	$url = youtube_sanitize_url( $url );
-	$url = parse_url( $url );
-	$id  = false;
-
-	if ( ! isset( $url['query'] ) )
-		return false;
-
-	parse_str( $url['query'], $qargs );
-
-	if ( ! isset( $qargs['v'] ) && ! isset( $qargs['list'] ) )
-		return false;
-
-	if ( isset( $qargs['list'] ) )
-		$id = preg_replace( '|[^_a-z0-9-]|i', '', $qargs['list'] );
-
-	if ( empty( $id ) )
-		$id = preg_replace( '|[^_a-z0-9-]|i', '', $qargs['v'] );
-
-	return $id;
-}
-endif;
-
-/**
  * Converts a YouTube URL into an embedded YouTube video.
  */
 function youtube_id( $url ) {
-	if ( apply_filters( 'jetpack_bail_on_shortcode', false, 'youtube' ) )
-		return '';
-
-	if ( ! $id = get_youtube_id( $url ) )
+	if ( ! $id = jetpack_get_youtube_id( $url ) )
 		return '<!--YouTube Error: bad URL entered-->';
 
 	$url = youtube_sanitize_url( $url );
@@ -247,7 +158,14 @@ function youtube_id( $url ) {
 	if ( ! isset( $url['query'] ) )
 		return false;
 
-	parse_str( $url['query'], $qargs );
+	if ( isset( $url['fragment'] ) ) {
+		wp_parse_str( $url['fragment'], $fargs );
+	} else {
+		$fargs = array();
+	}
+	wp_parse_str( $url['query'], $qargs );
+
+	$qargs = array_merge( $fargs, $qargs );
 
 	// calculate the width and height, taking content_width into consideration
 	global $content_width;
@@ -296,7 +214,30 @@ function youtube_id( $url ) {
 	$iv =     ( isset( $qargs['iv_load_policy'] ) && 3 == $qargs['iv_load_policy'] ) ? 3 : 1;
 
 	$fmt =    ( isset( $qargs['fmt'] )            && intval( $qargs['fmt'] )       ) ? '&fmt=' . (int) $qargs['fmt']     : '';
-	$start =  ( isset( $qargs['start'] )          && intval( $qargs['start'] )     ) ? '&start=' . (int) $qargs['start'] : '';
+
+	$start = 0;
+	if ( isset( $qargs['start'] ) ) {
+		$start = intval( $qargs['start'] );
+	} else if ( isset( $qargs['t'] ) ) {
+		$time_pieces = preg_split( '/(?<=\D)(?=\d+)/', $qargs['t'] );
+
+		foreach ( $time_pieces as $time_piece ) {
+			$int = (int) $time_piece;
+			switch ( substr( $time_piece, -1 ) ) {
+			case 'h' :
+				$start += $int * 3600;
+				break;
+			case 'm' :
+				$start += $int * 60;
+				break;
+			case 's' :
+				$start += $int;
+				break;
+			}
+		}
+	}
+
+	$start = $start ? '&start=' . $start : '';
 	$end =    ( isset( $qargs['end'] )            && intval( $qargs['end'] )       ) ? '&end=' . (int) $qargs['end']     : '';
 	$hd =     ( isset( $qargs['hd'] )             && intval( $qargs['hd'] )        ) ? '&hd=' . (int) $qargs['hd']       : '';
 	
@@ -354,7 +295,10 @@ function wpcom_youtube_embed_crazy_url_init() {
 
 add_action( 'init', 'wpcom_youtube_embed_crazy_url_init' );
 
-// higher priority because we need it before auto-link and autop get to it
 if ( apply_filters( 'jetpack_comments_allow_oembed', get_option('embed_autourls') ) ) {
-	add_filter( 'comment_text', 'youtube_link', 1 );
+	// We attach wp_kses_post to comment_text in default-filters.php with priority of 10 anyway, so the iframe gets filtered out.
+	if ( ! is_admin() ) {
+		// Higher priority because we need it before auto-link and autop get to it
+		add_filter( 'comment_text', 'youtube_link', 1 );
+	}
 }

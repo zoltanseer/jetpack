@@ -51,7 +51,7 @@ function sharing_meta_box_save( $post_id ) {
 		return $post_id;
 
 	// Record sharing disable
-	if ( isset( $_POST['post_type'] ) && ( 'post' == $_POST['post_type'] || 'page' == $_POST['post_type'] ) ) {
+	if ( isset( $_POST['post_type'] ) && ( $post_type_object = get_post_type_object( $_POST['post_type'] ) ) && $post_type_object->public ) {
 		if ( current_user_can( 'edit_post', $post_id ) ) {
 			if ( isset( $_POST['sharing_status_hidden'] ) ) {
 				if ( !isset( $_POST['enable_post_sharing'] ) ) {
@@ -146,21 +146,6 @@ function sharing_email_check( $true, $post, $data ) {
 	$recaptcha_result = recaptcha_check_answer( RECAPTCHA_PRIVATE_KEY, $_SERVER["REMOTE_ADDR"], $data["recaptcha_challenge_field"], $data["recaptcha_response_field"] );
 
 	return $recaptcha_result->is_valid;
-}
-
-add_action( 'init', 'sharing_init' );
-add_action( 'admin_init', 'sharing_add_meta_box' );
-add_action( 'save_post', 'sharing_meta_box_save' );
-add_action( 'sharing_email_send_post', 'sharing_email_send_post' );
-add_action( 'sharing_global_options', 'sharing_global_resources', 30 );
-add_action( 'sharing_admin_update', 'sharing_global_resources_save' );
-add_filter( 'sharing_services', 'sharing_restrict_to_single' );
-add_action( 'plugin_action_links_'.basename( dirname( __FILE__ ) ).'/'.basename( __FILE__ ), 'sharing_plugin_settings', 10, 4 );
-add_filter( 'plugin_row_meta', 'sharing_add_plugin_settings', 10, 2 );
-
-if ( defined( 'RECAPTCHA_PRIVATE_KEY' ) ) {
-	add_action( 'sharing_email_dialog', 'sharing_email_dialog' );
-	add_filter( 'sharing_email_check', 'sharing_email_check', 10, 3 );
 }
 
 add_action( 'init', 'sharing_init' );
