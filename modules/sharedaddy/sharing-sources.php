@@ -606,6 +606,7 @@ class Share_LinkedIn extends Sharing_Source {
 			</script><?php
 		}
 	}
+}
 
 class Share_Facebook extends Sharing_Source {
 	var $shortname = 'facebook';
