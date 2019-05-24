@@ -27,6 +27,8 @@ class Sharing_Admin {
 
 		require_once WP_SHARING_PLUGIN_DIR . 'sharing-service.php';
 
+		require_once WP_SHARING_PLUGIN_DIR . 'sharing-service.php';
+
 		require_once WP_SHARING_PLUGIN_DIR.'sharing-service.php';
 
 		add_action( 'admin_init', array( $this, 'admin_init' ) );
