@@ -153,6 +153,9 @@
 			$( '#live-preview div.sharedaddy' ).removeClass( 'sd-social-icon' );
 			$( '#live-preview li.advanced' ).removeClass( 'no-icon' );
 
+			$( '#live-preview div.sharedaddy' ).removeClass( 'sd-social-icon' );
+			$( '#live-preview li.advanced' ).removeClass( 'no-icon' );
+
 			// Button style
 			if ( 'icon' == button_style ) {
 				$( '#live-preview ul.preview div span' ).html( '&nbsp;' ).parent().addClass( 'no-text' ); // Remove text label
@@ -374,7 +377,7 @@
 		} ).change();
 
 		$( 'input[name=sharing_label]' ).blur( function() {
-			$('#live-preview h3.sd-title').html( $( '<div/>' ).text( $( this ).val() ).html() );
+			$('#live-preview h3.sd-title').text( $( '<div/>' ).text( $( this ).val() ).html() );
 		} );
 
 		init_handlers();
