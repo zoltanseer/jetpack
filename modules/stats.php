@@ -71,6 +71,24 @@ function stats_load() {
 		add_action( 'admin_init', 'stats_merged_widget_admin_init' );
 	}
 
+	add_filter( 'pre_option_db_version', 'stats_ignore_db_version' );
+}
+
+/**
+ * Delay conditional for current_user_can to after init.
+ */
+function stats_merged_widget_admin_init() {
+	if ( current_user_can( 'view_stats' ) ) {
+		add_action( 'load-index.php', 'stats_enqueue_dashboard_head' );
+		add_action( 'wp_dashboard_setup', 'stats_register_widget_control_callback' ); // hacky but works
+		add_action( 'jetpack_dashboard_widget', 'stats_jetpack_dashboard_widget' );
+	}
+}
+
+function stats_enqueue_dashboard_head() {
+	add_action( 'admin_head', 'stats_dashboard_head' );
+}
+
 /**
  * Prevent sparkline img requests being redirected to upgrade.php.
  * See wp-admin/admin.php where it checks $wp_db_version.
