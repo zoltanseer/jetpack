@@ -328,6 +328,13 @@ var WPCOMSharing = {
 					// Update the recaptcha
 					Recaptcha.create( key, 'sharing_recaptcha' );
 
+					key = '';
+					if ( $( '#recaptcha_public_key' ).length > 0 )
+						key = $( '#recaptcha_public_key' ).val();
+
+					// Update the recaptcha
+					Recaptcha.create( key, 'sharing_recaptcha' );
+
 					// Show dialog
 					$( '#sharing_email' ).css( {
 						left: $( this ).offset().left + 'px',

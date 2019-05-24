@@ -5,7 +5,7 @@
  * Plugin URI: http://wordpress.org/extend/plugins/jetpack/
  * Description: Bring the power of the WordPress.com cloud to your self-hosted WordPress. Jetpack enables you to connect your blog to a WordPress.com account to use the powerful features normally only available to WordPress.com users.
  * Author: Automattic
- * Version: 2.2.4
+ * Version: 2.2.5
  * Author URI: http://jetpack.me
  * License: GPL2+
  * Text Domain: jetpack
@@ -17,7 +17,7 @@ define( 'JETPACK__API_VERSION', 1 );
 define( 'JETPACK__MINIMUM_WP_VERSION', '3.3' );
 defined( 'JETPACK_CLIENT__AUTH_LOCATION' ) or define( 'JETPACK_CLIENT__AUTH_LOCATION', 'header' );
 defined( 'JETPACK_CLIENT__HTTPS' ) or define( 'JETPACK_CLIENT__HTTPS', 'AUTO' );
-define( 'JETPACK__VERSION', '2.2.4' );
+define( 'JETPACK__VERSION', '2.2.5' );
 define( 'JETPACK__PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 defined( 'JETPACK__GLOTPRESS_LOCALES_PATH' ) or define( 'JETPACK__GLOTPRESS_LOCALES_PATH', JETPACK__PLUGIN_DIR . 'locales.php' );
 
@@ -978,6 +978,11 @@ class Jetpack {
 			wp_safe_redirect( $url );
 			exit;
 		}
+		Jetpack::state( 'error', false );
+		Jetpack::state( 'module', false );
+		Jetpack::catch_errors( false );
+		do_action( 'jetpack_activate_default_modules', $min_version, $max_version, $other_modules );
+	}
 
 		do_action( 'jetpack_before_activate_default_modules', $min_version, $max_version, $other_modules );
 
@@ -1058,10 +1063,6 @@ class Jetpack {
 			if ( $module_data['requires_connection'] ) {
 				return false;
 			}
-			$active_state[] = $module;
-			Jetpack::state( $state, implode( ',', $active_state ) );
-			Jetpack::update_option( 'active_modules', array_unique( $active ) );
-			ob_end_clean();
 		}
 
 		// Check and see if the old plugin is active
@@ -3801,10 +3802,6 @@ class Jetpack_Client_Server {
 			),
 		);
 		$response = Jetpack_Client::_wp_remote_request( Jetpack::fix_url_for_bad_hosts( Jetpack::api_url( 'token' ), $args ), $args );
-
-		if ( is_wp_error( $response ) ) {
-			return new Jetpack_Error( 'token_http_request_failed', $response->get_error_message() );
-		}
 
 		if ( is_wp_error( $response ) ) {
 			return new Jetpack_Error( 'token_http_request_failed', $response->get_error_message() );
