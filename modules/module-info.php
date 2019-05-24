@@ -246,6 +246,7 @@ function notes_more_info() { ?>
 			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/notes.png' ) ?>" alt="<?php esc_attr_e( 'Notifications', 'jetpack' ) ?>" width="300" height="150" />
 		</a>
 	</div>
+	<p><?php esc_html_e( 'Share your posts with Twitter, Facebook, and a host of other services. You can configure services to appear as icons, text, or both. Some services have additional options to display smart buttons, such as Twitter, which will update the number of times the post has been shared.', 'jetpack' ); ?></p>
 
 	<p><?php esc_html_e( 'Keep up with the latest happenings on all your WordPress sites and interact with other WordPress.com users.', 'jetpack' ) ?></p>
 <?php
@@ -284,6 +285,14 @@ function latex_more_info() { ?>
 	</div>
 	<p><?php esc_html_e( 'Share your posts with Twitter, Facebook, and a host of other services. You can configure services to appear as icons, text, or both. Some services have additional options to display smart buttons, such as Twitter, which will update the number of times the post has been shared.', 'jetpack' ); ?></p>
 
+	<p><?php
+		if ( is_multisite() ) {
+			esc_html_e( 'The following services are included: Twitter, Facebook, Reddit, StumbleUpon, PressThis, Digg, LinkedIn, Google +1, Print, and Email.' , 'jetpack' );
+		} else {
+			esc_html_e( 'The following services are included: Twitter, Facebook, Reddit, StumbleUpon, Digg, LinkedIn, Google +1, Print, and Email.' , 'jetpack' );
+		}
+	?></p>
+
 	<p><?php printf( esc_html__( '%s is a powerful markup language for writing complex mathematical equations, formulas, etc.', 'jetpack' ), '<a href="http://www.latex-project.org/" target="_blank"><img src="//s0.wp.com/latex.php?latex=%5CLaTeX&amp;bg=transparent&amp;fg=000&amp;s=-1" alt="LaTeX logo" title="LaTeX" style="vertical-align: -25%" /></a>' ); ?></p>
 	<p><?php printf( esc_html__( 'Jetpack combines the power of %s and the simplicity of WordPress to give you the ultimate in math blogging platforms.', 'jetpack' ), '<img src="//s0.wp.com/latex.php?latex=%5CLaTeX&amp;bg=transparent&amp;fg=000&amp;s=-1" alt="LaTeX logo" title="LaTeX" style="vertical-align: -25%" />' ); ?></p>
 	<p><?php esc_html_e( 'Wow, that sounds nerdy.', 'jetpack' ) ?></p>
@@ -309,13 +318,34 @@ function latex_load_more_link( $description ) {
 }
 add_filter( 'jetpack_learn_more_button_latex', 'latex_load_more_link' );
 
-function jetpack_widgets_load_more_link( $description ) {
-	echo '<a class="button-secondary more-info-link" href="http://en.support.wordpress.com/widgets/">' . esc_html__( 'Learn More', 'jetpack' ) . '</a>';
-}
-add_filter( 'jetpack_learn_more_button_widgets', 'jetpack_widgets_load_more_link' );
+function jetpack_contact_form_more_info() {
+	echo '<div class="jp-info-img">';
+	echo '<a href="http://support.wordpress.com/contact-form/">';
+	echo '<img class="jp-info-img" src="' . plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/contactform.png' ) . '" alt="' . esc_attr__( 'Contact Form', 'jetpack' ) . '" width="300" height="150" />';
+	echo '</a>';
+	echo '</div>';
 
-// Subscriptions
-function jetpack_subscriptions_more_info() { ?>
+	echo '<p>';
+	_e( 'A contact form is a great way to offer your readers the ability to get in touch, without giving out your personal email address.', 'jetpack' );
+	echo '</p>';
+
+	echo '<p>';
+	_e( 'Each contact form can easily be customized to fit your needs. When a user submits your contact form, the feedback will be filtered through <a href="http://akismet.com/">Akismet</a> (if it is active on your site) to make sure it’s not spam. Any legitimate feedback will then be emailed to you, and added to your feedback management area.', 'jetpack' );
+	echo '</p>';
+}
+
+add_action( 'jetpack_learn_more_button_contact-form', 'jetpack_contact_form_learn_more_button' );
+add_action( 'jetpack_module_more_info_contact-form', 'jetpack_contact_form_more_info' );
+add_action( 'jetpack_module_more_info_connected_contact-form', 'jetpack_contact_form_more_info' );
+// Contact Form: STOP
+
+// Jetpack Comments: START
+function jetpack_comments_learn_more_button() {
+    echo '<a class="button-secondary more-info-link" href="#">' . __( 'Learn More', 'jetpack' ) . '</a>';
+}
+
+function jetpack_comments_more_info() {
+?>
 	<div class="jp-info-img">
 		<a href="http://en.support.wordpress.com/sharing/">
 			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/sharing.png' ) ?>" alt="<?php esc_attr_e( 'Sharing', 'jetpack' ) ?>" width="300" height="150" />
@@ -960,7 +990,8 @@ function jetpack_custom_site_icon() { ?>
 		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/site-icon.png' ) ?>" alt="<?php esc_attr_e( 'Site Icon', 'jetpack' ) ?>" width="300" height="150" />
 	</div>
 
-	<p><?php esc_html_e( 'Site Icon lets you create an icon for your site which is displayed as a favicon.', 'jetpack' ); ?></p>
+	<p><?php esc_html_e( 'Site Icon lets you create an icon for your site. This icon will be used as favicon, mobile icon, and Tile on Windows 8 computers.', 'jetpack' ); ?></p>
+	<p><?php printf( __( 'To add a new icon to your site, head over to <a href="%s">Settings &rarr; General &rarr; Site Icon</a>, and upload an icon.', 'jetpack' ), admin_url( 'options-general.php#site-icon' ) ); ?></p>
 
 <?php
 }
