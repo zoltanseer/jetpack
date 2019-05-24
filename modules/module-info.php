@@ -259,7 +259,12 @@ function notes_more_info() { ?>
 	<p><?php esc_html_e( 'Additionally you can define your own custom services.', 'jetpack' ); ?></p>
 <?php
 }
-add_action( 'jetpack_module_more_info_likes', 'jetpack_likes_more_info' );
+add_action( 'jetpack_module_more_info_widgets', 'jetpack_widgets_more_info' );
+
+function jetpack_widgets_more_info_connected() { ?>
+	<div class="jp-info-img">
+		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/_inc/images/screenshots/widgets.png' ) ?>" alt="<?php esc_attr_e( 'Widgets Screenshot', 'jetpack' ) ?>" width="300" height="150" />
+	</div>
 
 	<h4><?php esc_html_e( 'Notifications' , 'jetpack' ); ?></h4>
 	<p><?php esc_html_e( 'Keep up with the latest happenings on all your WordPress sites and interact with other WordPress.com users.', 'jetpack' ) ?></p>
@@ -710,7 +715,7 @@ function jetpack_mobile_push_notifications_more_info() { ?>
 
 	<h4><?php esc_html_e( 'Mobile Push Notifications' , 'jetpack' ); ?></h4>
 
-	<p><?php _e( 'If you have your blog added to the <a href="http://ios.wordpress.org/">WordPress for iOS app</a>, you’ll now be able to opt in to receive push notifications of new comments, which makes it easier than ever to keep up with your readers and moderate comments on the go.', 'jetpack' ); ?></p>
+	<p><?php echo sprintf( __( 'If you use <a href="%1$s">WordPress for iOS</a> or <a href="%2$s">WordPress for Android</a>, you’ll now be able to opt in to receive push notifications of new comments, which makes it easier than ever to keep up with your readers and moderate comments on the go.', 'jetpack' ), 'http://ios.wordpress.org/', 'http://android.wordpress.org/' ); ?></p>
 
 <?php
 }

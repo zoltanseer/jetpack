@@ -129,6 +129,9 @@
 			$( '#live-preview div.sharedaddy' ).removeClass( 'sd-social-icon' );
 			$( '#live-preview li.advanced' ).removeClass( 'no-icon' );
 
+			$( '#live-preview div.sharedaddy' ).removeClass( 'sd-social-icon' );
+			$( '#live-preview li.advanced' ).removeClass( 'no-icon' );
+
 			// Button style
 			if ( 'icon' == button_style ) {
 				$( '#live-preview ul.preview div span' ).html( '&nbsp;' ).parent().addClass( 'no-text' ); // Remove text label
@@ -178,6 +181,14 @@
 			return true;
 		}
 
+		function showExtraOptions( service ) {
+			jQuery( '.' + service + '-extra-options' ).css( { backgroundColor: '#ffffcc' } ).fadeIn();
+		}
+
+		function hideExtraOptions( service ) {
+			jQuery( '.' + service + '-extra-options' ).fadeOut( 'slow' );
+		}
+
 		function save_services() {
 			$( '#enabled-services h3 img' ).show();
 
@@ -203,6 +214,13 @@
 				if ( $( this ).hasClass( 'service' ) ) {
 					// Ready for saving
 					visible[visible.length] = $( this ).attr( 'id' );
+					showExtraOptions( $( this ).attr( 'id' ) );
+				}
+			} );
+
+			$( 'ul.services-available li' ).each( function() {
+				if ( $( this ).hasClass( 'service' ) ) {
+					hideExtraOptions( $( this ).attr( 'id' ) );
 				}
 			} );
 
@@ -210,6 +228,7 @@
 				if ( $( this ).hasClass( 'service' ) ) {
 					// Ready for saving
 					hidden[hidden.length] = $( this ).attr( 'id' );
+					showExtraOptions( $( this ).attr( 'id' ) );
 				}
 			} );
 
