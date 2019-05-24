@@ -81,57 +81,6 @@ class Jetpack_XMLRPC_Server {
 		return array(
 			'jetpack.remoteAuthorize' => array( $this, 'remote_authorize' ),
 		);
-		return $response;
-	}
-
-	/**
-	* Verifies that Jetpack.WordPress.com received a registration request from this site
-	*/
-	function verify_registration( $data ) {
-		return $this->verify_action( array( 'register', $data[0], $data[1] ) );
-	}
-
-	function remote_authorize( $request ) {
-		foreach( array( 'secret', 'state', 'redirect_uri', 'code' ) as $required ) {
-			if ( ! isset( $request[ $required ] ) || empty( $request[ $required ] ) ) {
-				return $this->error( new Jetpack_Error( 'missing_parameter', 'One or more parameters is missing from the request.', 400 ) );
-			}
-		}
-
-		if ( ! get_user_by( 'id', $request['state'] ) ) {
-			return $this->error( new Jetpack_Error( 'user_unknown', 'User not found.', 404 ) );
-		}
-
-		if ( Jetpack::is_active() && Jetpack::is_user_connected( $request['state'] ) ) {
-			return $this->error( new Jetpack_Error( 'already_connected', 'User already connected.', 400 ) );
-		}
-
-		$verified = $this->verify_action( array( 'authorize', $request['secret'], $request['state'] ) );
-
-		if ( is_a( $verified, 'IXR_Error' ) ) {
-			return $verified;
-		}
-
-		wp_set_current_user( $request['state'] );
-
-		$client_server = new Jetpack_Client_Server;
-		$result = $client_server->authorize( $request );
-
-		if ( is_wp_error( $result ) ) {
-			return $this->error( $result );
-		}
-
-		$response = array(
-			'result' => $result,
-		);
-		return $response;
-	}
-
-	/**
-	* Verifies that Jetpack.WordPress.com received a registration request from this site
-	*/
-	function verify_registration( $data ) {
-		return $this->verify_action( array( 'register', $data[0], $data[1] ) );
 	}
 
 	function remote_authorize( $request ) {

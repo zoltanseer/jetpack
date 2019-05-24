@@ -503,61 +503,6 @@ if ( -1 == document.location.href.indexOf( 'noheader' ) ) {
 </script>
 <?php
 }
-</style>
-<?php
-}
-
-
-/**
- * Detect if JS is on.  If so, remove cookie so next page load is via JS.
- *
- * @access public
- * @return void
- */
-function stats_js_remove_stnojs_cookie() {
-	$parsed = parse_url( admin_url() );
-?>
-<script type="text/javascript">
-/* <![CDATA[ */
-document.cookie = 'stnojs=0; expires=Wed, 9 Mar 2011 16:55:50 UTC; path=<?php echo esc_js( $parsed['path'] ); ?>';
-/* ]]> */
-</script>
-<?php
-}
-
-/**
- * Normal page load.  Load page content via JS.
- *
- * @access public
- * @return void
- */
-function stats_js_load_page_via_ajax() {
-?>
-<script type="text/javascript">
-/* <![CDATA[ */
-if ( -1 == document.location.href.indexOf( 'noheader' ) ) {
-	jQuery( function( $ ) {
-		$.get( document.location.href + '&noheader', function( responseText ) {
-			$( '#stats-loading-wrap' ).replaceWith( responseText );
-		} );
-	} );
-}
-/* ]]> */
-</script>
-<?php
-}
-</style>
-<?php
-}
-
-
-/**
- * Stats Report Page.
- *
- * @access public
- * @param bool $main_chart_only (default: false) Main Chart Only.
- */
-function stats_reports_page( $main_chart_only = false ) {
 
 /**
  * Stats Report Page.
@@ -918,6 +863,10 @@ function stats_admin_bar_head() {
 
 	if ( ! current_user_can( 'view_stats' ) )
 		return;
+
+	if ( function_exists( 'is_admin_bar_showing' ) && ! is_admin_bar_showing() ) {
+		return;
+	}
 
 	if ( function_exists( 'is_admin_bar_showing' ) && ! is_admin_bar_showing() ) {
 		return;
