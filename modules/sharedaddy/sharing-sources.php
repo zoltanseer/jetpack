@@ -747,17 +747,6 @@ class Share_Facebook extends Sharing_Advanced_Source {
 		return $locale->facebook_locale;
 	}
 
-	function guess_locale_from_lang( $lang ) {
-		$lang = strtolower( str_replace( '-', '_', $lang ) );
-		if ( 5 == strlen( $lang ) )
-			$lang = substr( $lang, 0, 3 ) . strtoupper( substr( $lang, 3, 2 ) ); // Already in xx_xx, just make sure it's uppered
-		else if ( 3 == strlen( $lang ) )
-			$lang = $lang; // Don't know what to do with these
-		else
-			$lang = $lang . '_' . strtoupper( $lang ); // Sometimes this gives a workable locale
-		return $lang;
-	}
-
 	public function get_display( $post ) {
 		if ( $this->share_type == 'share' ) {
 			return '<div class="facebook_button"><a name="fb_share" rel="nofollow" type="button" share_url="' . apply_filters( 'sharing_permalink', get_permalink( $post->ID ), $post->ID, $this->id ) . '" href="http://www.facebook.com/sharer.php?u=' . rawurlencode( get_permalink( $post->ID ) ) . '&t=' . rawurlencode( apply_filters( 'sharing_post_title', $post->post_title, $post->ID, $this->id ) ) . '">'.__( 'Share' , 'jetpack' ).'</a><script src="http://static.ak.fbcdn.net/connect.php/js/FB.Share" type="text/javascript"></script></div>';
