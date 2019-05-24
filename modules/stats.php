@@ -9,6 +9,7 @@
  * Auto Activate: Yes
  * Module Tags: Site Stats, Recommended
  * Feature: Recommended, Traffic
+ * Additional Search Queries: statistics, tracking, analytics, views, traffic, stats
  */
 
 if ( defined( 'STATS_VERSION' ) ) {
@@ -70,20 +71,7 @@ function stats_load() {
 		add_action( 'admin_init', 'stats_merged_widget_admin_init' );
 	}
 
-/**
- * Prevent sparkline img requests being redirected to upgrade.php.
- * See wp-admin/admin.php where it checks $wp_db_version.
- */
-function stats_ignore_db_version( $version ) {
-	if (
-		is_admin() &&
-		isset( $_GET['page'] ) && $_GET['page'] == 'stats' &&
-		isset( $_GET['chart'] ) && strpos($_GET['chart'], 'admin-bar-hours') === 0
-	) {
-		global $wp_db_version;
-		return $wp_db_version;
-	}
-	return $version;
+	add_filter( 'pre_option_db_version', 'stats_ignore_db_version' );
 }
 
 
@@ -142,15 +130,52 @@ function stats_map_meta_caps( $caps, $cap, $user_id, $args ) {
 	return $caps;
 }
 
+function stats_enqueue_dashboard_head() {
+	add_action( 'admin_head', 'stats_dashboard_head' );
+}
+
+/**
+ * Prevent sparkline img requests being redirected to upgrade.php.
+ * See wp-admin/admin.php where it checks $wp_db_version.
+ */
+function stats_ignore_db_version( $version ) {
+	if (
+		is_admin() &&
+		isset( $_GET['page'] ) && $_GET['page'] == 'stats' &&
+		isset( $_GET['chart'] ) && strpos($_GET['chart'], 'admin-bar-hours') === 0
+	) {
+		global $wp_db_version;
+		return $wp_db_version;
+	}
+	return $version;
+}
+
+/**
+ * Maps view_stats cap to read cap as needed
+ *
+ * @return array Possibly mapped capabilities for meta capability
+ */
+function stats_map_meta_caps( $caps, $cap, $user_id, $args ) {
+	// Map view_stats to exists
+	if ( 'view_stats' == $cap ) {
+		$user        = new WP_User( $user_id );
+		$user_role   = array_shift( $user->roles );
+		$stats_roles = stats_get_option( 'roles' );
+
+		// Is the users role in the available stats roles?
+		if ( is_array( $stats_roles ) && in_array( $user_role, $stats_roles ) ) {
+			$caps = array( 'read' );
+		}
+	}
+
+	return $caps;
+}
+
 function stats_template_redirect() {
 	global $wp_the_query, $current_user, $stats_footer;
 
 	if ( is_feed() || is_robots() || is_trackback() || is_preview() )
 		return;
-
-	$options = stats_get_options();
-	// Ensure this is always setup for the check below
-	$options['reg_users'] = empty( $options['reg_users'] ) ? false : true;
 
 	// Should we be counting this user's views?
 	if ( !empty( $current_user->ID ) ) {
@@ -282,6 +307,8 @@ function stats_upgrade_options( $options ) {
 function stats_array( $kvs ) {
 	/**
 	 * Filter the options added to the JavaScript Stats tracking code.
+	 *
+	 * @module stats
 	 *
 	 * @since 1.1.0
 	 *
@@ -678,8 +705,6 @@ function stats_admin_bar_head() {
 }
 
 function stats_admin_bar_menu( &$wp_admin_bar ) {
-	$blog_id = stats_get_option( 'blog_id' );
-
 	$url = add_query_arg( 'page', 'stats', admin_url( 'admin.php' ) ); // no menu_page_url() blog-side.
 
 	$img_src = esc_attr( add_query_arg( array( 'noheader'=>'', 'proxy'=>'', 'chart'=>'admin-bar-hours-scale' ), $url ) );

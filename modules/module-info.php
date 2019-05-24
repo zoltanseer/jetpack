@@ -269,6 +269,57 @@ function notes_more_info() { ?>
 }
 add_action( 'jetpack_module_more_info_notes', 'notes_more_info' );
 
+// Publicize
+function publicize_more_info() { ?>
+	<div class="jp-info-img">
+		<a href="http://en.support.wordpress.com/publicize/">
+			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/publicize.png' ) ?>" alt="<?php esc_attr_e( 'Publicize', 'jetpack' ) ?>" width="328" height="123" />
+		</a>
+	</div>
+	<p><?php esc_html_e( 'Share your posts with Twitter, Facebook, and a host of other services. You can configure services to appear as icons, text, or both. Some services have additional options to display smart buttons, such as Twitter, which will update the number of times the post has been shared.', 'jetpack' ); ?></p>
+
+	<p><?php
+		if ( is_multisite() ) {
+			esc_html_e( 'The following services are included: Twitter, Facebook, Reddit, PressThis, Digg, LinkedIn, Google +1, Print, and Email.' , 'jetpack' );
+		} else {
+			esc_html_e( 'The following services are included: Twitter, Facebook, Reddit, Digg, LinkedIn, Google +1, Print, and Email.' , 'jetpack' );
+		}
+	?></p>
+
+	<p><?php esc_html_e( 'Publicize allows you to connect your blog to popular social networking sites and automatically share new posts with your friends.	 You can make a connection for just yourself or for all users on your blog.', 'jetpack' ) ?></p>
+	<p><?php esc_html_e( 'Publicize allows you to share your posts on Facebook, Twitter, Tumblr, Yahoo!, and Linkedin.', 'jetpack' ); ?></p>
+
+<?php	if ( 'jetpack_module_more_info_connected_publicize' == current_filter() ) : ?>
+
+	<p><?php printf( __( 'Manage your <a href="%s">Publicize settings</a>.', 'jetpack' ), menu_page_url( 'sharing', false ) ); ?>
+
+<?php	endif; ?>
+
+	<p>&rarr; <a href="http://jetpack.me/support/publicize/"><?php esc_html_e( 'More information on using Publicize.', 'jetpack' ); ?></a></p>
+<?php
+}
+
+add_action( 'jetpack_module_more_info_publicize', 'publicize_more_info' );
+add_action( 'jetpack_module_more_info_connected_publicize', 'publicize_more_info' );
+
+function publicize_load_more_link( $description ) {
+	echo '<a class="button-secondary more-info-link" href="http://jetpack.me/support/publicize/">' . esc_html__( 'Learn More', 'jetpack' ) . '</a>';
+}
+add_filter( 'jetpack_learn_more_button_publicize', 'publicize_load_more_link' );
+
+// Notifications
+function notes_more_info() { ?>
+	<div class="jp-info-img">
+		<a href="http://support.wordpress.com/notifications/">
+			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/notes.png' ) ?>" alt="<?php esc_attr_e( 'Notifications', 'jetpack' ) ?>" width="300" height="150" />
+		</a>
+	</div>
+
+	<p><?php esc_html_e( 'Keep up with the latest happenings on all your WordPress sites and interact with other WordPress.com users.', 'jetpack' ) ?></p>
+<?php
+}
+add_action( 'jetpack_module_more_info_notes', 'notes_more_info' );
+
 function notes_more_info_connected() { ?>
 	<div class="jp-info-img">
 		<a href="http://support.wordpress.com/notifications/">
@@ -513,11 +564,6 @@ function jetpack_protect_more_link() {
 }
 add_action( 'jetpack_learn_more_button_protect', 'jetpack_protect_more_link' );
 
-function jetpack_protect_search_terms( $terms ) {
-	$terms = _x( 'security, secure, protection, botnet, brute force', 'search terms', 'jetpack' );
-	return $terms;
-}
-add_filter( 'jetpack_search_terms_protect', 'jetpack_protect_search_terms' );
 
 // JSON API
 function jetpack_json_api_more_info() { ?>
@@ -964,7 +1010,7 @@ add_action( 'jetpack_learn_more_button_markdown', 'jetpack_markdown_more_link' )
 // Site Verification Tools: START
 function jetpack_verification_tools_more_info() { ?>
 	<p><?php esc_html_e( 'Use these tools to verify that you own/control your website with other external services like Google, Bing and Pinterest.', 'jetpack' ); ?></p>
-	<p><?php printf( __( "Verifying your site allows you to access advanced features on these other services (e.g. Webmaster tools, or getting a verified badge). We'll just add an invisible %s tag to the source code of your homepage.", 'jetpack' ), '<code>meta</code>' ); ?></p>
+	<p><?php printf( __( "Verifying your site allows you to access advanced features on these other services (e.g. Webmaster tools, Google Search Console, or getting a verified badge). We'll just add an invisible %s tag to the source code of your homepage.", 'jetpack' ), '<code>meta</code>' ); ?></p>
 <?php
 }
 add_action( 'jetpack_module_more_info_verification-tools', 'jetpack_verification_tools_more_info' );

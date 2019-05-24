@@ -352,6 +352,10 @@ body .sd-content ul li.share-custom.no-icon a span {
 
 
 /* Individual official buttons */
+.googleplus1_button .g-plus {
+	vertical-align: top !important;
+}
+
 .reddit_button iframe {
 	margin-top: 1px;
 }
@@ -371,8 +375,6 @@ body .sd-social-official li.share-press-this a
 	top: 0;
 }
 
-body .sd-content li.share-custom a:hover span {
-}
 
 /* Custom icons */
 body .sd-social-icon .sd-content li.share-custom>a {
