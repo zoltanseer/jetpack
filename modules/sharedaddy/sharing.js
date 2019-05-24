@@ -204,7 +204,7 @@ var updateLinkedInCount = function( data ) {
 								$more_sharing_pane.data( 'justSlid', false );
 							}, 300 );
 
-							if ( $more_sharing_pane.find( '.share-google-plus-1' ).size() ) {
+							if ( $more_sharing_pane.find( '.share-google-plus-1' ).length ) {
 								// The pane needs to stay open for the Google+ Button
 								return;
 							}
@@ -699,6 +699,11 @@ var updateLinkedInCount = function( data ) {
 
 					// Update the recaptcha
 					Recaptcha.create( key, 'sharing_recaptcha', { lang : sharing_js_options.lang } );
+
+					// Reset reCATPCHA if exists.
+					if ( 'object' === typeof grecaptcha && 'function' === typeof grecaptcha.reset ) {
+						grecaptcha.reset();
+					}
 
 					// Reset reCATPCHA if exists.
 					if ( 'object' === typeof grecaptcha && 'function' === typeof grecaptcha.reset ) {
