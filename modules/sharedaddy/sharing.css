@@ -256,6 +256,12 @@ body .sd-content ul li.share-custom.no-icon a span {
 .sd-social-icon-text .sd-content li.share-pocket a:before {
 	content: '\f224';
 }
+.sd-social-icon .sd-content ul li.share-skype a:before,
+.sd-social-text .sd-content ul li.share-skype a:before,
+.sd-content ul li.share-skype div.option.option-smart-off a:before,
+.sd-social-icon-text .sd-content li.share-skype a:before {
+	content: '\f220';
+}
 .sd-social-icon .sd-content ul li.share-pinterest a:before,
 .sd-social-text .sd-content ul li.share-pinterest a:before,
 .sd-content ul li.share-pinterest div.option.option-smart-off a:before,
@@ -346,6 +352,10 @@ body .sd-content ul li.share-custom.no-icon a span {
 	width: 98px;
 }
 
+.sd-social-official .sd-content .skypeShare {
+	width: 55px;
+}
+
 /* Individual official buttons */
 .googleplus1_button .g-plus {
 	vertical-align: top !important;
@@ -370,6 +380,12 @@ body .sd-social-official li.share-press-this a
 	top: 0;
 }
 
+/* Custom icons */
+body .sd-social-icon .sd-content li.share-custom>a {
+	padding: 2px 3px 0 3px;
+	position: relative;
+	top: 4px;
+}
 
 /* Custom icons */
 body .sd-social-icon .sd-content li.share-custom>a {
@@ -563,6 +579,11 @@ body .sd-social-icon .sd-content li.share-custom a span {
 
 .sd-social-icon .sd-content ul li[class*='share-'].share-pocket a.sd-button {
 	background: #ee4056;
+	color: #fff !important;
+}
+
+.sd-social-icon .sd-content ul li[class*='share-'].share-skype a.sd-button {
+	background: #00AFF0;
 	color: #fff !important;
 }
 

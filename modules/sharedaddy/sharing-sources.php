@@ -926,7 +926,7 @@ class Share_Facebook extends Sharing_Source {
 		if ( apply_filters( 'jetpack_register_post_for_share_counts', true, $post->ID, 'facebook' ) ) {
 			sharing_register_post_for_share_counts( $post->ID );
 		}
-		return $this->get_link( $this->get_process_request_url( $post->ID ), _x( 'Facebook', 'share to', 'jetpack' ), __( 'Share on Facebook', 'jetpack' ), 'share=facebook', 'sharing-facebook-' . $post->ID );
+		return $this->get_link( $this->get_process_request_url( $post->ID ), _x( 'Facebook', 'share to', 'jetpack' ), __( 'Click to share on Facebook', 'jetpack' ), 'share=facebook', 'sharing-facebook-' . $post->ID );
 	}
 
 	public function process_request( $post, array $post_data ) {
@@ -1188,6 +1188,33 @@ class Share_GooglePlus1 extends Sharing_Source {
 	}
 
 	public function get_display( $post ) {
+		return $this->get_link( $this->get_process_request_url( $post->ID ), _x( 'Press This', 'share to', 'jetpack' ), __( 'Click to Press This!', 'jetpack' ), 'share=press-this' );
+	}
+}
+
+class Share_GooglePlus1 extends Sharing_Source {
+	public $shortname = 'googleplus1';
+	public $genericon = '\f218';
+	private $state = false;
+
+	public function __construct( $id, array $settings ) {
+		parent::__construct( $id, $settings );
+
+		if ( 'official' == $this->button_style )
+			$this->smart = true;
+		else
+			$this->smart = false;
+	}
+
+	public function get_name() {
+		return __( 'Google', 'jetpack' );
+	}
+
+	public function has_custom_button_style() {
+		return $this->smart;
+	}
+
+	public function get_display( $post ) {
 
 		if ( $this->smart ) {
 			$share_url = $this->get_share_url( $post->ID );
@@ -1285,10 +1312,6 @@ class Share_Custom extends Sharing_Advanced_Source {
 	public function __construct( $id, array $settings ) {
 		parent::__construct( $id, $settings );
 		
-		$opts = $this->get_options();
-
-		$opts = $this->get_options();
-
 		$opts = $this->get_options();
 
 		$opts = $this->get_options();
@@ -1716,967 +1739,86 @@ class Share_Pocket extends Sharing_Source {
 
 }
 
-class Share_Tumblr extends Sharing_Source {
-	public $shortname = 'tumblr';
-	public $genericon = '\f214';
+class Share_Skype extends Sharing_Source {
+	public $shortname = 'skype';
+	public $genericon = '\f220';
+	private $share_type = 'default';
+
 	public function __construct( $id, array $settings ) {
 		parent::__construct( $id, $settings );
-		if ( 'official' == $this->button_style )
-			$this->smart = true;
-		else
-			$this->smart = false;
-	}
 
-	public function get_name() {
-		return __( 'Tumblr', 'jetpack' );
-	}
-
-	public function get_display( $post ) {
-		if ( $this->smart ) {
-			$target = '';
-			if ( true == $this->open_link_in_new )
-				$target = '_blank';
-
-			return '<a target="' . $target . '" href="http://www.tumblr.com/share/link/?url=' . rawurlencode( $this->get_share_url( $post->ID ) ) . '&name=' . rawurlencode( $this->get_share_title( $post->ID ) ) . '" title="' . __( 'Share on Tumblr', 'jetpack' ) . '" style="display:inline-block; text-indent:-9999px; overflow:hidden; width:62px; height:20px; background:url(\'//platform.tumblr.com/v1/share_2.png\') top left no-repeat transparent;">' . __( 'Share on Tumblr', 'jetpack' ) . '</a>';
-		 } else {
-			return $this->get_link( $this->get_process_request_url( $post->ID ), _x( 'Tumblr', 'share to', 'jetpack' ), __( 'Click to share on Tumblr', 'jetpack' ), 'share=tumblr' );
+		if ( isset( $settings['share_type'] ) ) {
+			$this->share_type = $settings['share_type'];
 		}
-	}
 
-	public function process_request( $post, array $post_data ) {
-		// Record stats
-		parent::process_request( $post, $post_data );
-
-		// Redirect to Tumblr's sharing endpoint (a la their bookmarklet)
-		$url = 'http://www.tumblr.com/share?v=3&u=' . rawurlencode( $this->get_share_url( $post->ID ) ) . '&t=' . rawurlencode( $this->get_share_title( $post->ID ) ) . '&s=';
-		wp_redirect( $url );
-		die();
-	}
-	// http://www.tumblr.com/share?v=3&u=URL&t=TITLE&s=
-	public function display_footer() {
-		if ( $this->smart ) {
-			?><script type="text/javascript" src="//platform.tumblr.com/v1/share.js"></script><?php
+		if ( 'official' == $this->button_style ) {
+			$this->smart = true;
 		} else {
-			$this->js_dialog( $this->shortname, array( 'width' => 450, 'height' => 450 ) );
-		}
-	}
-}
-
-class Share_Pinterest extends Sharing_Source {
-	public $shortname = 'pinterest';
-	public $genericon = '\f209';
-
-	public function __construct( $id, array $settings ) {
-		parent::__construct( $id, $settings );
-		if ( 'official' == $this->button_style )
-			$this->smart = true;
-		else
 			$this->smart = false;
+		}
 	}
 
 	public function get_name() {
-		return __( 'Pinterest', 'jetpack' );
-	}
-
-	public function get_image( $post ) {
-		if ( class_exists( 'Jetpack_PostImages' ) ) {
-			$image = Jetpack_PostImages::get_image( $post->ID, array( 'fallback_to_avatars' => true ) );
-			if ( ! empty( $image ) ) {
-				return $image['src'];
-			}
-		}
-
-		/**
-		 * Filters the default image used by the Pinterest Pin It share button.
-		 *
-		 * @module sharedaddy
-		 *
-		 * @since 3.6.0
-		 *
-		 * @param string $url Default image URL.
-		 */
-		return apply_filters( 'jetpack_sharing_pinterest_default_image', 'https://s0.wp.com/i/blank.jpg' );
-	}
-
-	public function get_external_url( $post ) {
-		$url = 'https://www.pinterest.com/pin/create/button/?url=' . rawurlencode( $this->get_share_url( $post->ID ) ) . '&media=' . rawurlencode( $this->get_image( $post ) ) . '&description=' . rawurlencode( $post->post_title );
-
-		/**
-		 * Filters the Pinterest share URL used in sharing button output.
-		 *
-		 * @module sharedaddy
-		 *
-		 * @since 3.6.0
-		 *
-		 * @param string $url Pinterest share URL.
-		 */
-		return apply_filters( 'jetpack_sharing_pinterest_share_url', $url );
-	}
-
-	public function get_widget_type() {
-		/**
-		 * Filters the Pinterest widget type.
-		 *
-		 * @see https://business.pinterest.com/en/widget-builder
-		 *
-		 * @module sharedaddy
-		 *
-		 * @since 3.6.0
-		 *
-		 * @param string $type Pinterest widget type. Default of 'buttonPin' for single-image selection. 'buttonBookmark' for multi-image modal.
-		 */
-		return apply_filters( 'jetpack_sharing_pinterest_widget_type', 'buttonPin' );
+		return __( 'Skype', 'jetpack' );
 	}
 
 	public function get_display( $post ) {
-		$display = '';
-
 		if ( $this->smart ) {
-			$display = sprintf(
-				'<div class="pinterest_button"><a href="%s" data-pin-do="%s" data-pin-config="beside"><img src="//assets.pinterest.com/images/pidgets/pinit_fg_en_rect_gray_20.png" /></a></div>',
-				esc_url( $this->get_external_url( $post ) ),
-				esc_attr( $this->get_widget_type() )
+			$skype_share_html = sprintf(
+				'<div class="skype-share" data-href="%1$s" data-lang="%2$s" data-style="small" data-source="jetpack" ></div>',
+				esc_attr( $this->get_share_url( $post->ID ) ),
+				'en-US'
 			);
-		} else {
-			$display = $this->get_link( $this->get_process_request_url( $post->ID ), _x( 'Pinterest', 'share to', 'jetpack' ), __( 'Click to share on Pinterest', 'jetpack' ), 'share=pinterest', 'sharing-pinterest-' . $post->ID );
+			return $skype_share_html;
 		}
 
 		/** This filter is already documented in modules/sharedaddy/sharing-sources.php */
-		if ( apply_filters( 'jetpack_register_post_for_share_counts', true, $post->ID, 'linkedin' ) ) {
+		if ( apply_filters( 'jetpack_register_post_for_share_counts', true, $post->ID, 'skype' ) ) {
 			sharing_register_post_for_share_counts( $post->ID );
 		}
-
-		return $display;
+		return $this->get_link(
+			$this->get_process_request_url( $post->ID ), _x( 'Skype', 'share to', 'jetpack' ), __( 'Share on Skype', 'jetpack' ), 'share=skype', 'sharing-skype-' . $post->ID );
 	}
 
 	public function process_request( $post, array $post_data ) {
+		$skype_url = sprintf(
+			'https://web.skype.com/share?url=%1$s&lang=%2$s=&source=jetpack',
+			rawurlencode( $this->get_share_url( $post->ID ) ),
+			'en-US'
+		);
+
 		// Record stats
 		parent::process_request( $post, $post_data );
-		// If we're triggering the multi-select panel, then we don't need to redirect to Pinterest
-		if ( !isset( $_GET['js_only'] ) ) {
-			$pinterest_url = esc_url_raw( $this->get_external_url( $post ) );
-			wp_redirect( $pinterest_url );
-		} else {
-			echo '// share count bumped';
-		}
+
+		// Redirect to Skype
+		wp_redirect( $skype_url );
 		die();
 	}
 
 	public function display_footer() {
-		/**
-		 * Filter the Pin it button appearing when hovering over images when using the official button style.
-		 *
-		 * @module sharedaddy
-		 *
-		 * @since 3.6.0
-		 *
-		 * @param bool $jetpack_pinit_over True by default, displays the Pin it button when hovering over images.
-		 */
-		$jetpack_pinit_over = apply_filters( 'jetpack_pinit_over_button', true );
-		?>
-		<?php if ( $this->smart ) : ?>
-			<script type="text/javascript">
-				// Pinterest shared resources
-				var s = document.createElement("script");
-				s.type = "text/javascript";
-				s.async = true;
-				<?php if ( $jetpack_pinit_over ) echo "s.setAttribute('data-pin-hover', true);"; ?>
-				s.src = window.location.protocol + "//assets.pinterest.com/js/pinit.js";
-				var x = document.getElementsByTagName("script")[0];
-				x.parentNode.insertBefore(s, x);
-				// if 'Pin it' button has 'counts' make container wider
-				jQuery(window).load( function(){ jQuery( 'li.share-pinterest a span:visible' ).closest( '.share-pinterest' ).width( '80px' ); } );
-			</script>
-		<?php elseif ( 'buttonPin' != $this->get_widget_type() ) : ?>
-			<script type="text/javascript">
-				jQuery(document).on('ready', function(){
-					jQuery('body').on('click', 'a.share-pinterest', function(e){
-						e.preventDefault();
-						// Load Pinterest Bookmarklet code
-						var s = document.createElement("script");
-						s.type = "text/javascript";
-						s.src = window.location.protocol + "//assets.pinterest.com/js/pinmarklet.js?r=" + ( Math.random() * 99999999 );
-						var x = document.getElementsByTagName("script")[0];
-						x.parentNode.insertBefore(s, x);
-						// Trigger Stats
-						var s = document.createElement("script");
-						s.type = "text/javascript";
-						s.src = this + ( this.toString().indexOf( '?' ) ? '&' : '?' ) + 'js_only=1';
-						var x = document.getElementsByTagName("script")[0];
-						x.parentNode.insertBefore(s, x);
-					});
-				});
-			</script>
-		<?php endif;
-	}
-}
-
-class Share_Pocket extends Sharing_Source {
-	public $shortname = 'pocket';
-	public $genericon = '\f224';
-
-	public function __construct( $id, array $settings ) {
-		parent::__construct( $id, $settings );
-
-		if ( 'official' == $this->button_style )
-			$this->smart = true;
-		else
-			$this->smart = false;
-	}
-
-	public function get_name() {
-		return __( 'Pocket', 'jetpack' );
-	}
-
-	public function process_request( $post, array $post_data ) {
-		// Record stats
-		parent::process_request( $post, $post_data );
-
-		$pocket_url = esc_url_raw( 'https://getpocket.com/save/?url=' . rawurlencode( $this->get_share_url( $post->ID ) ) . '&title=' . rawurlencode( $this->get_share_title( $post->ID ) ) );
-		wp_redirect( $pocket_url );
-		exit;
-	}
-
-	public function get_display( $post ) {
-		if ( $this->smart ) {
-			$post_count = 'horizontal';
-
-			$button = '';
-			$button .= '<div class="pocket_button">';
-			$button .= sprintf( '<a href="https://getpocket.com/save" class="pocket-btn" data-lang="%s" data-save-url="%s" data-pocket-count="%s" >%s</a>', 'en', esc_attr( $this->get_share_url( $post->ID ) ), $post_count, esc_attr__( 'Pocket', 'jetpack' ) );
-			$button .= '</div>';
-
-			return $button;
-		} else {
-			return $this->get_link( $this->get_process_request_url( $post->ID ), _x( 'Pocket', 'share to', 'jetpack' ), __( 'Click to share on Pocket', 'jetpack' ), 'share=pocket' );
-		}
-
-	}
-
-	function display_footer() {
 		if ( $this->smart ) :
 		?>
 		<script>
-		// Don't use Pocket's default JS as it we need to force init new Pocket share buttons loaded via JS.
-		function jetpack_sharing_pocket_init() {
-			jQuery.getScript( 'https://widgets.getpocket.com/v1/j/btn.js?v=1' );
-		}
-		jQuery( document ).on( 'ready', jetpack_sharing_pocket_init );
-		jQuery( document.body ).on( 'post-load', jetpack_sharing_pocket_init );
+		(function(r, d, s) {
+			r.loadSkypeWebSdkAsync = r.loadSkypeWebSdkAsync || function(p) {
+				var js, sjs = d.getElementsByTagName(s)[0];
+				if (d.getElementById(p.id)) { return; }
+				js = d.createElement(s);
+				js.id = p.id;
+				js.src = p.scriptToLoad;
+				js.onload = p.callback
+				sjs.parentNode.insertBefore(js, sjs);
+			};
+			var p = {
+				scriptToLoad: 'https://swx.cdn.skype.com/shared/v/latest/skypewebsdk.js',
+				id: 'skype_web_sdk'
+			};
+			r.loadSkypeWebSdkAsync(p);
+		})(window, document, 'script');
 		</script>
 		<?php
 		else :
-			$this->js_dialog( $this->shortname, array( 'width' => 450, 'height' => 450 ) );
+			$this->js_dialog( $this->shortname, array( 'width' => 305, 'height' => 665 ) );
 		endif;
-
-	}
-
-}
-
-class Share_Tumblr extends Sharing_Source {
-	public $shortname = 'tumblr';
-	public $genericon = '\f214';
-	public function __construct( $id, array $settings ) {
-		parent::__construct( $id, $settings );
-		if ( 'official' == $this->button_style )
-			$this->smart = true;
-		else
-			$this->smart = false;
-	}
-
-	public function get_name() {
-		return __( 'Tumblr', 'jetpack' );
-	}
-
-	public function get_display( $post ) {
-		if ( $this->smart ) {
-			$target = '';
-			if ( true == $this->open_link_in_new )
-				$target = '_blank';
-
-			return '<a target="' . $target . '" href="http://www.tumblr.com/share/link/?url=' . rawurlencode( $this->get_share_url( $post->ID ) ) . '&name=' . rawurlencode( $this->get_share_title( $post->ID ) ) . '" title="' . __( 'Share on Tumblr', 'jetpack' ) . '" style="display:inline-block; text-indent:-9999px; overflow:hidden; width:62px; height:20px; background:url(\'//platform.tumblr.com/v1/share_2.png\') top left no-repeat transparent;">' . __( 'Share on Tumblr', 'jetpack' ) . '</a>';
-		 } else {
-			return $this->get_link( $this->get_process_request_url( $post->ID ), _x( 'Tumblr', 'share to', 'jetpack' ), __( 'Click to share on Tumblr', 'jetpack' ), 'share=tumblr' );
-		}
-	}
-
-	public function process_request( $post, array $post_data ) {
-		// Record stats
-		parent::process_request( $post, $post_data );
-
-		// Redirect to Tumblr's sharing endpoint (a la their bookmarklet)
-		$url = 'http://www.tumblr.com/share?v=3&u=' . rawurlencode( $this->get_share_url( $post->ID ) ) . '&t=' . rawurlencode( $this->get_share_title( $post->ID ) ) . '&s=';
-		wp_redirect( $url );
-		die();
-	}
-	// http://www.tumblr.com/share?v=3&u=URL&t=TITLE&s=
-	public function display_footer() {
-		if ( $this->smart ) {
-			?><script type="text/javascript" src="//platform.tumblr.com/v1/share.js"></script><?php
-		} else {
-			$this->js_dialog( $this->shortname, array( 'width' => 450, 'height' => 450 ) );
-		}
 	}
 }
-
-class Share_Pinterest extends Sharing_Source {
-	public $shortname = 'pinterest';
-	public $genericon = '\f209';
-
-	public function __construct( $id, array $settings ) {
-		parent::__construct( $id, $settings );
-		if ( 'official' == $this->button_style )
-			$this->smart = true;
-		else
-			$this->smart = false;
-	}
-
-	public function get_name() {
-		return __( 'Pinterest', 'jetpack' );
-	}
-
-	public function get_image( $post ) {
-		if ( class_exists( 'Jetpack_PostImages' ) ) {
-			$image = Jetpack_PostImages::get_image( $post->ID, array( 'fallback_to_avatars' => true ) );
-			if ( ! empty( $image ) ) {
-				return $image['src'];
-			}
-		}
-
-		/**
-		 * Filters the default image used by the Pinterest Pin It share button.
-		 *
-		 * @module sharedaddy
-		 *
-		 * @since 3.6.0
-		 *
-		 * @param string $url Default image URL.
-		 */
-		return apply_filters( 'jetpack_sharing_pinterest_default_image', 'https://s0.wp.com/i/blank.jpg' );
-	}
-
-	public function get_external_url( $post ) {
-		$url = 'https://www.pinterest.com/pin/create/button/?url=' . rawurlencode( $this->get_share_url( $post->ID ) ) . '&media=' . rawurlencode( $this->get_image( $post ) ) . '&description=' . rawurlencode( $post->post_title );
-
-		/**
-		 * Filters the Pinterest share URL used in sharing button output.
-		 *
-		 * @module sharedaddy
-		 *
-		 * @since 3.6.0
-		 *
-		 * @param string $url Pinterest share URL.
-		 */
-		return apply_filters( 'jetpack_sharing_pinterest_share_url', $url );
-	}
-
-	public function get_widget_type() {
-		/**
-		 * Filters the Pinterest widget type.
-		 *
-		 * @see https://business.pinterest.com/en/widget-builder
-		 *
-		 * @module sharedaddy
-		 *
-		 * @since 3.6.0
-		 *
-		 * @param string $type Pinterest widget type. Default of 'buttonPin' for single-image selection. 'buttonBookmark' for multi-image modal.
-		 */
-		return apply_filters( 'jetpack_sharing_pinterest_widget_type', 'buttonPin' );
-	}
-
-	public function get_display( $post ) {
-		$display = '';
-
-		if ( $this->smart ) {
-			$display = sprintf(
-				'<div class="pinterest_button"><a href="%s" data-pin-do="%s" data-pin-config="beside"><img src="//assets.pinterest.com/images/pidgets/pinit_fg_en_rect_gray_20.png" /></a></div>',
-				esc_url( $this->get_external_url( $post ) ),
-				esc_attr( $this->get_widget_type() )
-			);
-		} else {
-			$display = $this->get_link( $this->get_process_request_url( $post->ID ), _x( 'Pinterest', 'share to', 'jetpack' ), __( 'Click to share on Pinterest', 'jetpack' ), 'share=pinterest', 'sharing-pinterest-' . $post->ID );
-		}
-
-		/** This filter is already documented in modules/sharedaddy/sharing-sources.php */
-		if ( apply_filters( 'jetpack_register_post_for_share_counts', true, $post->ID, 'linkedin' ) ) {
-			sharing_register_post_for_share_counts( $post->ID );
-		}
-
-		return $display;
-	}
-
-	public function process_request( $post, array $post_data ) {
-		// Record stats
-		parent::process_request( $post, $post_data );
-		// If we're triggering the multi-select panel, then we don't need to redirect to Pinterest
-		if ( !isset( $_GET['js_only'] ) ) {
-			$pinterest_url = esc_url_raw( $this->get_external_url( $post ) );
-			wp_redirect( $pinterest_url );
-		} else {
-			echo '// share count bumped';
-		}
-		die();
-	}
-
-	public function display_footer() {
-		/**
-		 * Filter the Pin it button appearing when hovering over images when using the official button style.
-		 *
-		 * @module sharedaddy
-		 *
-		 * @since 3.6.0
-		 *
-		 * @param bool $jetpack_pinit_over True by default, displays the Pin it button when hovering over images.
-		 */
-		$jetpack_pinit_over = apply_filters( 'jetpack_pinit_over_button', true );
-		?>
-		<?php if ( $this->smart ) : ?>
-			<script type="text/javascript">
-				// Pinterest shared resources
-				var s = document.createElement("script");
-				s.type = "text/javascript";
-				s.async = true;
-				<?php if ( $jetpack_pinit_over ) echo "s.setAttribute('data-pin-hover', true);"; ?>
-				s.src = window.location.protocol + "//assets.pinterest.com/js/pinit.js";
-				var x = document.getElementsByTagName("script")[0];
-				x.parentNode.insertBefore(s, x);
-				// if 'Pin it' button has 'counts' make container wider
-				jQuery(window).load( function(){ jQuery( 'li.share-pinterest a span:visible' ).closest( '.share-pinterest' ).width( '80px' ); } );
-			</script>
-		<?php elseif ( 'buttonPin' != $this->get_widget_type() ) : ?>
-			<script type="text/javascript">
-				jQuery(document).on('ready', function(){
-					jQuery('body').on('click', 'a.share-pinterest', function(e){
-						e.preventDefault();
-						// Load Pinterest Bookmarklet code
-						var s = document.createElement("script");
-						s.type = "text/javascript";
-						s.src = window.location.protocol + "//assets.pinterest.com/js/pinmarklet.js?r=" + ( Math.random() * 99999999 );
-						var x = document.getElementsByTagName("script")[0];
-						x.parentNode.insertBefore(s, x);
-						// Trigger Stats
-						var s = document.createElement("script");
-						s.type = "text/javascript";
-						s.src = this + ( this.toString().indexOf( '?' ) ? '&' : '?' ) + 'js_only=1';
-						var x = document.getElementsByTagName("script")[0];
-						x.parentNode.insertBefore(s, x);
-					});
-				});
-			</script>
-		<?php endif;
-	}
-}
-
-class Share_Pocket extends Sharing_Source {
-	public $shortname = 'pocket';
-	public $genericon = '\f224';
-
-	public function __construct( $id, array $settings ) {
-		parent::__construct( $id, $settings );
-
-		if ( 'official' == $this->button_style )
-			$this->smart = true;
-		else
-			$this->smart = false;
-	}
-
-	public function get_name() {
-		return __( 'Pocket', 'jetpack' );
-	}
-
-	public function process_request( $post, array $post_data ) {
-		// Record stats
-		parent::process_request( $post, $post_data );
-
-		$pocket_url = esc_url_raw( 'https://getpocket.com/save/?url=' . rawurlencode( $this->get_share_url( $post->ID ) ) . '&title=' . rawurlencode( $this->get_share_title( $post->ID ) ) );
-		wp_redirect( $pocket_url );
-		exit;
-	}
-
-	public function get_display( $post ) {
-		if ( $this->smart ) {
-			$post_count = 'horizontal';
-
-			$button = '';
-			$button .= '<div class="pocket_button">';
-			$button .= sprintf( '<a href="https://getpocket.com/save" class="pocket-btn" data-lang="%s" data-save-url="%s" data-pocket-count="%s" >%s</a>', 'en', esc_attr( $this->get_share_url( $post->ID ) ), $post_count, esc_attr__( 'Pocket', 'jetpack' ) );
-			$button .= '</div>';
-
-			return $button;
-		} else {
-			return $this->get_link( $this->get_process_request_url( $post->ID ), _x( 'Pocket', 'share to', 'jetpack' ), __( 'Click to share on Pocket', 'jetpack' ), 'share=pocket' );
-		}
-
-	}
-
-	function display_footer() {
-		if ( $this->smart ) :
-		?>
-		<script>
-		// Don't use Pocket's default JS as it we need to force init new Pocket share buttons loaded via JS.
-		function jetpack_sharing_pocket_init() {
-			jQuery.getScript( 'https://widgets.getpocket.com/v1/j/btn.js?v=1' );
-		}
-		jQuery( document ).on( 'ready', jetpack_sharing_pocket_init );
-		jQuery( document.body ).on( 'post-load', jetpack_sharing_pocket_init );
-		</script>
-		<?php
-		else :
-			$this->js_dialog( $this->shortname, array( 'width' => 450, 'height' => 450 ) );
-		endif;
-
-	}
-
-}
-
-class Share_Tumblr extends Sharing_Source {
-	public $shortname = 'tumblr';
-	public $genericon = '\f214';
-	public function __construct( $id, array $settings ) {
-		parent::__construct( $id, $settings );
-		if ( 'official' == $this->button_style )
-			$this->smart = true;
-		else
-			$this->smart = false;
-	}
-
-	public function get_name() {
-		return __( 'Tumblr', 'jetpack' );
-	}
-
-	public function get_display( $post ) {
-		if ( $this->smart ) {
-			$target = '';
-			if ( true == $this->open_link_in_new )
-				$target = '_blank';
-
-			return '<a target="' . $target . '" href="http://www.tumblr.com/share/link/?url=' . rawurlencode( $this->get_share_url( $post->ID ) ) . '&name=' . rawurlencode( $this->get_share_title( $post->ID ) ) . '" title="' . __( 'Share on Tumblr', 'jetpack' ) . '" style="display:inline-block; text-indent:-9999px; overflow:hidden; width:62px; height:20px; background:url(\'//platform.tumblr.com/v1/share_2.png\') top left no-repeat transparent;">' . __( 'Share on Tumblr', 'jetpack' ) . '</a>';
-		 } else {
-			return $this->get_link( $this->get_process_request_url( $post->ID ), _x( 'Tumblr', 'share to', 'jetpack' ), __( 'Click to share on Tumblr', 'jetpack' ), 'share=tumblr' );
-		}
-	}
-
-	public function process_request( $post, array $post_data ) {
-		// Record stats
-		parent::process_request( $post, $post_data );
-
-		// Redirect to Tumblr's sharing endpoint (a la their bookmarklet)
-		$url = 'http://www.tumblr.com/share?v=3&u=' . rawurlencode( $this->get_share_url( $post->ID ) ) . '&t=' . rawurlencode( $this->get_share_title( $post->ID ) ) . '&s=';
-		wp_redirect( $url );
-		die();
-	}
-	// http://www.tumblr.com/share?v=3&u=URL&t=TITLE&s=
-	public function display_footer() {
-		if ( $this->smart ) {
-			?><script type="text/javascript" src="//platform.tumblr.com/v1/share.js"></script><?php
-		} else {
-			$this->js_dialog( $this->shortname, array( 'width' => 450, 'height' => 450 ) );
-		}
-	}
-}
-
-class Share_Pinterest extends Sharing_Source {
-	public $shortname = 'pinterest';
-	public $genericon = '\f209';
-
-	public function __construct( $id, array $settings ) {
-		parent::__construct( $id, $settings );
-		if ( 'official' == $this->button_style )
-			$this->smart = true;
-		else
-			$this->smart = false;
-	}
-
-	public function get_name() {
-		return __( 'Pinterest', 'jetpack' );
-	}
-
-	public function get_image( $post ) {
-		if ( class_exists( 'Jetpack_PostImages' ) ) {
-			$image = Jetpack_PostImages::get_image( $post->ID, array( 'fallback_to_avatars' => true ) );
-			if ( ! empty( $image ) ) {
-				return $image['src'];
-			}
-		}
-
-		/**
-		 * Filters the default image used by the Pinterest Pin It share button.
-		 *
-		 * @since 3.6
-		 *
-		 * @param string $url Default image URL.
-		 */
-		return apply_filters( 'jetpack_sharing_pinterest_default_image', 'https://s0.wp.com/i/blank.jpg' );
-	}
-
-	public function get_external_url( $post ) {
-		$url = '//www.pinterest.com/pin/create/button/?url=' . rawurlencode( $this->get_share_url( $post->ID ) ) . '&media=' . rawurlencode( $this->get_image( $post ) ) . '&description=' . rawurlencode( $post->post_title );
-
-		/**
-		 * Filters the Pinterest share URL used in sharing button output.
-		 *
-		 * @since 3.6
-		 *
-		 * @param string $url Pinterest share URL.
-		 */
-		return apply_filters( 'jetpack_sharing_pinterest_share_url', $url );
-	}
-
-	public function get_widget_type() {
-		/**
-		 * Filters the Pinterest widget type.
-		 *
-		 * @since 3.6
-		 *
-		 * @link https://business.pinterest.com/en/widget-builder
-		 *
-		 * @param string $type Pinterest widget type. Default of 'buttonPin' for single-image selection. 'buttonBookmark' for multi-image modal.
-		 */
-		return apply_filters( 'jetpack_sharing_pinterest_widget_type', 'buttonPin' );
-	}
-
-	public function get_display( $post ) {
-		$display = '';
-
-		if ( $this->smart ) {
-			$display = sprintf(
-				'<div class="pinterest_button"><a href="%s" data-pin-do="%s" data-pin-config="beside"><img src="//assets.pinterest.com/images/pidgets/pinit_fg_en_rect_gray_20.png" /></a></div>',
-				esc_url( $this->get_external_url( $post ) ),
-				esc_attr( $this->get_widget_type() )
-			);
-		} else {
-			$display = $this->get_link( $this->get_process_request_url( $post->ID ), _x( 'Pinterest', 'share to', 'jetpack' ), __( 'Click to share on Pinterest', 'jetpack' ), 'share=pinterest', 'sharing-pinterest-' . $post->ID );
-		}
-
-		if ( apply_filters( 'jetpack_register_post_for_share_counts', true, $post->ID, 'linkedin' ) ) {
-			sharing_register_post_for_share_counts( $post->ID );
-		}
-
-		return $display;
-	}
-
-	public function process_request( $post, array $post_data ) {
-		// Record stats
-		parent::process_request( $post, $post_data );
-		// If we're triggering the multi-select panel, then we don't need to redirect to Pinterest
-		if ( !isset( $_GET['js_only'] ) ) {
-			$pinterest_url = esc_url_raw( $this->get_external_url( $post ) );
-			wp_redirect( $pinterest_url );
-		} else {
-			echo '// share count bumped';
-		}
-		die();
-	}
-
-	public function display_footer() {
-		/**
-		 * Filter the Pin it button appearing when hovering over images when using the official button style.
-		 *
-		 * @since 3.6.0
-		 *
-		 * @param bool $jetpack_pinit_over True by default, displays the Pin it button when hovering over images.
-		 */
-		$jetpack_pinit_over = apply_filters( 'jetpack_pinit_over_button', true );
-		?>
-		<?php if ( $this->smart ) : ?>
-			<script type="text/javascript">
-				// Pinterest shared resources
-				var s = document.createElement("script");
-				s.type = "text/javascript";
-				s.async = true;
-				<?php if ( $jetpack_pinit_over ) echo "s.setAttribute('data-pin-hover', true);"; ?>
-				s.src = window.location.protocol + "//assets.pinterest.com/js/pinit.js";
-				var x = document.getElementsByTagName("script")[0];
-				x.parentNode.insertBefore(s, x);
-				// if 'Pin it' button has 'counts' make container wider
-				jQuery(window).load( function(){ jQuery( 'li.share-pinterest a span:visible' ).closest( '.share-pinterest' ).width( '80px' ); } );
-			</script>
-		<?php elseif ( 'buttonPin' != $this->get_widget_type() ) : ?>
-			<script type="text/javascript">
-				jQuery(document).on('ready', function(){
-					jQuery('body').on('click', 'a.share-pinterest', function(e){
-						e.preventDefault();
-						// Load Pinterest Bookmarklet code
-						var s = document.createElement("script");
-						s.type = "text/javascript";
-						s.src = window.location.protocol + "//assets.pinterest.com/js/pinmarklet.js?r=" + ( Math.random() * 99999999 );
-						var x = document.getElementsByTagName("script")[0];
-						x.parentNode.insertBefore(s, x);
-						// Trigger Stats
-						var s = document.createElement("script");
-						s.type = "text/javascript";
-						s.src = this + ( this.toString().indexOf( '?' ) ? '&' : '?' ) + 'js_only=1';
-						var x = document.getElementsByTagName("script")[0];
-						x.parentNode.insertBefore(s, x);
-					});
-				});
-			</script>
-		<?php endif;
-	}
-}
-
-class Share_Pocket extends Sharing_Source {
-	public $shortname = 'pocket';
-	public $genericon = '\f224';
-
-	public function __construct( $id, array $settings ) {
-		parent::__construct( $id, $settings );
-
-		if ( 'official' == $this->button_style )
-			$this->smart = true;
-		else
-			$this->smart = false;
-	}
-
-	public function get_name() {
-		return __( 'Pocket', 'jetpack' );
-	}
-
-	public function process_request( $post, array $post_data ) {
-		// Record stats
-		parent::process_request( $post, $post_data );
-
-		$pocket_url = esc_url_raw( 'https://getpocket.com/save/?url=' . rawurlencode( $this->get_share_url( $post->ID ) ) . '&title=' . rawurlencode( $this->get_share_title( $post->ID ) ) );
-		wp_redirect( $pocket_url );
-		exit;
-	}
-
-	public function get_display( $post ) {
-		if ( $this->smart ) {
-			$post_count = 'horizontal';
-
-			$button = '';
-			$button .= '<div class="pocket_button">';
-			$button .= sprintf( '<a href="https://getpocket.com/save" class="pocket-btn" data-lang="%s" data-save-url="%s" data-pocket-count="%s" >%s</a>', 'en', esc_attr( $this->get_share_url( $post->ID ) ), $post_count, esc_attr__( 'Pocket', 'jetpack' ) );
-			$button .= '</div>';
-
-			return $button;
-		} else {
-			return $this->get_link( $this->get_process_request_url( $post->ID ), _x( 'Pocket', 'share to', 'jetpack' ), __( 'Click to share on Pocket', 'jetpack' ), 'share=pocket' );
-		}
-
-	}
-
-	function display_footer() {
-		if ( $this->smart ) :
-		?>
-		<script>
-		// Don't use Pocket's default JS as it we need to force init new Pocket share buttons loaded via JS.
-		function jetpack_sharing_pocket_init() {
-			jQuery.getScript( 'https://widgets.getpocket.com/v1/j/btn.js?v=1' );
-		}
-		jQuery( document ).on( 'ready', jetpack_sharing_pocket_init );
-		jQuery( document.body ).on( 'post-load', jetpack_sharing_pocket_init );
-		</script>
-		<?php
-		else :
-			$this->js_dialog( $this->shortname, array( 'width' => 450, 'height' => 450 ) );
-		endif;
-
-	}
-
-}
-
-class Share_Pinterest extends Sharing_Source {
-	var $shortname = 'pinterest';
-	var $genericon = '\f209';
-
-	public function __construct( $id, array $settings ) {
-		parent::__construct( $id, $settings );
-		if ( 'official' == $this->button_style )
-			$this->smart = true;
-		else
-			$this->smart = false;
-	}
-
-	public function get_name() {
-		return __( 'Pinterest', 'jetpack' );
-	}
-
-	public function get_image( $post ) {
-		if ( class_exists( 'Jetpack_PostImages' ) ) {
-			$image = Jetpack_PostImages::get_image( $post->ID, array( 'fallback_to_avatars' => true ) );
-			if ( ! empty( $image ) ) {
-				return $image['src'];
-			}
-		}
-
-		/**
-		 * Filters the default image used by the Pinterest Pin It share button.
-		 *
-		 * @since 3.6
-		 *
-		 * @param string $url Default image URL.
-		 */
-		return apply_filters( 'jetpack_sharing_pinterest_default_image', 'https://s0.wp.com/i/blank.jpg' );
-	}
-
-	public function get_external_url( $post ) {
-		$url = '//www.pinterest.com/pin/create/button/?url=' . rawurlencode( $this->get_share_url( $post->ID ) ) . '&media=' . rawurlencode( $this->get_image( $post ) ) . '&description=' . rawurlencode( $post->post_title );
-
-		/**
-		 * Filters the Pinterest share URL used in sharing button output.
-		 *
-		 * @since 3.6
-		 *
-		 * @param string $url Pinterest share URL.
-		 */
-		return apply_filters( 'jetpack_sharing_pinterest_share_url', $url );
-	}
-
-	public function get_widget_type() {
-		/**
-		 * Filters the Pinterest widget type used in official sharing button output.
-		 *
-		 * @since 3.6
-		 *
-		 * @link https://business.pinterest.com/en/widget-builder
-		 *
-		 * @param string $type Pinterest widget type.
-		 */
-		return apply_filters( 'jetpack_sharing_pinterest_widget_type', 'buttonPin' );
-	}
-
-	public function get_display( $post ) {
-		$display = '';
-
-		if ( $this->smart ) {
-			$display = sprintf(
-				'<div class="pinterest_button"><a href="%s" data-pin-do="%s" data-pin-config="beside"><img src="//assets.pinterest.com/images/pidgets/pinit_fg_en_rect_gray_20.png" /></a></div>',
-				esc_url( $this->get_external_url( $post ) ),
-				esc_attr( $this->get_widget_type() )
-			);
-		} else {
-			$display = $this->get_link( $this->get_share_url( $post->ID ), _x( 'Pinterest', 'share to', 'jetpack' ), __( 'Click to share on Pinterest', 'jetpack' ), 'share=pinterest', 'sharing-pinterest-' . $post->ID );
-		}
-
-		if ( apply_filters( 'jetpack_register_post_for_share_counts', true, $post->ID, 'linkedin' ) ) {
-			sharing_register_post_for_share_counts( $post->ID );
-		}
-
-		return $display;
-	}
-
-	public function process_request( $post, array $post_data ) {
-		// Record stats
-		parent::process_request( $post, $post_data );
-		// If we're triggering the multi-select panel, then we don't need to redirect to Pinterest
-		if ( !isset( $_GET['js_only'] ) ) {
-			$pinterest_url = esc_url_raw( $this->get_external_url( $post ) );
-			wp_redirect( $pinterest_url );
-		} else {
-			echo '// share count bumped';
-		}
-		die();
-	}
-
-	public function display_footer() {
-		/**
-		 * Filter the Pin it button appearing when hovering over images when using the official button style.
-		 *
-		 * @since 3.6.0
-		 *
-		 * @param bool $jetpack_pinit_over True by default, displays the Pin it button when hovering over images.
-		 */
-		$jetpack_pinit_over = apply_filters( 'jetpack_pinit_over_button', true );
-		?>
-		<?php if ( $this->smart ) : ?>
-			<script type="text/javascript">
-				// Pinterest shared resources
-				var s = document.createElement("script");
-				s.type = "text/javascript";
-				s.async = true;
-				<?php if ( $jetpack_pinit_over ) echo "s.setAttribute('data-pin-hover', true);"; ?>
-				s.src = window.location.protocol + "//assets.pinterest.com/js/pinit.js";
-				var x = document.getElementsByTagName("script")[0];
-				x.parentNode.insertBefore(s, x);
-				// if 'Pin it' button has 'counts' make container wider
-				jQuery(window).load( function(){ jQuery( 'li.share-pinterest a span:visible' ).closest( '.share-pinterest' ).width( '80px' ); } );
-			</script>
-		<?php elseif ( 'buttonPin' != $this->get_widget_type() ) : ?>
-			<script type="text/javascript">
-				jQuery(document).on('ready', function(){
-					jQuery('body').on('click', 'a.share-pinterest', function(e){
-						e.preventDefault();
-						// Load Pinterest Bookmarklet code
-						var s = document.createElement("script");
-						s.type = "text/javascript";
-						s.src = window.location.protocol + "//assets.pinterest.com/js/pinmarklet.js?r=" + ( Math.random() * 99999999 );
-						var x = document.getElementsByTagName("script")[0];
-						x.parentNode.insertBefore(s, x);
-						// Trigger Stats
-						var s = document.createElement("script");
-						s.type = "text/javascript";
-						s.src = this + ( this.toString().indexOf( '?' ) ? '&' : '?' ) + 'js_only=1';
-						var x = document.getElementsByTagName("script")[0];
-						x.parentNode.insertBefore(s, x);
-					});
-				});
-			</script>
-		<?php endif;
-	}
-}
-
-class Share_Pocket extends Sharing_Source {
-	var $shortname = 'pocket';
-	var $genericon = '\f224';
-
-	public function __construct( $id, array $settings ) {
-		parent::__construct( $id, $settings );
-
-		if ( 'official' == $this->button_style )
-			$this->smart = true;
-		else
-			$this->smart = false;
-	}
-
-	public function get_name() {
-		return __( 'Pocket', 'jetpack' );
-	}
-
-	public function process_request( $post, array $post_data ) {
-		// Record stats
-		parent::process_request( $post, $post_data );
-
-		$pocket_url = esc_url_raw( 'https://getpocket.com/save/?url=' . rawurlencode( $this->get_share_url( $post->ID ) ) . '&title=' . rawurlencode( $this->get_share_title( $post->ID ) ) );
-		wp_redirect( $pocket_url );
-		exit;
-	}
-
-	public function get_display( $post ) {
-		if ( $this->smart ) {
-			$post_count = 'horizontal';
-
-			$button = '';
-			$button .= '<div class="pocket_button">';
-			$button .= sprintf( '<a href="https://getpocket.com/save" class="pocket-btn" data-lang="%s" data-save-url="%s" data-pocket-count="%s" >%s</a>', 'en', esc_attr( $this->get_share_url( $post->ID ) ), $post_count, esc_attr__( 'Pocket', 'jetpack' ) );
-			$button .= '</div>';
-
-			return $button;
-		} else {
-			return $this->get_link( get_permalink( $post->ID ), _x( 'Pocket', 'share to', 'jetpack' ), __( 'Click to share on Pocket', 'jetpack' ), 'share=pocket' );
-		}
-
-	}
-
-	function display_footer() {
-		if ( $this->smart ) :
-		?>
-		<script>
-		// Don't use Pocket's default JS as it we need to force init new Pocket share buttons loaded via JS.
-		function jetpack_sharing_pocket_init() {
-			jQuery.getScript( 'https://widgets.getpocket.com/v1/j/btn.js?v=1' );
-		}
-		jQuery( document ).on( 'ready', jetpack_sharing_pocket_init );
-		jQuery( document.body ).on( 'post-load', jetpack_sharing_pocket_init );
-		</script>
-		<?php
-		else :
-			$this->js_dialog( $this->shortname, array( 'width' => 450, 'height' => 450 ) );
-		endif;
-
-	}
-
-}
-

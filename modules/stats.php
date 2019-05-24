@@ -71,28 +71,6 @@ function stats_load() {
 		add_action( 'admin_init', 'stats_merged_widget_admin_init' );
 	}
 
-	add_filter( 'pre_option_db_version', 'stats_ignore_db_version' );
-}
-
-
-	add_filter( 'pre_option_db_version', 'stats_ignore_db_version' );
-}
-
-/**
- * Delay conditional for current_user_can to after init.
- */
-function stats_merged_widget_admin_init() {
-	if ( current_user_can( 'view_stats' ) ) {
-		add_action( 'load-index.php', 'stats_enqueue_dashboard_head' );
-		add_action( 'wp_dashboard_setup', 'stats_register_widget_control_callback' ); // hacky but works
-		add_action( 'jetpack_dashboard_widget', 'stats_jetpack_dashboard_widget' );
-	}
-}
-
-function stats_enqueue_dashboard_head() {
-	add_action( 'admin_head', 'stats_dashboard_head' );
-}
-
 /**
  * Prevent sparkline img requests being redirected to upgrade.php.
  * See wp-admin/admin.php where it checks $wp_db_version.
@@ -109,25 +87,19 @@ function stats_ignore_db_version( $version ) {
 	return $version;
 }
 
+
+	add_filter( 'pre_option_db_version', 'stats_ignore_db_version' );
+}
+
 /**
- * Maps view_stats cap to read cap as needed
- *
- * @return array Possibly mapped capabilities for meta capability
+ * Delay conditional for current_user_can to after init.
  */
-function stats_map_meta_caps( $caps, $cap, $user_id, $args ) {
-	// Map view_stats to exists
-	if ( 'view_stats' == $cap ) {
-		$user        = new WP_User( $user_id );
-		$user_role   = array_shift( $user->roles );
-		$stats_roles = stats_get_option( 'roles' );
-
-		// Is the users role in the available stats roles?
-		if ( is_array( $stats_roles ) && in_array( $user_role, $stats_roles ) ) {
-			$caps = array( 'read' );
-		}
+function stats_merged_widget_admin_init() {
+	if ( current_user_can( 'view_stats' ) ) {
+		add_action( 'load-index.php', 'stats_enqueue_dashboard_head' );
+		add_action( 'wp_dashboard_setup', 'stats_register_widget_control_callback' ); // hacky but works
+		add_action( 'jetpack_dashboard_widget', 'stats_jetpack_dashboard_widget' );
 	}
-
-	return $caps;
 }
 
 function stats_enqueue_dashboard_head() {
@@ -429,8 +401,8 @@ function stats_reports_page() {
 /** This filter is documented in modules/shortcodes/audio.php */
 echo esc_url( apply_filters( 'jetpack_static_url', "{$http}://en.wordpress.com/i/loading/loading-64.gif" ) ); ?>" /></p>
 <p style="font-size: 11pt; margin: 0;"><a href="https://wordpress.com/stats/<?php echo $domain; ?>"><?php esc_html_e( 'View stats on WordPress.com right now', 'jetpack' ); ?></a></p>
-<p class="hide-if-js"><?php esc_html_e( 'Your Site Stats work better with Javascript enabled.', 'jetpack' ); ?><br />
-<a href="<?php echo esc_url( $nojs_url ); ?>"><?php esc_html_e( 'View Site Stats without Javascript', 'jetpack' ); ?></a>.</p>
+<p class="hide-if-js"><?php esc_html_e( 'Your Site Stats work better with JavaScript enabled.', 'jetpack' ); ?><br />
+<a href="<?php echo esc_url( $nojs_url ); ?>"><?php esc_html_e( 'View Site Stats without JavaScript', 'jetpack' ); ?></a>.</p>
 </div>
 <?php
 		return;
@@ -929,39 +901,36 @@ function stats_jetpack_dashboard_widget() {
 function stats_register_widget_control_callback() {
 	$GLOBALS['wp_dashboard_control_callbacks']['dashboard_stats'] = 'stats_dashboard_widget_control';
 }
-// Javascript and CSS for dashboard widget
+// JavaScript and CSS for dashboard widget
 function stats_dashboard_head() { ?>
 <script type="text/javascript">
 /* <![CDATA[ */
-jQuery(window).load( function() {
-	jQuery( function($) {
-		resizeChart();
-		jQuery(window).resize( _.debounce( function(){
-			resizeChart();
-		}, 100) );
-	} );
+jQuery( function($) {
+	var dashStats = jQuery( '#dashboard_stats div.inside' );
 
-	function resizeChart() {
-		var dashStats = jQuery( '#dashboard_stats div.inside' );
-
-		if ( dashStats.find( '.dashboard-widget-control-form' ).length ) {
-			return;
-		}
-
-		if ( ! dashStats.length ) {
-			dashStats = jQuery( '#dashboard_stats div.dashboard-widget-content' );
-			var h = parseInt( dashStats.parent().height() ) - parseInt( dashStats.prev().height() );
-			var args = 'width=' + dashStats.width() + '&height=' + h.toString();
-		} else {
-			if ( jQuery('#dashboard_stats' ).hasClass('postbox') ) {
-				var args = 'width=' + ( dashStats.prev().width() * 2 ).toString();
-			} else {
-				var args = 'width=' + ( dashStats.width() * 2 ).toString();
-			}
-		}
-
-		dashStats.not( '.dashboard-widget-control' ).load( 'admin.php?page=stats&noheader&dashboard&' + args );
+	if ( dashStats.find( '.dashboard-widget-control-form' ).length ) {
+		return;
 	}
+
+	if ( ! dashStats.length ) {
+		dashStats = jQuery( '#dashboard_stats div.dashboard-widget-content' );
+		var h = parseInt( dashStats.parent().height() ) - parseInt( dashStats.prev().height() );
+		var args = 'width=' + dashStats.width() + '&height=' + h.toString();
+	} else {
+		if ( jQuery('#dashboard_stats' ).hasClass('postbox') ) {
+			var args = 'width=' + ( dashStats.prev().width() * 2 ).toString();
+		} else {
+			var args = 'width=' + ( dashStats.width() * 2 ).toString();
+		}
+	}
+
+	dashStats
+		.not( '.dashboard-widget-control' )
+		.load( 'admin.php?page=stats&noheader&dashboard&' + args );
+
+	jQuery( window ).one( 'resize', function() {
+		jQuery( '#stat-chart' ).css( 'width', 'auto' );
+	} );
 } );
 /* ]]> */
 </script>
