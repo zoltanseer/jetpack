@@ -983,6 +983,10 @@ function stats_admin_bar_head() {
 		return;
 	}
 
+	if ( function_exists( 'is_admin_bar_showing' ) && ! is_admin_bar_showing() ) {
+		return;
+	}
+
 	add_action( 'admin_bar_menu', 'stats_admin_bar_menu', 100 );
 ?>
 
