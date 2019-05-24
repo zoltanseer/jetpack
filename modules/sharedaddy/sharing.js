@@ -1167,6 +1167,15 @@ if ( sharing_js_options && sharing_js_options.counts ) {
 						grecaptcha.reset();
 					}
 
+					// Reset reCATPCHA if exists.
+					if (
+						'object' === typeof grecaptcha &&
+						'function' === typeof grecaptcha.reset &&
+						window.___grecaptcha_cfg.count
+					) {
+						grecaptcha.reset();
+					}
+
 					// Show dialog
 					$sharing_email
 						.css( {
