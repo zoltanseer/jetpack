@@ -43,14 +43,6 @@ function grofiles_more_info() { ?>
 }
 add_action( 'jetpack_module_more_info_gravatar-hovercards', 'grofiles_more_info' );
 
-function grofiles_more_info() { ?>
-	<?php esc_html_e(
-		'Enhance plain Gravatar images with information about a person (including a name,
-		bio, pictures, and contact info) when they leave a comment on one of your posts.'
-		, 'jetpack' );
-}
-add_action( 'jetpack_module_more_info_gravatar-hovercards', 'grofiles_more_info' );
-
 /**
  * Shortcodes
  */

@@ -64,13 +64,7 @@ function stats_load() {
 		add_action( 'admin_init', 'stats_merged_widget_admin_init' );
 	}
 
-	// Add an icon to see stats in WordPress.com for a particular post
-	add_action( 'admin_print_styles-edit.php', 'jetpack_stats_load_admin_css' );
-	add_filter( 'manage_posts_columns', 'jetpack_stats_post_table' );
-	add_filter( 'manage_pages_columns', 'jetpack_stats_post_table' );
-	add_action( 'manage_posts_custom_column', 'jetpack_stats_post_table_cell', 10, 2 );
-	add_action( 'manage_pages_custom_column', 'jetpack_stats_post_table_cell', 10, 2 );
-}
+	add_filter( 'pre_option_db_version', 'stats_ignore_db_version' );
 
 	add_filter( 'pre_option_db_version', 'stats_ignore_db_version' );
 
@@ -443,6 +437,10 @@ function stats_reports_load() {
 		add_action( 'admin_print_footer_scripts', 'stats_js_load_page_via_ajax' );
 	}
 }
+</style>
+<?php
+}
+
 
 /**
  * Stats Reports CSS.
@@ -672,6 +670,19 @@ function stats_convert_image_urls( $html ) {
 }
 
 /**
+ * Callback for preg_replace_callback used in stats_convert_chart_urls()
+ *
+ * @since 5.6.0
+ *
+ * @param  array  $matches The matches resulting from the preg_replace_callback call.
+ * @return string          The admin url for the chart.
+ */
+function jetpack_stats_convert_chart_urls_callback( $matches ) {
+	// If there is a query string, change the beginning '?' to a '&' so it fits into the middle of this query string.
+	return 'admin.php?page=stats&noheader&chart=' . $matches[1] . str_replace( '?', '&', $matches[2] );
+}
+
+/**
  * Stats Convert Chart URLs.
  *
  * @access public
@@ -679,13 +690,11 @@ function stats_convert_image_urls( $html ) {
  * @return string
  */
 function stats_convert_chart_urls( $html ) {
-	$html = preg_replace_callback( '|https?://[-.a-z0-9]+/wp-includes/charts/([-.a-z0-9]+).php(\??)|',
-		create_function(
-			'$matches',
-			// If there is a query string, change the beginning '?' to a '&' so it fits into the middle of this query string.
-			'return "admin.php?page=stats&noheader&chart=" . $matches[1] . str_replace( "?", "&", $matches[2] );'
-		),
-		$html );
+	$html = preg_replace_callback(
+		'|https?://[-.a-z0-9]+/wp-includes/charts/([-.a-z0-9]+).php(\??)|',
+		'jetpack_stats_convert_chart_urls_callback',
+		$html
+	);
 	return $html;
 }
 

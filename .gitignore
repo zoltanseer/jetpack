@@ -14,3 +14,5 @@ languages/messages.pot
 npm-debug.log
 tests/php/files/jetpack-150x150.jpg
 *.unison.tmp
+
+/_inc/client
