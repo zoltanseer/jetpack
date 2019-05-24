@@ -339,80 +339,6 @@ function jetpack_subscriptions_more_info() { ?>
 	<div class="jp-info-img">
 		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/subscriptions.jpg' ) ?>" alt="<?php esc_attr_e( 'Subsriptions Screenshot', 'jetpack' ) ?>" width="300" height="150" />
 	</div>
-	<p><?php esc_html_e( 'Share your posts with Twitter, Facebook, and a host of other services. You can configure services to appear as icons, text, or both. Some services have additional options to display smart buttons, such as Twitter, which will update the number of times the post has been shared.', 'jetpack' ); ?></p>
-
-	<p><?php
-		if ( is_multisite() ) {
-			esc_html_e( 'The following services are included: Twitter, Facebook, Reddit, PressThis, Digg, LinkedIn, Google +1, Print, and Email.' , 'jetpack' );
-		} else {
-			esc_html_e( 'The following services are included: Twitter, Facebook, Reddit, Digg, LinkedIn, Google +1, Print, and Email.' , 'jetpack' );
-		}
-	?></p>
-
-	<p><?php esc_html_e( 'Easily allow any visitor to subscribe to all of your posts via email through a widget in your blog&#8217;s sidebar.  Every time you publish a post, WordPress.com will send a notification to all your subscribers.', 'jetpack' ); ?></p>
-	<p><?php esc_html_e( 'When leaving comments, your visitors can also subscribe to a post&#8217;s comments to keep up with the conversation.', 'jetpack' ); ?></p>
-
-	<p><?php printf(
-		__( 'To use the Subscriptions widget, go to Appearance &#8594; <a href="%s">Widgets</a>. Drag the widget labeled &#8220;Blog Subscriptions (Jetpack)&#8221; into one of your sidebars and configure away.', 'jetpack' ),
-		admin_url( 'widgets.php' )
-	); ?></p>
-	<p><?php printf(
-		__( 'You can also make changes to your Subscription settings at the bottom of the <a href="%s">Discussion Settings</a> page.', 'jetpack' ),
-		admin_url( 'options-discussion.php#jetpack-subscriptions-settings' )
-	); ?></p>
-	<p><?php printf(
-		__( 'To customize the emails sent from your blog to your followers, check the settings at the bottom of the <a href="%s">Reading Settings</a> page.', 'jetpack' ),
-		admin_url( 'options-reading.php#follower-settings' )
-	); ?></p>
-<?php
-}
-add_action( 'jetpack_module_more_info_subscriptions', 'jetpack_subscriptions_more_info' );
-
-/**
- * Enhanced Distribution
- */
-function jetpack_enhanced_distribution_more_link() {
-	echo '<a class="button-secondary more-info-link" href="http://en.wordpress.com/firehose/">' . esc_html__( 'Learn More', 'jetpack' ) . '</a>';
-}
-add_action( 'jetpack_learn_more_button_enhanced-distribution', 'jetpack_enhanced_distribution_more_link' );
-
-function jetpack_enhanced_distribution_more_info() { ?>
-	<p><?php esc_html_e( 'Jetpack will automatically take the great published content from your blog or website and share it instantly with third party services like search engines, increasing your reach and traffic.', 'jetpack' ); ?></p>
-<?php
-}
-add_action( 'jetpack_module_more_info_enhanced-distribution', 'jetpack_enhanced_distribution_more_info' );
-
-
-/**
- * Protect
- */
-function jetpack_protect_more_link() {
-	echo '<a class="button-secondary more-info-link" href="http://jetpack.me/support/protect/">' . esc_html__( 'Learn More', 'jetpack' ) . '</a>';
-}
-add_action( 'jetpack_learn_more_button_protect', 'jetpack_protect_more_link' );
-
-function jetpack_protect_more_info() { ?>
-	<p><?php esc_html_e( 'Protect is a cloud-powered brute force attack prevention tool. We leverage the millions of WordPress sites to identify and block malicious IPs.
-
-Protect tracks failed login attempts across all Jetpack-connected sites using the Protect module.  If any single IP has too many failed attempts in a short period of time, they are blocked from logging in to any site with this plugin installed.
-
-Protect is derived from BruteProtect, and will disable BruteProtect on your site if it is currently enabled.', 'jetpack' ); ?></p><?php
-}
-
-add_action( 'jetpack_module_more_info_protect', 'jetpack_protect_more_info' );
-
-/**
- * JSON API
- */
-function jetpack_json_api_more_link() {
-	echo '<a class="button-secondary more-info-link" href="http://jetpack.me/support/json-api/">' . esc_html__( 'Learn More', 'jetpack' ) . '</a>';
-}
-add_action( 'jetpack_learn_more_button_json-api', 'jetpack_json_api_more_link' );
-
-function jetpack_json_api_more_info() { ?>
-	<p><?php esc_html_e( 'Jetpack will allow you to authorize applications and services to securely connect to your blog and allow them to use your content in new ways and offer you new functionality.', 'jetpack' ); ?>
-
-	<p><?php _e( "Developers can use WordPress.com's <a href='http://developer.wordpress.com/docs/oauth2/'>OAuth2</a> authentication system and <a href='http://developer.wordpress.com/docs/api/'>WordPress.com REST API</a> to manage and access your site's content.", 'jetpack' ); ?></p>
 
 	<p><?php esc_html_e( 'Easily allow any visitor to subscribe to all of your posts via email through a widget in your blog&#8217;s sidebar.  Every time you publish a post, WordPress.com will send a notification to all your subscribers.', 'jetpack' ); ?></p>
 	<p><?php esc_html_e( 'When leaving comments, your visitors can also subscribe to a post&#8217;s comments to keep up with the conversation.', 'jetpack' ); ?></p>
@@ -504,7 +430,10 @@ function jetpack_contact_form_more_info() {
 	echo '</p>';
 
 	echo '<p>';
-	_e( 'Each contact form can easily be customized to fit your needs. When a user submits your contact form, the feedback will be filtered through <a href="http://akismet.com/">Akismet</a> (if it is active on your site) to make sure it’s not spam. Any legitimate feedback will then be emailed to you, and added to your feedback management area.', 'jetpack' );
+	printf(
+		__( 'Each contact form can easily be customized to fit your needs. When a user submits your contact form, the feedback will be filtered through <a href="http://akismet.com/">Akismet</a> (if it is <a href="%s">active on your site</a>) to make sure it’s not spam. Any legitimate feedback will then be emailed to you, and added to your feedback management area.', 'jetpack' ),
+		admin_url( 'plugin-install.php?tab=search&s=akismet' )
+	);
 	echo '</p>';
 }
 add_action( 'jetpack_module_more_info_contact-form', 'jetpack_contact_form_more_info' );
@@ -567,8 +496,16 @@ function jetpack_custom_css_more_info() { ?>
 	</div>
 
 	<p><?php esc_html_e( "The Custom CSS editor gives you the ability to add to or replace your theme's CSS, all while supplying syntax coloring, auto-indentation, and immediate feedback on the validity of the CSS you're writing.", 'jetpack' ); ?></p>
-	<p><?php printf( __( 'To use the CSS editor, go to Appearance &#8594; <a href="%s">Edit CSS</a>.', 'jetpack' ), admin_url( 'themes.php?page=editcss' ) ); ?></p>
-<?php
+
+	<?php if ( Jetpack::is_module_active( 'custom-css' ) ) : ?>
+
+		<p><?php printf( __( 'To use the CSS editor, go to Appearance &#8594; <a href="%s">Edit CSS</a>.', 'jetpack' ), admin_url( 'themes.php?page=editcss' ) ); ?></p>
+
+	<?php else : ?>
+
+		<p><?php esc_html_e( 'After activating this module, find the editor in Appearance &#8594; Edit CSS.', 'jetpack' ); ?></p>
+
+	<?php endif;
 }
 add_action( 'jetpack_module_more_info_custom-css', 'jetpack_custom_css_more_info' );
 
@@ -892,21 +829,32 @@ function jetpack_custom_content_types_more_info() { ?>
 		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/custom-content-types.jpg' ) ?>" alt="<?php esc_attr_e( 'Custom Content Type', 'jetpack' ) ?>" width="300" height="150" />
 	</div>
 
-	<p><?php esc_html_e( 'Organize and display different types of content on your site, separate from posts and pages.', 'jetpack' ); ?></p>
-	<p><?php printf( __( 'To enable a custom content type, head over to <a href="%s">Settings &rarr; Writing &rarr; Your Custom Content Types</a> to activate either "Portfolio Projects” or “Testimonials” by checking the corresponding checkbox. You can now add projects and testimonials under the new "Portfolio” or “Testimonials” menu item in your sidebar.', 'jetpack' ), admin_url( 'options-writing.php#cpt-options' ) ); ?></p>
-	<p><?php
-		/* translators: all variables are URLs */
-		printf(
-			__(
-				'Once added, your custom content will be visible on your website at %1$s or %2$s, or you may add them with <a href="%3$s" target="_blank">shortcodes</a>.',
-				'jetpack'
-			),
-			get_site_url() . '/portfolio/',
-			get_site_url() . '/testimonial/',
-			'http://jetpack.me/support/custom-content-types/'
-		);
-	?></p>
-<?php
+	<p><?php esc_html_e( 'Organize and display different types of content on your site, such as Portfolio Projects and Testimonials. These content types are separate from Posts and Pages.', 'jetpack' ); ?></p>
+
+	<?php if ( Jetpack::is_module_active( 'custom-content-types' ) ) : ?>
+
+		<p><?php printf( __( 'To enable a custom content type, head over to <a href="%s">Settings &rarr; Writing &rarr; Your Custom Content Types</a> and activate either "Portfolio Projects” or “Testimonials” by checking the corresponding checkbox. You can now add projects and testimonials under the new "Portfolio” and “Testimonials” menu items in your sidebar.', 'jetpack' ), admin_url( 'options-writing.php#cpt-options' ) ); ?></p>
+
+		<p><?php
+			/* translators: all variables are URLs */
+			printf(
+				__(
+					'Once added, your custom content will be visible on your website at <a href="%1$s">%1$s</a> or <a href="%2$s">%2$s</a>, or you may add them with <a href="%3$s" target="_blank">shortcodes</a>.',
+					'jetpack'
+				),
+				get_site_url() . '/portfolio/',
+				get_site_url() . '/testimonial/',
+				'http://jetpack.me/support/custom-content-types/'
+			);
+		?></p>
+
+	<?php else : ?>
+
+			<p><?php esc_html_e( 'Once activated, you can selectively activate the content types you need at Settings &rarr; Writing &rarr; Your Custom Content Types.'); ?></p>
+
+            <p><?php echo wp_kses( sprintf( __( 'Full details can be found on the <a href="%s" title="Custom Content Types support page" target="_blank">Custom Content Types support page</a>.', 'jetpack' ), 'https://jetpack.me/support/custom-content-types/' ), array( 'a' => array( 'href' => true, 'title' => true, 'target' => true ) ) ); ?></p>
+
+	<?php endif;
 }
 add_action( 'jetpack_module_more_info_custom-content-types', 'jetpack_custom_content_types_more_info' );
 
@@ -961,13 +909,30 @@ add_action( 'jetpack_module_more_info_manage', 'jetpack_custom_jetpack_manage' )
 
 // XML Sitemap: START
 function jetpack_xml_sitemap_more_info() { ?>
-	<p><?php esc_html_e( 'This module creates an XML sitemap file that lists the URLs of posts and pages in your site with important information about each one.', 'jetpack' ); ?></p>
-	<p><?php esc_html_e( 'This file is accessed by search engines like Google or Bing so they can crawl and understand your site.', 'jetpack' ); ?></p>
-	<p>&rarr; <a href="http://jetpack.me/support/sitemaps/"><?php esc_html_e( 'More information on Sitemaps.', 'jetpack' ); ?></a></p>
+	<p><?php esc_html_e( 'This module creates two XML sitemap files that list the URLs of posts and pages in your site with important information about each one. This files can be accessed by search engines like Google or Bing so they can crawl and understand your site.', 'jetpack' ); ?></p>
 	<?php if ( '0' == get_option( 'blog_public' ) ) : ?>
-		<p><strong><?php esc_html_e( 'Your site is currently set to discourage search engines from indexing it so the sitemap will not be accesible.', 'jetpack' ); ?></strong></p>
+		<p><strong><?php esc_html_e( 'Your site is currently set to discourage search engines from indexing it so the sitemap will not be accessible.', 'jetpack' ); ?></strong></p>
+	<?php else :
+		$sitemap_url = home_url( get_option( 'permalink_structure' ) ? '/sitemap.xml' : '/?jetpack-sitemap=true' );
+		$news_sitemap_url = home_url( get_option( 'permalink_structure' ) ? '/news-sitemap.xml' : '/?jetpack-news-sitemap=true' );
+		if ( Jetpack::is_module_active( 'sitemaps' ) ) : ?>
+			<p><?php esc_html_e( 'Your sitemaps are accessible at:', 'jetpack' ); ?></p>
+		<?php else : ?>
+			<p><?php esc_html_e( 'After activating the module, your sitemaps will be accessible at:', 'jetpack' ); ?></p>
+		<?php endif; ?>
+		<ul>
+			<li>
+				<?php /* translators: the placeholder is an URL of a sitemap */ ?>
+				<?php printf( __( '<a href="%1$s" target="_blank">%1$s</a>&nbsp&#150; a standard sitemap for use with any search engine;', 'jetpack' ), esc_url( $sitemap_url ) ); ?>
+			</li>
+			<li>
+				<?php /* translators: the placeholder is an URL of a sitemap */ ?>
+				<?php printf( __( '<a href="%1$s" target="_blank">%1$s</a>&nbsp;&#150; a sitemap specially tailored for Google News.', 'jetpack' ), esc_url( $news_sitemap_url ) ); ?>
+			</li>
+		</ul>
 	<?php endif; ?>
-	<?php
+	<p>&rarr; <a href="http://jetpack.me/support/sitemaps/"><?php esc_html_e( 'More information on Sitemaps.', 'jetpack' ); ?></a></p>
+<?php
 }
 add_action( 'jetpack_module_more_info_sitemaps', 'jetpack_xml_sitemap_more_info' );
 // XML Sitemap: STOP

@@ -71,20 +71,6 @@ function stats_load() {
 		add_action( 'admin_init', 'stats_merged_widget_admin_init' );
 	}
 
-	add_filter( 'pre_option_db_version', 'stats_ignore_db_version' );
-}
-
-/**
- * Delay conditional for current_user_can to after init.
- */
-function stats_merged_widget_admin_init() {
-	if ( current_user_can( 'view_stats' ) ) {
-		add_action( 'load-index.php', 'stats_enqueue_dashboard_head' );
-		add_action( 'wp_dashboard_setup', 'stats_register_widget_control_callback' ); // hacky but works
-		add_action( 'jetpack_dashboard_widget', 'stats_jetpack_dashboard_widget' );
-	}
-}
-
 function stats_enqueue_dashboard_head() {
 	add_action( 'admin_head', 'stats_dashboard_head' );
 }
@@ -398,14 +384,14 @@ if ( -1 == document.location.href.indexOf( 'noheader' ) ) {
 <?php
 }
 
-function stats_reports_page() {
+function stats_reports_page( $main_chart_only = false ) {
 	if ( isset( $_GET['dashboard'] ) )
 		return stats_dashboard_widget_content();
 
 	$blog_id = stats_get_option( 'blog_id' );
 	$domain = Jetpack::build_raw_urls( get_home_url() );
 
-	if ( !isset( $_GET['noheader'] ) && empty( $_GET['nojs'] ) && empty( $_COOKIE['stnojs'] ) ) {
+	if ( ! $main_chart_only && !isset( $_GET['noheader'] ) && empty( $_GET['nojs'] ) && empty( $_COOKIE['stnojs'] ) ) {
 		$nojs_url = add_query_arg( 'nojs', '1' );
 		$http = is_ssl() ? 'https' : 'http';
 		// Loading message
@@ -441,6 +427,8 @@ echo esc_url( apply_filters( 'jetpack_static_url', "{$http}://en.wordpress.com/i
 	if ( get_locale() !== 'en_US' ) {
 		$q['jp_lang'] = get_locale();
 	}
+	// Only show the main chart, without extra header data, or metaboxes.
+	$q['main_chart_only'] = $main_chart_only;
 	$args = array(
 		'view' => array( 'referrers', 'postviews', 'searchterms', 'clicks', 'post', 'table' ),
 		'numdays' => 'int',
