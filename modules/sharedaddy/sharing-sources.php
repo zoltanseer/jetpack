@@ -942,8 +942,6 @@ class Share_Custom extends Sharing_Advanced_Source {
 
 		$opts = $this->get_options();
 
-		$opts = $this->get_options();
-
 		if ( isset( $settings['name'] ) ) {
 			$this->name = $settings['name'];
 			$this->shortname = preg_replace( '/[^a-z0-9]*/', '', $settings['name'] );
