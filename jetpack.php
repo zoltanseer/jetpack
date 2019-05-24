@@ -5,7 +5,7 @@
  * Plugin URI: http://wordpress.org/extend/plugins/jetpack/
  * Description: Bring the power of the WordPress.com cloud to your self-hosted WordPress. Jetpack enables you to connect your blog to a WordPress.com account to use the powerful features normally only available to WordPress.com users.
  * Author: Automattic
- * Version: 1.8.1
+ * Version: 1.8.2
  * Author URI: http://jetpack.me
  * License: GPL2+
  * Text Domain: jetpack
@@ -17,7 +17,7 @@ define( 'JETPACK__API_VERSION', 1 );
 define( 'JETPACK__MINIMUM_WP_VERSION', '3.2' );
 defined( 'JETPACK_CLIENT__AUTH_LOCATION' ) or define( 'JETPACK_CLIENT__AUTH_LOCATION', 'header' );
 defined( 'JETPACK_CLIENT__HTTPS' ) or define( 'JETPACK_CLIENT__HTTPS', 'AUTO' );
-define( 'JETPACK__VERSION', '1.8.1' );
+define( 'JETPACK__VERSION', '1.8.2' );
 define( 'JETPACK__PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 defined( 'JETPACK__GLOTPRESS_LOCALES_PATH' ) or define( 'JETPACK__GLOTPRESS_LOCALES_PATH', JETPACK__PLUGIN_DIR . 'locales.php' );
 
@@ -110,118 +110,6 @@ class Jetpack {
 			$instance = new Jetpack;
 
 			$instance->plugin_upgrade();
-		}
-
-		// Future: switch on version? If so, think twice before updating version/old_version.
-	}
-
-	/**
-	 * Must never be called statically
-	 */
-	function plugin_upgrade() {
-		// Upgrade: 1.1 -> 1.2
-		if ( get_option( 'jetpack_id' ) ) {
-			// Move individual jetpack options to single array of options
-			$options = array();
-			foreach ( Jetpack::get_option_names() as $option ) {
-				if ( false !== $value = get_option( "jetpack_$option" ) ) {
-					$options[$option] = $value;
-				}
-			}
-
-			if ( $options ) {
-				Jetpack::update_options( $options );
-
-				foreach ( array_keys( $options ) as $option ) {
-					delete_option( "jetpack_$option" );
-				}
-			}
-
-			// Add missing version and old_version options
-			if ( !$version = Jetpack::get_option( 'version' ) ) {
-				$version = $old_version = '1.1:' . time();
-				Jetpack::update_options( compact( 'version', 'old_version' ) );
-			}
-		}
-
-		// Future: switch on version? If so, think twice before updating version/old_version.
-	}
-
-	/**
-	 * Must never be called statically
-	 */
-	function plugin_upgrade() {
-		// Upgrade: 1.1 -> 1.2
-		if ( get_option( 'jetpack_id' ) ) {
-			// Move individual jetpack options to single array of options
-			$options = array();
-			foreach ( Jetpack::get_option_names() as $option ) {
-				if ( false !== $value = get_option( "jetpack_$option" ) ) {
-					$options[$option] = $value;
-				}
-			}
-
-			if ( $options ) {
-				Jetpack::update_options( $options );
-
-				foreach ( array_keys( $options ) as $option ) {
-					delete_option( "jetpack_$option" );
-				}
-			}
-
-			// Add missing version and old_version options
-			if ( !$version = Jetpack::get_option( 'version' ) ) {
-				$version = $old_version = '1.1:' . time();
-				Jetpack::update_options( compact( 'version', 'old_version' ) );
-			}
-		}
-
-		// Future: switch on version? If so, think twice before updating version/old_version.
-	}
-
-	/**
-	 * Must never be called statically
-	 */
-	function plugin_upgrade() {
-		// Upgrade: 1.1 -> 1.2
-		if ( get_option( 'jetpack_id' ) ) {
-			// Move individual jetpack options to single array of options
-			$options = array();
-			foreach ( Jetpack::get_option_names() as $option ) {
-				if ( false !== $value = get_option( "jetpack_$option" ) ) {
-					$options[$option] = $value;
-				}
-			}
-
-			if ( $options ) {
-				Jetpack::update_options( $options );
-
-				foreach ( array_keys( $options ) as $option ) {
-					delete_option( "jetpack_$option" );
-				}
-			}
-
-			// Add missing version and old_version options
-			if ( !$version = Jetpack::get_option( 'version' ) ) {
-				$version = $old_version = '1.1:' . time();
-				Jetpack::update_options( compact( 'version', 'old_version' ) );
-			}
-		}
-
-		// Upgrade from a single user token to a user_id-indexed array and a master_user ID
-		if ( !Jetpack::get_option( 'user_tokens' ) ) {
-			if ( $user_token = Jetpack::get_option( 'user_token' ) ) {
-				$token_parts = explode( '.', $user_token );
-				if ( isset( $token_parts[2] ) ) {
-					$master_user = $token_parts[2];
-					$user_tokens = array( $master_user => $user_token );
-					Jetpack::update_options( compact( 'master_user', 'user_tokens' ) );
-					Jetpack::delete_option( 'user_token' );
-				} else {
-					// @todo: is this even possible?
-					trigger_error( sprintf( 'Jetpack::plugin_upgrade found no user_id in user_token "%s"', $user_token ), E_USER_WARNING );
-				}
-			}
 		}
 
 		// Future: switch on version? If so, think twice before updating version/old_version.
@@ -2831,7 +2719,7 @@ p {
 		if ( !isset( $clients[$client_blog_id] ) ) {
 			Jetpack::load_xml_rpc_client();
 			$clients[$client_blog_id] = new Jetpack_IXR_ClientMulticall( array(
-				'user_id' => get_current_user_id()
+				'user_id' => JETPACK_MASTER_USER,
 			) );
 			ignore_user_abort( true );
 			add_action( 'shutdown', array( 'Jetpack', 'xmlrpc_async_call' ) );
