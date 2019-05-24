@@ -39,7 +39,7 @@ add_action( 'jetpack_module_more_info_vaultpress', 'vaultpress_jetpack_more_info
 function grofiles_load_more_link() {
 	echo 'https://jetpack.com/support/gravatar-hovercards/';
 }
-add_filter( 'jetpack_learn_more_button_gravatar-hovercards', 'grofiles_load_more_link' );
+add_action( 'jetpack_module_more_info_shortlinks', 'wpme_more_info' );
 
 function grofiles_more_info() { ?>
 	<?php esc_html_e(
@@ -64,15 +64,7 @@ function jetpack_shortcodes_more_info() { ?>
 		editor and click “Publish.”'
 		, 'jetpack' );
 }
-add_action( 'jetpack_module_more_info_gravatar-hovercards', 'grofiles_more_info' );
-
-/**
- * Shortcodes
- */
-function jetpack_shortcodes_load_more_link( $description ) {
-	echo '<a class="button-secondary more-info-link" href="http://en.support.wordpress.com/shortcodes/" target="_blank">' . esc_html__( 'Learn More' , 'jetpack' ) . '</a>';
-}
-add_filter( 'jetpack_learn_more_button_shortcodes', 'jetpack_shortcodes_load_more_link' );
+add_filter( 'jetpack_learn_more_button_publicize', 'publicize_load_more_link' );
 
 /**
  * Shortlinks
@@ -241,22 +233,13 @@ function jetpack_enhanced_distribution_more_info() {
 }
 add_action( 'jetpack_module_more_info_enhanced-distribution', 'jetpack_enhanced_distribution_more_info' );
 
-	<p><?php printf( __( '<strong>The Twitter Widget</strong> shows your latest tweets within a sidebar on your theme.', 'jetpack' ) ); ?></p>
-	<p><?php printf( __( '<strong>The Facebook Like Box Widget</strong> shows your Facebook Like Box within a sidebar on your theme.', 'jetpack' ) ); ?></p>
-	<p><?php printf( __( '<strong>The Google+ Badge Widget</strong> allows you to display information about a person, a page, or a community from Google+.', 'jetpack' ) ); ?></p>
-	<p><?php printf( __( '<strong>The Image Widget</strong> lets you easily add images to a sidebar on your theme.', 'jetpack' ) ); ?></strong> <?php esc_html_e( '', 'jetpack' ) ?></p>
-	<p><?php printf( __( '<strong>The Gravatar Widget</strong> allows you to pull in your Gravatar image along with some of your Gravatar profile data.', 'jetpack' ) ); ?></p>
-	<p><?php printf( __( '<strong>The Gallery Widget</strong> provides you with a simple way to display a photo gallery or slideshow in your blog’s sidebar. Requires the Tiled Gallery module.', 'jetpack' ) ); ?></p>
-	<p><?php printf( __( '<strong>The Display WordPress Posts Widget</strong> lets you display up to ten recent posts from another WordPress.com blog, or a self-hosted WordPress site with Jetpack enabled.', 'jetpack' ) ); ?></p>
-	<p><?php printf( __( '<strong>The Social Media Icons Widget</strong> lets you add icons for the most popular social networks to your sidebar or other widget area.', 'jetpack' ) ); ?></p>
-	<p><?php printf( __( '<strong>The Contact Info Widget</strong> helps you display important information about your business. The widget allows you to show your business on a map, as well as your opening hours and contact information.', 'jetpack' ) ); ?></p>
-	<p><?php printf( __( '<strong>The Goodreads Widget</strong> lets you display your Goodreads Shelf in your sidebar.', 'jetpack' ) ); ?></p>
-	<!--<p><?php printf( __( '<strong>The Upcoming Events Widget</strong> allows you to use an iCalendar link to display a list of events on your site.', 'jetpack' ) ); ?></p>-->
-
-	<p><?php esc_html_e( 'Each of these widgets has a number of customization options.', 'jetpack' ); ?>  <?php printf( __( 'To use the widgets, go to Appearance &#8594; <a href="%s">Widgets</a>. Drag them into one of your sidebars and configure away.', 'jetpack' ), admin_url( 'widgets.php' ) ); ?></p>
-<?php
+/**
+ * Infinite Scroll
+ */
+function jetpack_infinite_scroll_more_button() {
+	echo 'https://jetpack.com/support/infinite-scroll';
 }
-add_action( 'jetpack_module_more_info_widgets', 'jetpack_widgets_more_info' );
+add_action( 'jetpack_learn_more_button_infinite-scroll', 'jetpack_infinite_scroll_more_button' );
 
 /**
  * Protect
@@ -291,11 +274,13 @@ function jetpack_json_api_more_info() {
 }
 add_action( 'jetpack_module_more_info_json-api', 'jetpack_json_api_more_info' );
 
-function jetpack_carousel_more_info() {
-?>
-	<div class="jp-info-img">
-		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/images/screenshots/carousel.jpg' ) ?>" alt="<?php esc_attr_e( 'Gallery Carousel Screenshot', 'jetpack' ) ?>" width="300" height="188" />
-	</div>
+/**
+ * Tiled Galleries
+ */
+function jetpack_tiled_gallery_more_link() {
+	echo 'https://jetpack.com/support/tiled-galleries/';
+}
+add_action( 'jetpack_learn_more_button_tiled-gallery', 'jetpack_tiled_gallery_more_link' );
 
 /**
  * Contact Form
