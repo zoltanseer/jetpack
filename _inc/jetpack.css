@@ -101,6 +101,39 @@
 			#jp-header #jp-clouds .jp-disconnect a.clicked div {
 				top: -1.7em;
 			}
+
+	/* Retina Header Clouds & Status Light */
+	@media only screen and (-moz-min-device-pixel-ratio: 1.5), only screen and (-o-min-device-pixel-ratio: 3/2), only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-device-pixel-ratio: 1.5) {
+	    #jp-header #jp-clouds {
+	    	background: transparent url( images/header-clouds-2x.png ) -315px 100% repeat-x;
+			background-size:1600px 400px;
+	    }
+	    	#jp-header.small #jp-clouds {
+	    		background: transparent url( images/header-clouds-small-2x.png ) -120px 100% repeat-x;
+	    		background-size:980px 140px;
+	    	}
+
+	    #jp-header #jp-clouds .jp-disconnect a {
+	    	background: #8caa46 url( images/status-light-2x.png ) 3px 85% no-repeat;
+	    	background-size:25px 57px;
+	    }
+	    	#jp-header #jp-clouds .jp-disconnect a:hover {
+	    		background: #8caa46 url( images/status-light-2x.png ) 3px -2% no-repeat;
+	    		background-size:25px 57px;
+	    	}
+	}
+
+
+			#jp-header #jp-clouds .jp-disconnect div {
+				position: relative;
+				line-height: 1.7em;
+				height: 1.7em;
+			}
+
+			#jp-header #jp-clouds .jp-disconnect a:hover div,
+			#jp-header #jp-clouds .jp-disconnect a.clicked div {
+				top: -1.7em;
+			}
 	
 	/* Retina Header Clouds & Status Light */
 	@media only screen and (-moz-min-device-pixel-ratio: 1.5), only screen and (-o-min-device-pixel-ratio: 3/2), only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-device-pixel-ratio: 1.5) {

@@ -261,23 +261,6 @@ function notes_more_info() { ?>
 }
 add_action( 'jetpack_module_more_info_widgets', 'jetpack_widgets_more_info' );
 
-function jetpack_widgets_more_info_connected() { ?>
-	<div class="jp-info-img">
-		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/_inc/images/screenshots/widgets.png' ) ?>" alt="<?php esc_attr_e( 'Widgets Screenshot', 'jetpack' ) ?>" width="300" height="150" />
-	</div>
-
-	<h4><?php esc_html_e( 'Sharing' , 'jetpack' ); ?></h4>
-	<?php
-	if ( class_exists( 'Sharing_Admin' ) ) {
-		?>
-
-		<p><?php printf( __( 'To configure your sharing settings, go to the Settings &rarr; <a href="%s">Sharing</a> menu.', 'jetpack' ), 'options-general.php?page=sharing' ); ?></p>
-		<p><?php esc_html_e( 'Drag and drop sharing services into the enabled section to have them show up on your site, and drag them into the hidden section to have them hidden behind a button.', 'jetpack' ); ?>
-
-		<?php
-	}
-	?>
-
 	<h4><?php esc_html_e( 'Notifications' , 'jetpack' ); ?></h4>
 	<p><?php esc_html_e( 'Keep up with the latest happenings on all your WordPress sites and interact with other WordPress.com users.', 'jetpack' ) ?></p>
 <?php
@@ -295,6 +278,16 @@ function notes_more_info_connected() { ?>
 	<p><?php esc_html_e( 'Keep up with the latest happenings on all your WordPress sites and interact with other WordPress.com users.', 'jetpack' ) ?></p>
 	<p><?php printf( __( 'You can view your notifications in the Toolbar and <a href="%s">on WordPress.com</a>.', 'jetpack' ), 'http://wordpress.com/#!/notifications/' ); ?></p>
 <?php
+
+	if ( 'jetpack_module_more_info_connected_subscriptions' == current_filter() )
+		printf( '<p>' . __( 'To use the Subscriptions widget, go to Appearance &#8594; <a href="%s">Widgets</a>. Drag the widget labeled &#8220;Blog Subscriptions (Jetpack)&#8221; into one of your sidebars and configure away.', 'jetpack' ) . '</p>', admin_url( 'widgets.php' ) );
+		printf( '<p>' . __( 'You can also make changes to your Subscription settings at the bottom of the <a href="%s">Discussion Settings</a> page.', 'jetpack' ) . '</p>', admin_url( 'options-discussion.php#jetpack-subscriptions-settings' ) );
+}
+add_action( 'jetpack_module_more_info_subscriptions', 'jetpack_subscriptions_more_info' );
+add_action( 'jetpack_module_more_info_connected_subscriptions', 'jetpack_subscriptions_more_info' );
+
+function jetpack_subscriptions_load_more_link() {
+	echo '<a class="button more-info-link" href="http://en.support.wordpress.com/following/">' . esc_html__( 'Learn More', 'jetpack' ) . '</a>';
 }
 add_filter( 'jetpack_module_more_info_connected_notes', 'notes_more_info_connected' );
 
@@ -303,6 +296,17 @@ function notes_load_more_link( $description ) {
 }
 add_filter( 'jetpack_learn_more_button_notes', 'notes_load_more_link' );
 
+add_action( 'jetpack_module_more_info_enhanced-distribution', 'jetpack_enhanced_distribution_more_info' );
+add_action( 'jetpack_module_more_info_connected_enhanced-distribution', 'jetpack_enhanced_distribution_more_info' );
+
+function jetpack_enhanced_distribution_more_link() {
+	echo '<a class="button more-info-link" href="http://en.wordpress.com/firehose/">' . esc_html__( 'Learn More', 'jetpack' ) . '</a>';
+}
+add_action( 'jetpack_learn_more_button_enhanced-distribution', 'jetpack_enhanced_distribution_more_link' );
+
+// JSON API
+function jetpack_json_api_more_info() { ?>
+	<h4><?php esc_html_e( 'JSON API' , 'jetpack' ); ?></h4>
 
 // LaTeX
 function latex_more_info() { ?>
@@ -326,11 +330,6 @@ function latex_more_info() { ?>
 <?php
 }
 add_action( 'jetpack_module_more_info_widgets', 'jetpack_widgets_more_info' );
-
-function jetpack_widgets_more_info_connected() { ?>
-	<div class="jp-info-img">
-		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/_inc/images/screenshots/widgets.png' ) ?>" alt="<?php esc_attr_e( 'Widgets Screenshot', 'jetpack' ) ?>" width="300" height="150" />
-	</div>
 
 	<h4><img src="http://l.wordpress.com/latex.php?latex=%5CLaTeX&amp;bg=transparent&amp;fg=000&amp;s=1" alt="LaTeX logo" title="LaTeX" style="vertical-align: -27%" /> Makes Beautiful Math</h4>
 	<p><?php printf( esc_html__( '%s is a powerful markup language for writing complex mathematical equations, formulas, etc.', 'jetpack' ), '<a href="http://www.latex-project.org/" target="_blank"><img src="http://l.wordpress.com/latex.php?latex=%5CLaTeX&amp;bg=transparent&amp;fg=000&amp;s=-1" alt="LaTeX logo" title="LaTeX" style="vertical-align: -25%" /></a>' ); ?></p>
@@ -356,18 +355,17 @@ function latex_more_info_connected() { ?>
 		printf( '<p>' . __( 'To use the Subscriptions widget, go to Appearance &#8594; <a href="%s">Widgets</a>. Drag the widget labeled &#8220;Blog Subscriptions (Jetpack)&#8221; into one of your sidebars and configure away.', 'jetpack' ) . '</p>', admin_url( 'widgets.php' ) );
 		printf( '<p>' . __( 'You can also make changes to your Subscription settings at the bottom of the <a href="%s">Discussion Settings</a> page.', 'jetpack' ) . '</p>', admin_url( 'options-discussion.php#jetpack-subscriptions-settings' ) );
 }
-add_action( 'jetpack_module_more_info_subscriptions', 'jetpack_subscriptions_more_info' );
-add_action( 'jetpack_module_more_info_connected_subscriptions', 'jetpack_subscriptions_more_info' );
-
-function jetpack_subscriptions_load_more_link() {
-	echo '<a class="button more-info-link" href="http://en.support.wordpress.com/following/">' . esc_html__( 'Learn More', 'jetpack' ) . '</a>';
-}
 add_action( 'jetpack_module_more_info_connected_latex', 'latex_more_info_connected' );
 
 function latex_load_more_link( $description ) {
 	echo '<a class="button-secondary more-info-link" href="http://support.wordpress.com/latex/">' . esc_html__( 'Learn More', 'jetpack' ) . '</a>';
 }
 add_filter( 'jetpack_learn_more_button_latex', 'latex_load_more_link' );
+
+	<p><?php esc_html_e( 'Jetpack will automatically take the great published content from your blog or website and share it instantly with third party services like search engines, increasing your reach and traffic.', 'jetpack' ); ?></p>
+
+<?php
+}
 
 add_action( 'jetpack_module_more_info_enhanced-distribution', 'jetpack_enhanced_distribution_more_info' );
 add_action( 'jetpack_module_more_info_connected_enhanced-distribution', 'jetpack_enhanced_distribution_more_info' );
@@ -449,9 +447,15 @@ function jetpack_comments_more_info() {
 	<p><?php esc_html_e( 'Additionally you can define your own custom services.', 'jetpack' ); ?></p>
 <?php
 }
-add_action( 'jetpack_module_more_info_widgets', 'jetpack_widgets_more_info' );
 
-function jetpack_widgets_more_info_connected() { ?>
+function jpatd_load_more_link( $description ) {
+	echo '<a class="button-secondary more-info-link" href="http://en.support.wordpress.com/proofreading/">' . esc_html__( 'Learn More', 'jetpack' ) . '</a>';
+}
+add_filter( 'jetpack_learn_more_button_after-the-deadline', 'jpatd_load_more_link' );
+
+
+// RSS Links Widget, Image Widget, Twitter Widget
+function jetpack_widgets_more_info() { ?>
 	<div class="jp-info-img">
 		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/_inc/images/screenshots/widgets.png' ) ?>" alt="<?php esc_attr_e( 'Widgets Screenshot', 'jetpack' ) ?>" width="300" height="150" />
 	</div>
@@ -471,109 +475,20 @@ function jetpack_widgets_more_info_connected() { ?>
 	<p><?php printf( __( 'Full details can be found on the <a href="%s">Sharing support page</a>. This video also gives a swish run-down of how to use the Sharing feature. Watch it in HD for extra snazz!', 'jetpack' ), 'http://support.wordpress.com/sharing/' ); ?></p>
 <?php
 }
-add_action( 'jetpack_module_more_info_connected_widgets', 'jetpack_widgets_more_info_connected' );
+add_action( 'jetpack_module_more_info_widgets', 'jetpack_widgets_more_info' );
 
 function sharedaddy_load_more_link( $description ) {
 	echo '<a class="button-secondary more-info-link" href="http://support.wordpress.com/sharing/">' . esc_html__( 'Learn More', 'jetpack' ) . '</a>';
+}
+add_action( 'jetpack_module_more_info_connected_widgets', 'jetpack_widgets_more_info_connected' );
+
+function jetpack_widgets_load_more_link( $description ) {
+	echo '<a class="button-secondary more-info-link" href="http://en.support.wordpress.com/widgets/">' . esc_html__( 'Learn More', 'jetpack' ) . '</a>';
 }
 add_filter( 'jetpack_learn_more_button_widgets', 'jetpack_widgets_load_more_link' );
 
 // Subscriptions
 function jetpack_subscriptions_more_info() { ?>
-	<div class="jp-info-img">
-		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/_inc/images/screenshots/subscriptions.png' ) ?>" alt="<?php esc_attr_e( 'Subsriptions Screenshot', 'jetpack' ) ?>" width="300" height="150" />
-	</div>
-
-	<h4><?php esc_html_e( 'Subscriptions' , 'jetpack' ); ?></h4>
-
-	<p><?php esc_html_e( 'Easily allow any visitor to subscribe to all of your posts via email through a widget in your blog&#8217;s sidebar.  Every time you publish a post, WordPress.com will send a notification to all your subscribers.', 'jetpack' ); ?></p>
-	<p><?php esc_html_e( 'When leaving comments, your visitors can also subscribe to a post&#8217;s comments to keep up with the conversation.', 'jetpack' ); ?></p>
-
-<?php
-
-	if ( 'jetpack_module_more_info_connected_subscriptions' == current_filter() )
-		printf( '<p>' . __( 'To use the Subscriptions widget, go to Appearance &#8594; <a href="%s">Widgets</a>. Drag the widget labeled &#8220;Blog Subscriptions (Jetpack)&#8221; into one of your sidebars and configure away.', 'jetpack' ) . '</p>', admin_url( 'widgets.php' ) );
-		printf( '<p>' . __( 'You can also make changes to your Subscription settings at the bottom of the <a href="%s">Discussion Settings</a> page.', 'jetpack' ) . '</p>', admin_url( 'options-discussion.php#jetpack-subscriptions-settings' ) );
-}
-add_action( 'jetpack_module_more_info_subscriptions', 'jetpack_subscriptions_more_info' );
-add_action( 'jetpack_module_more_info_connected_subscriptions', 'jetpack_subscriptions_more_info' );
-
-function jetpack_subscriptions_load_more_link() {
-	echo '<a class="button more-info-link" href="http://en.support.wordpress.com/following/">' . esc_html__( 'Learn More', 'jetpack' ) . '</a>';
-}
-add_action( 'jetpack_learn_more_button_subscriptions', 'jetpack_subscriptions_load_more_link' );
-
-// Enhanced Distribution
-
-function jetpack_enhanced_distribution_more_info() { ?>
-	<h4><?php esc_html_e( 'Enhanced Distribution' , 'jetpack' ); ?></h4>
-
-	<p><?php esc_html_e( 'Jetpack will automatically take the great published content from your blog or website and share it instantly with third party services like search engines, increasing your reach and traffic.', 'jetpack' ); ?></p>
-
-<?php
-}
-
-add_action( 'jetpack_module_more_info_enhanced-distribution', 'jetpack_enhanced_distribution_more_info' );
-add_action( 'jetpack_module_more_info_connected_enhanced-distribution', 'jetpack_enhanced_distribution_more_info' );
-
-function jetpack_enhanced_distribution_more_link() {
-	echo '<a class="button more-info-link" href="http://en.wordpress.com/firehose/">' . esc_html__( 'Learn More', 'jetpack' ) . '</a>';
-}
-add_action( 'jetpack_learn_more_button_enhanced-distribution', 'jetpack_enhanced_distribution_more_link' );
-
-// JSON API
-function jetpack_json_api_more_info() { ?>
-	<h4><?php esc_html_e( 'JSON API' , 'jetpack' ); ?></h4>
-
-	<p><?php esc_html_e( 'Jetpack will allow you to authorize applications and services to securely connect to your blog and allow them to use your content in new ways and offer you new functionality.', 'jetpack' ); ?>
-
-	<p><?php _e( "Developers can use WordPress.com's <a href='http://developer.wordpress.com/docs/oauth2/'>OAuth2</a> authentication system and <a href='http://developer.wordpress.com/docs/api/'>WordPress.com REST API</a> to manage and access your site's content.", 'jetpack' ); ?></p>
-
-<?php
-}
-
-add_action( 'jetpack_module_more_info_json-api', 'jetpack_json_api_more_info' );
-add_action( 'jetpack_module_more_info_connected_json-api', 'jetpack_json_api_more_info' );
-
-function jetpack_json_api_more_link() {
-	echo '<a class="button more-info-link" href="http://jetpack.me/support/json-api/">' . esc_html__( 'Learn More', 'jetpack' ) . '</a>';
-}
-add_action( 'jetpack_learn_more_button_json-api', 'jetpack_json_api_more_link' );
-
-// Contact Form: START
-function jetpack_contact_form_learn_more_button() {
-    echo '<a class="button more-info-link" href="http://support.wordpress.com/contact-form/">' . __( 'Learn More', 'jetpack' ) . '</a>';
-}
-
-function jetpack_contact_form_more_info() {
-    echo '<div class="jp-info-img">';
-    echo '<a href="http://support.wordpress.com/contact-form/">';
-    echo '<img class="jp-info-img" src="' . plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/_inc/images/screenshots/contactform.png' ) . '" alt="' . esc_attr__( 'Contact Form', 'jetpack' ) . '" width="300" height="150" />';
-    echo '</a>';
-    echo '</div>';
-
-    echo '<h4>' . esc_html__( 'Contact Form', 'jetpack' ) . '</h4>';
-
-    echo '<p>';
-    _e( 'A contact form is a great way to offer your readers the ability to get in touch, without giving out your personal email address.', 'jetpack' );
-    echo '</p>';
-
-    echo '<p>';    _e( 'Each contact form can easily be customized to fit your needs. When a user submits your contact form, the feedback will be filtered through <a href="http://akismet.com/">Akismet</a> (if it is active on your site) to make sure it’s not spam. Any legitimate feedback will then be emailed to you, and added to your feedback management area.', 'jetpack' );
-    echo '</p>';
-}
-
-add_action( 'jetpack_learn_more_button_contact-form', 'jetpack_contact_form_learn_more_button' );
-add_action( 'jetpack_module_more_info_contact-form', 'jetpack_contact_form_more_info' );
-add_action( 'jetpack_module_more_info_connected_contact-form', 'jetpack_contact_form_more_info' );
-// Contact Form: STOP
-
-// Jetpack Comments: START
-function jetpack_comments_learn_more_button() {
-    echo '<a class="button more-info-link" href="#">' . __( 'Learn More', 'jetpack' ) . '</a>';
-}
-
-function jetpack_comments_more_info() {
-?>
 	<div class="jp-info-img">
 		<a href="http://en.support.wordpress.com/proofreading/">
 			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/_inc/images/screenshots/spelling.png' ) ?>" alt="<?php esc_attr_e( 'Spelling and Grammar', 'jetpack' ) ?>" width="300" height="150" />
@@ -585,7 +500,13 @@ function jetpack_comments_more_info() {
 	<p><?php printf( __( "The <a href='%s'>After&nbsp;the&nbsp;Deadline</a> Proofreading service improves your writing by using artificial intelligence to find your errors and offer smart suggestions.", 'jetpack' ), 'http://www.afterthedeadline.com/' ); ?></p>
 	<p><?php printf( __( 'After the Deadline provides a number of <a href="%s">customization options</a>, which you can edit in your profile.', 'jetpack' ), esc_url( get_edit_profile_url( get_current_user_id() ) ) . '#atd' ); ?></p>
 <?php
+
+	if ( 'jetpack_module_more_info_connected_subscriptions' == current_filter() )
+		printf( '<p>' . __( 'To use the Subscriptions widget, go to Appearance &#8594; <a href="%s">Widgets</a>. Drag the widget labeled &#8220;Blog Subscriptions (Jetpack)&#8221; into one of your sidebars and configure away.', 'jetpack' ) . '</p>', admin_url( 'widgets.php' ) );
+		printf( '<p>' . __( 'You can also make changes to your Subscription settings at the bottom of the <a href="%s">Discussion Settings</a> page.', 'jetpack' ) . '</p>', admin_url( 'options-discussion.php#jetpack-subscriptions-settings' ) );
 }
+add_action( 'jetpack_module_more_info_subscriptions', 'jetpack_subscriptions_more_info' );
+add_action( 'jetpack_module_more_info_connected_subscriptions', 'jetpack_subscriptions_more_info' );
 
 function jpatd_load_more_link( $description ) {
 	echo '<a class="button-secondary more-info-link" href="http://en.support.wordpress.com/proofreading/">' . esc_html__( 'Learn More', 'jetpack' ) . '</a>';
@@ -843,6 +764,8 @@ add_action( 'jetpack_module_more_info_mobile-push', 'jetpack_mobile_push_notific
  *
  */
 function jetpack_infinite_scroll_more_info() {
+	$support_text = sprintf( __( 'If you are a theme author, you can learn about adding support for Infinite Scroll at <a href="%1$s">%1$s</a>.', 'jetpack' ), 'http://jetpack.me/support/infinite-scroll/' );
+
 	?>
 	<h4><?php esc_html_e( 'Infinite Scroll', 'jetpack' ); ?></h4>
 
@@ -858,15 +781,19 @@ function jetpack_infinite_scroll_more_info() {
 
 		<?php
 
-		if ( current_user_can( 'update_themes' ) ) {
+		if ( current_user_can( 'update_themes' ) ) :
 			ob_start();
 			theme_update_available( function_exists( 'wp_get_theme' ) ? wp_get_theme() : (object) get_theme( get_current_theme() ) );
 			$theme_update_available = ob_get_clean();
 
 			if ( ! empty( $theme_update_available ) ) : ?>
 				<p><?php printf( __( 'There is an update available for your theme. You may wish to check if this update adds Infinite Scroll support by visiting the <a href="%s">WordPress Updates</a> page.', 'jetpack' ), esc_url( admin_url( 'update-core.php' ) ) ); ?></p>
+			<?php else : ?>
+				<p><?php echo $support_text; ?></p>
 			<?php endif; ?>
-		<?php } ?>
+		<?php else : ?>
+			<p><?php echo $support_text; ?></p>
+		<?php endif; ?>
 	<?php endif;
 }
 add_action( 'jetpack_module_more_info_infinite-scroll', 'jetpack_infinite_scroll_more_info' );
