@@ -20,6 +20,8 @@ var WPCOMSharing = {
 	},
 	update_twitter_count : function( data ) {
 		if ( 'undefined' != typeof data.count && ( data.count * 1 ) > 0 ) {
+			if ( 'undefined' == typeof WPCOM_sharing_counts[ data.url ] )
+				data.url = data.url.replace(/\/$/, "");
 			WPCOMSharing.inject_share_count( 'sharing-twitter-' + WPCOM_sharing_counts[ data.url ], data.count );
 		}
 	},
@@ -348,6 +350,13 @@ var WPCOMSharing = {
 
 					// Update the recaptcha
 					Recaptcha.create( key, 'sharing_recaptcha' );
+
+					key = '';
+					if ( $( '#recaptcha_public_key' ).length > 0 )
+						key = $( '#recaptcha_public_key' ).val();
+
+					// Update the recaptcha
+					Recaptcha.create( key, 'sharing_recaptcha', { lang : recaptcha_options.lang } );
 
 					key = '';
 					if ( $( '#recaptcha_public_key' ).length > 0 )

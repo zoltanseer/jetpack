@@ -88,6 +88,9 @@ Learn more (and get detailed instructions) in our [contribute guide](http://jetp
 
 == Changelog ==
 
+= 2.9 =
+* ???
+
 = 2.8 =
 * New Module: Markdown
 * Module Update: Jetpack Monitor
