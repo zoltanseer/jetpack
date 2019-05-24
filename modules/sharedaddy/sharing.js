@@ -183,6 +183,20 @@ var WPCOMSharing = {
 			} );
 		}
 
+		$( document ).click(function() {
+		
+			// Click outside 
+			// remove any timer
+			$more_sharing_buttons.each( function() {
+				clearTimeout( $( this ).data( 'timer' ) );
+			} );
+			$more_sharing_buttons.data( 'timer', false );
+			
+			// slide down forcibly
+			$( '.sharedaddy .inner' ).slideUp();
+			
+		});
+		
 		// Add click functionality
 		$( '.sharedaddy ul' ).each( function( item ) {
 
@@ -350,6 +364,13 @@ var WPCOMSharing = {
 
 					// Update the recaptcha
 					Recaptcha.create( key, 'sharing_recaptcha' );
+
+					key = '';
+					if ( $( '#recaptcha_public_key' ).length > 0 )
+						key = $( '#recaptcha_public_key' ).val();
+
+					// Update the recaptcha
+					Recaptcha.create( key, 'sharing_recaptcha', { lang : recaptcha_options.lang } );
 
 					key = '';
 					if ( $( '#recaptcha_public_key' ).length > 0 )
