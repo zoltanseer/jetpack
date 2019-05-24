@@ -64,7 +64,13 @@ function stats_load() {
 		add_action( 'admin_init', 'stats_merged_widget_admin_init' );
 	}
 
-	add_filter( 'pre_option_db_version', 'stats_ignore_db_version' );
+	// Add an icon to see stats in WordPress.com for a particular post
+	add_action( 'admin_print_styles-edit.php', 'jetpack_stats_load_admin_css' );
+	add_filter( 'manage_posts_columns', 'jetpack_stats_post_table' );
+	add_filter( 'manage_pages_columns', 'jetpack_stats_post_table' );
+	add_action( 'manage_posts_custom_column', 'jetpack_stats_post_table_cell', 10, 2 );
+	add_action( 'manage_pages_custom_column', 'jetpack_stats_post_table_cell', 10, 2 );
+}
 
 	add_filter( 'pre_option_db_version', 'stats_ignore_db_version' );
 
@@ -162,7 +168,7 @@ function stats_template_redirect() {
 	// Should we be counting this user's views?
 	if ( ! empty( $current_user->ID ) ) {
 		$count_roles = stats_get_option( 'count_roles' );
-		if ( ! array_intersect( $current_user->roles, $count_roles ) ) {
+		if ( ! is_array( $count_roles ) || ! array_intersect( $current_user->roles, $count_roles ) ) {
 			return;
 		}
 	}
@@ -501,6 +507,57 @@ if ( -1 == document.location.href.indexOf( 'noheader' ) ) {
 <?php
 }
 
+
+/**
+ * Detect if JS is on.  If so, remove cookie so next page load is via JS.
+ *
+ * @access public
+ * @return void
+ */
+function stats_js_remove_stnojs_cookie() {
+	$parsed = parse_url( admin_url() );
+?>
+<script type="text/javascript">
+/* <![CDATA[ */
+document.cookie = 'stnojs=0; expires=Wed, 9 Mar 2011 16:55:50 UTC; path=<?php echo esc_js( $parsed['path'] ); ?>';
+/* ]]> */
+</script>
+<?php
+}
+
+/**
+ * Normal page load.  Load page content via JS.
+ *
+ * @access public
+ * @return void
+ */
+function stats_js_load_page_via_ajax() {
+?>
+<script type="text/javascript">
+/* <![CDATA[ */
+if ( -1 == document.location.href.indexOf( 'noheader' ) ) {
+	jQuery( function( $ ) {
+		$.get( document.location.href + '&noheader', function( responseText ) {
+			$( '#stats-loading-wrap' ).replaceWith( responseText );
+		} );
+	} );
+}
+/* ]]> */
+</script>
+<?php
+}
+</style>
+<?php
+}
+
+
+/**
+ * Stats Report Page.
+ *
+ * @access public
+ * @param bool $main_chart_only (default: false) Main Chart Only.
+ */
+function stats_reports_page( $main_chart_only = false ) {
 
 /**
  * Stats Report Page.
@@ -861,7 +918,6 @@ function stats_admin_bar_head() {
 
 	if ( ! current_user_can( 'view_stats' ) )
 		return;
-	}
 
 	if ( function_exists( 'is_admin_bar_showing' ) && ! is_admin_bar_showing() ) {
 		return;
