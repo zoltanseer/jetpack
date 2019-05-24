@@ -43,6 +43,8 @@ class Sharing_Admin {
 
 		require_once WP_SHARING_PLUGIN_DIR . 'sharing-service.php';
 
+		require_once WP_SHARING_PLUGIN_DIR . 'sharing-service.php';
+
 		require_once WP_SHARING_PLUGIN_DIR.'sharing-service.php';
 
 		add_action( 'admin_init', array( $this, 'admin_init' ) );
@@ -56,7 +58,15 @@ class Sharing_Admin {
 	}
 
 	public function sharing_head() {
-		wp_enqueue_script( 'sharing-js', WP_SHARING_PLUGIN_URL . 'admin-sharing.js', array( 'jquery-ui-draggable', 'jquery-ui-droppable', 'jquery-ui-sortable', 'jquery-form' ), 2 );
+		wp_enqueue_script(
+			'sharing-js',
+			Jetpack::get_file_url_for_environment(
+				'_inc/build/sharedaddy/admin-sharing.min.js',
+				'modules/sharedaddy/admin-sharing.js'
+			),
+			array( 'jquery-ui-draggable', 'jquery-ui-droppable', 'jquery-ui-sortable', 'jquery-form' ),
+			2
+		);
 		$postfix = ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) ? '' : '.min';
 		if ( is_rtl() ) {
 			wp_enqueue_style( 'sharing-admin', WP_SHARING_PLUGIN_URL . 'admin-sharing-rtl' . $postfix . '.css', false, JETPACK__VERSION );
@@ -409,10 +419,10 @@ class Sharing_Admin {
 										$label = $post_type_object->labels->name;
 									}
 								?>
-								<?php 
-								if ( $br ) { 
+								<?php
+								if ( $br ) {
 									echo '<br />';
-								} 
+								}
 								?>
 								<label><input type="checkbox"<?php checked( in_array( $show, $global['show'] ) ); ?> name="show[]" value="<?php echo esc_attr( $show ); ?>" /> <?php echo esc_html( $label ); ?></label>
 								<?php
