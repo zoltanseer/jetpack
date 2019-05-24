@@ -20,14 +20,6 @@ class Sharing_Admin {
 
 		require_once WP_SHARING_PLUGIN_DIR . 'sharing-service.php';
 
-		require_once WP_SHARING_PLUGIN_DIR . 'sharing-service.php';
-
-		require_once WP_SHARING_PLUGIN_DIR . 'sharing-service.php';
-
-		require_once WP_SHARING_PLUGIN_DIR . 'sharing-service.php';
-
-		require_once WP_SHARING_PLUGIN_DIR . 'sharing-service.php';
-
 		require_once WP_SHARING_PLUGIN_DIR.'sharing-service.php';
 
 		add_action( 'admin_init', array( $this, 'admin_init' ) );
@@ -50,7 +42,16 @@ class Sharing_Admin {
 			array( 'jquery-ui-draggable', 'jquery-ui-droppable', 'jquery-ui-sortable', 'jquery-form' ),
 			2
 		);
-		$postfix = ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) ? '' : '.min';
+
+		/**
+		 * Filters the switch that if set to true allows Jetpack to use minified assets. Defaults to true
+		 * if the SCRIPT_DEBUG constant is not set or set to false. The filter overrides it.
+		 *
+		 * @since 6.2.0
+		 *
+		 * @param boolean $var should Jetpack use minified assets.
+		 */
+		$postfix = apply_filters( 'jetpack_should_use_minified_assets', true ) ? '.min' : '';
 		if ( is_rtl() ) {
 			wp_enqueue_style( 'sharing-admin', WP_SHARING_PLUGIN_URL . 'admin-sharing-rtl' . $postfix . '.css', false, JETPACK__VERSION );
 		} else {
