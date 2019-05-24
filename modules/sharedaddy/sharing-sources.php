@@ -1221,34 +1221,6 @@ class Share_GooglePlus1 extends Sharing_Source {
 	}
 
 	public function get_display( $post ) {
-		return $this->get_link( $this->get_process_request_url( $post->ID ), _x( 'Press This', 'share to', 'jetpack' ), __( 'Click to Press This!', 'jetpack' ), 'share=press-this' );
-	}
-}
-
-class Share_GooglePlus1 extends Sharing_Source {
-	public $shortname = 'googleplus1';
-	public $icon = '\f218';
-	private $state = false;
-
-	public function __construct( $id, array $settings ) {
-		parent::__construct( $id, $settings );
-
-		if ( 'official' == $this->button_style ) {
-			$this->smart = true;
-		} else {
-			$this->smart = false;
-		}
-	}
-
-	public function get_name() {
-		return __( 'Google', 'jetpack' );
-	}
-
-	public function has_custom_button_style() {
-		return $this->smart;
-	}
-
-	public function get_display( $post ) {
 
 		if ( $this->smart ) {
 			$share_url = $this->get_share_url( $post->ID );
@@ -1346,6 +1318,8 @@ class Share_Custom extends Sharing_Advanced_Source {
 	public function __construct( $id, array $settings ) {
 		parent::__construct( $id, $settings );
 		
+		$opts = $this->get_options();
+
 		$opts = $this->get_options();
 
 		$opts = $this->get_options();
@@ -1552,7 +1526,28 @@ class Share_Tumblr extends Sharing_Source {
 				$target = '_blank';
 			}
 
-			return '<a target="' . $target . '" href="https://www.tumblr.com/share/link/?url=' . rawurlencode( $this->get_share_url( $post->ID ) ) . '&name=' . rawurlencode( $this->get_share_title( $post->ID ) ) . '" title="' . __( 'Share on Tumblr', 'jetpack' ) . '" style="display:inline-block; text-indent:-9999px; overflow:hidden; width:62px; height:20px; background:url(\'https://platform.tumblr.com/v1/share_2.png\') top left no-repeat transparent;">' . __( 'Share on Tumblr', 'jetpack' ) . '</a>';
+			/**
+			 * If we are looking at a single post, let Tumblr figure out the post type (text, photo, link, quote, chat, or video)
+			 * based on the content available on the page.
+			 * If we are not looking at a single post, content from other posts can appear on the page and Tumblr will pick that up.
+			 * In this case, we want Tumblr to focus on our current post, so we will limit the post type to link, where we can give Tumblr a link to our post.
+			 */
+			if ( ! is_single() ) {
+				$posttype = 'data-posttype="link"';
+			} else {
+				$posttype = '';
+			}
+
+			// Documentation: https://www.tumblr.com/docs/en/share_button
+			return sprintf(
+				'<a class="tumblr-share-button" target="%1$s" href="%2$s" data-title="%3$s" data-content="%4$s" title="%5$s"%6$s>%5$s</a>',
+				$target,
+				'https://www.tumblr.com/share',
+				$this->get_share_title( $post->ID ),
+				$this->get_share_url( $post->ID ),
+				__( 'Share on Tumblr', 'jetpack' ),
+				$posttype
+			);
 		 } else {
 			return $this->get_link( $this->get_process_request_url( $post->ID ), _x( 'Tumblr', 'share to', 'jetpack' ), __( 'Click to share on Tumblr', 'jetpack' ), 'share=tumblr' );
 		}
@@ -1567,10 +1562,10 @@ class Share_Tumblr extends Sharing_Source {
 		wp_redirect( $url );
 		die();
 	}
-	// http://www.tumblr.com/share?v=3&u=URL&t=TITLE&s=
+
 	public function display_footer() {
 		if ( $this->smart ) {
-			?><script type="text/javascript" src="https://platform.tumblr.com/v1/share.js"></script><?php
+			?><script id="tumblr-js" type="text/javascript" src="https://assets.tumblr.com/share-button.js"></script><?php
 		} else {
 			$this->js_dialog( $this->shortname, array( 'width' => 450, 'height' => 450 ) );
 		}
