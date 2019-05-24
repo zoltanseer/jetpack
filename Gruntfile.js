@@ -64,10 +64,12 @@ var frontendcss = [
 	'modules/shortcodes/css/slideshow-shortcode.css',
 	'modules/shortcodes/css/style.css', // TODO: Should be renamed to shortcode-presentations
 	'modules/subscriptions/subscriptions.css',
+	'modules/theme-tools/responsive-videos/responsive-videos.css',
 	'modules/tiled-gallery/tiled-gallery/tiled-gallery.css',
 	'modules/widgets/wordpress-post-widget/style.css',
 	'modules/widgets/gravatar-profile.css',
 	'modules/widgets/goodreads/css/goodreads.css',
+	'modules/widgets/social-media-icons/style.css',
 	'modules/widgets/top-posts/style.css',
 	'modules/widgets/widgets.css' // TODO Moved to image-widget/style.css
 ];

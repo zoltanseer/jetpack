@@ -227,6 +227,14 @@ function publicize_more_info() { ?>
 	</div>
 	<p><?php esc_html_e( 'Share your posts with Twitter, Facebook, and a host of other services. You can configure services to appear as icons, text, or both. Some services have additional options to display smart buttons, such as Twitter, which will update the number of times the post has been shared.', 'jetpack' ); ?></p>
 
+	<p><?php
+		if ( is_multisite() ) {
+			esc_html_e( 'The following services are included: Twitter, Facebook, Reddit, StumbleUpon, PressThis, Digg, LinkedIn, Google +1, Print, and Email.' , 'jetpack' );
+		} else {
+			esc_html_e( 'The following services are included: Twitter, Facebook, Reddit, StumbleUpon, Digg, LinkedIn, Google +1, Print, and Email.' , 'jetpack' );
+		}
+	?></p>
+
 	<p><?php esc_html_e( 'Publicize allows you to connect your blog to popular social networking sites and automatically share new posts with your friends.	 You can make a connection for just yourself or for all users on your blog.', 'jetpack' ) ?></p>
 	<p><?php esc_html_e( 'Publicize allows you to share your posts on Facebook, Twitter, Tumblr, Yahoo!, and Linkedin.', 'jetpack' ); ?></p>
 
@@ -435,7 +443,8 @@ function jetpack_widgets_more_info_connected() { ?>
 	<p><?php printf( __( '<strong>The Gravatar Widget</strong> allows you to pull in your Gravatar image along with some of your Gravatar profile data.', 'jetpack' ) ); ?></p>
 	<p><?php printf( __( '<strong>The Gallery Widget</strong> provides you with a simple way to display a photo gallery or slideshow in your blog’s sidebar. Requires the Tiled Gallery module.', 'jetpack' ) ); ?></p>
 	<p><?php printf( __( '<strong>The Display WordPress Posts Widget</strong> lets you display up to ten recent posts from another WordPress.com blog, or a self-hosted WordPress site with Jetpack enabled.', 'jetpack' ) ); ?></p>
-	<p><?php printf( __( '<strong>The Upcoming Events Widget</strong> allows you to use an iCalendar link to display a list of events on your site.', 'jetpack' ) ); ?></p>
+	<p><?php printf( __( '<strong>The Social Media Icons Widget</strong> lets you add icons for the most popular social networks to your sidebar or other widget area.', 'jetpack' ) ); ?></p>
+	<!--<p><?php printf( __( '<strong>The Upcoming Events Widget</strong> allows you to use an iCalendar link to display a list of events on your site.', 'jetpack' ) ); ?></p>-->
 
 	<p><?php esc_html_e( 'Each of these widgets has a number of customization options.', 'jetpack' ); ?>  <?php printf( __( 'To use the widgets, go to Appearance &#8594; <a href="%s">Widgets</a>. Drag them into one of your sidebars and configure away.', 'jetpack' ), admin_url( 'widgets.php' ) ); ?></p>
 <?php

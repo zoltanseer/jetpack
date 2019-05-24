@@ -1,4 +1,4 @@
-/* global WPCOM_sharing_counts, Recaptcha */
+/* global WPCOM_sharing_counts, grecaptcha */
 var sharing_js_options;
 if ( sharing_js_options && sharing_js_options.counts ) {
 	var WPCOMSharing = {
@@ -20,24 +20,19 @@ if ( sharing_js_options && sharing_js_options.counts ) {
 				}
 
 				// get both the http and https version of these URLs
-				https_url = encodeURIComponent( url.replace( /^http:\/\//i, 'https://' ) );
-				http_url  = encodeURIComponent( url.replace( /^https:\/\//i, 'http://' ) );
-
-				if ( jQuery( 'a[data-shared=sharing-facebook-' + id  + ']' ).length ) {
-					facebookPostIds.push( id );
-				}
+				https_url = url.replace( /^http:\/\//i, 'https://' );
+				http_url  = url.replace( /^https:\/\//i, 'http://' );
 
 				urls = {
 					twitter: [
 						'https://cdn.api.twitter.com/1/urls/count.json?callback=WPCOMSharing.update_twitter_count&url=' +
-							http_url,
+							encodeURIComponent( http_url ),
 						'https://cdn.api.twitter.com/1/urls/count.json?callback=WPCOMSharing.update_twitter_count&url=' +
-							https_url
+							encodeURIComponent( https_url )
 					],
 					// LinkedIn actually gets the share count for both the http and https version automatically -- so we don't need to do extra magic
 					linkedin: [
-						window.location.protocol +
-							'//www.linkedin.com/countserv/count/share?format=jsonp&callback=WPCOMSharing.update_linkedin_count&url=' +
+							'https://www.linkedin.com/countserv/count/share?format=jsonp&callback=WPCOMSharing.update_linkedin_count&url=' +
 							encodeURIComponent( url )
 					],
 					// Pinterest, like LinkedIn, handles share counts for both http and https
@@ -48,6 +43,11 @@ if ( sharing_js_options && sharing_js_options.counts ) {
 					]
 				};
 
+				if ( jQuery( 'a[data-shared=sharing-facebook-' + id  + ']' ).length ) {
+					WPCOMSharing.bump_sharing_count_stat( 'facebook' );
+					facebookPostIds.push( id );
+				}
+
 				for ( service in urls ) {
 					if ( ! jQuery( 'a[data-shared=sharing-' + service + '-' + id  + ']' ).length ) {
 						continue;
@@ -56,6 +56,8 @@ if ( sharing_js_options && sharing_js_options.counts ) {
 					while ( ( service_url = urls[ service ].pop() ) ) {
 						jQuery.getScript( service_url );
 					}
+
+					WPCOMSharing.bump_sharing_count_stat( service );
 				}
 
 				WPCOMSharing.done_urls[ id ] = true;
@@ -68,7 +70,6 @@ if ( sharing_js_options && sharing_js_options.counts ) {
 					url: 'https://public-api.wordpress.com/rest/v1.1/sites/' + window.WPCOM_site_ID + '/sharing-buttons/facebook/' + path_ending,
 					jsonpCallback: 'WPCOMSharing.update_facebook_count',
 					data: { post_ID: facebookPostIds },
-					success: WPCOMSharing.update_facebook_count,
 					cache: true
 				});
 			}
@@ -154,6 +155,9 @@ if ( sharing_js_options && sharing_js_options.counts ) {
 				return String( count ).substring( 0, 1 ) + 'K+';
 			}
 			return '10K+';
+		},
+		bump_sharing_count_stat: function( service ) {
+			new Image().src = document.location.protocol + '//pixel.wp.com/g.gif?v=wpcom-no-pv&x_sharing-count-request=' + service + '&r=' + Math.random();
 		}
 	};
 }
@@ -176,7 +180,9 @@ if ( sharing_js_options && sharing_js_options.counts ) {
 
 	function WPCOMSharing_do() {
 		var $more_sharing_buttons;
-		WPCOMSharing.get_counts();
+		if ( 'undefined' !== typeof WPCOMSharing ) {
+			WPCOMSharing.get_counts();
+		}
 		$more_sharing_buttons = $( '.sharedaddy a.sharing-anchor' );
 
 		$more_sharing_buttons.click( function() {
@@ -381,7 +387,7 @@ if ( sharing_js_options && sharing_js_options.counts ) {
 
 			// Email button
 			$( 'a.share-email', this ).on( 'click', function() {
-				var url = $( this ).attr( 'href' ), key;
+				var url = $( this ).attr( 'href' );
 
 				if ( $sharing_email.is( ':visible' ) ) {
 					$sharing_email.slideUp( 200 );
@@ -737,6 +743,11 @@ if ( sharing_js_options && sharing_js_options.counts ) {
 					// Update the recaptcha
 					Recaptcha.create( key, 'sharing_recaptcha', { lang : sharing_js_options.lang } );
 
+					// Reset reCATPCHA if exists.
+					if ( 'object' === typeof grecaptcha && 'function' === typeof grecaptcha.reset ) {
+						grecaptcha.reset();
+					}
+
 					// Show dialog
 					$sharing_email.css( {
 						left: $( this ).offset().left + 'px',
@@ -784,7 +795,10 @@ if ( sharing_js_options && sharing_js_options.counts ) {
 										$( '#sharing_email .errors-' + response ).show();
 										form.find( 'input[type=submit]' ).removeAttr( 'disabled' );
 										form.find( 'a.sharing_cancel' ).show();
-										Recaptcha.reload();
+
+										if ( 'object' === typeof grecaptcha && 'function' === typeof grecaptcha.reset ) {
+											grecaptcha.reset();
+										}
 									}
 									else {
 										$( '#sharing_email form' ).hide();
