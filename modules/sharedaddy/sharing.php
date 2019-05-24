@@ -449,8 +449,6 @@ class Sharing_Admin {
 		do_action( 'post_admin_screen_sharing' );
 		?>
 
-		<?php do_action( 'post_admin_screen_sharing' ) ?>
-
 				<div class="inerror" style="display: none; margin-top: 15px">
 					<p><?php _e( 'An error occurred creating your new sharing service - please check you gave valid details.', 'jetpack' ); ?></p>
 				</div>
