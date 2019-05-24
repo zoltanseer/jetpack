@@ -64,7 +64,13 @@ function stats_load() {
 		add_action( 'admin_init', 'stats_merged_widget_admin_init' );
 	}
 
-	add_filter( 'pre_option_db_version', 'stats_ignore_db_version' );
+	// Add an icon to see stats in WordPress.com for a particular post
+	add_action( 'admin_print_styles-edit.php', 'jetpack_stats_load_admin_css' );
+	add_filter( 'manage_posts_columns', 'jetpack_stats_post_table' );
+	add_filter( 'manage_pages_columns', 'jetpack_stats_post_table' );
+	add_action( 'manage_posts_custom_column', 'jetpack_stats_post_table_cell', 10, 2 );
+	add_action( 'manage_pages_custom_column', 'jetpack_stats_post_table_cell', 10, 2 );
+}
 
 	add_filter( 'pre_option_db_version', 'stats_ignore_db_version' );
 
@@ -497,10 +503,6 @@ if ( -1 == document.location.href.indexOf( 'noheader' ) ) {
 </script>
 <?php
 }
-</style>
-<?php
-}
-
 
 /**
  * Stats Report Page.
@@ -815,7 +817,7 @@ function stats_configuration_screen() {
 ?>
 		</td></tr>
 		<tr valign="top"><th scope="row"><?php esc_html_e( 'Smiley' , 'jetpack' ); ?></th>
-		<td><label><input type='checkbox'<?php checked( isset( $options['hide_smile'] ) && $options['hide_smile'] ); ?> name='hide_smile' id='hide_smile' /> <?php esc_html_e( 'Hide the stats smiley face image.', 'jetpack' ); ?></label><br /> <span class="description"><?php esc_html_e( 'The image helps collect stats and <strong>makes the world a better place</strong> but should still work when hidden', 'jetpack' ); ?> <img class="stats-smiley" alt="<?php esc_attr_e( 'Smiley face', 'jetpack' ); ?>" src="<?php echo esc_url( plugins_url( 'images/stats-smiley.gif', dirname( __FILE__ ) ) ); ?>" width="6" height="5" /></span></td></tr>
+		<td><label><input type='checkbox'<?php checked( isset( $options['hide_smile'] ) && $options['hide_smile'] ); ?> name='hide_smile' id='hide_smile' /> <?php esc_html_e( 'Hide the stats smiley face image.', 'jetpack' ); ?></label><br /> <span class="description"><?php echo wp_kses( __( 'The image helps collect stats and <strong>makes the world a better place</strong> but should still work when hidden', 'jetpack' ), array( 'strong' => array() ) ); ?> <img class="stats-smiley" alt="<?php esc_attr_e( 'Smiley face', 'jetpack' ); ?>" src="<?php echo esc_url( plugins_url( 'images/stats-smiley.gif', dirname( __FILE__ ) ) ); ?>" width="6" height="5" /></span></td></tr>
 		<tr valign="top"><th scope="row"><?php esc_html_e( 'Report visibility' , 'jetpack' ); ?></th>
 		<td>
 			<?php esc_html_e( 'Select the roles that will be able to view stats reports.', 'jetpack' ); ?><br/>
@@ -861,6 +863,10 @@ function stats_admin_bar_head() {
 
 	if ( ! current_user_can( 'view_stats' ) )
 		return;
+
+	if ( function_exists( 'is_admin_bar_showing' ) && ! is_admin_bar_showing() ) {
+		return;
+	}
 
 	if ( function_exists( 'is_admin_bar_showing' ) && ! is_admin_bar_showing() ) {
 		return;
@@ -1612,7 +1618,7 @@ function stats_str_getcsv( $csv ) {
 
 	fwrite( $temp, $csv, strlen( $csv ) );
 	fseek( $temp, 0 );
-	while ( false !== $row = fgetcsv( $temp, 2000 ) ) {		
+	while ( false !== $row = fgetcsv( $temp, 2000 ) ) {
 		$data[] = $row;
 	}
 	fclose( $temp );
