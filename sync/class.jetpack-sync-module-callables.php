@@ -98,17 +98,21 @@ class Jetpack_Sync_Module_Callables extends Jetpack_Sync_Module {
 	}
 	
 	public function maybe_sync_callables() {
+		if ( ! is_admin() || Jetpack_Sync_Settings::is_doing_cron() ) {
+			return;
+		}
+
 		if ( get_transient( self::CALLABLES_AWAIT_TRANSIENT_NAME ) ) {
 			return;
 		}
+
+		set_transient( self::CALLABLES_AWAIT_TRANSIENT_NAME, microtime( true ), Jetpack_Sync_Defaults::$default_sync_callables_wait_time );
 
 		$callables = $this->get_all_callables();
 
 		if ( empty( $callables ) ) {
 			return;
 		}
-
-		set_transient( self::CALLABLES_AWAIT_TRANSIENT_NAME, microtime( true ), Jetpack_Sync_Defaults::$default_sync_callables_wait_time );
 
 		$callable_checksums = (array) get_option( self::CALLABLES_CHECKSUM_OPTION_NAME, array() );
 

@@ -10,9 +10,10 @@ require_once dirname( __FILE__ ) . '/class.jetpack-sync-settings.php';
 class Jetpack_Sync_Actions {
 	static $sender = null;
 	static $listener = null;
+	const INITIAL_SYNC_MULTISITE_INTERVAL = 10;
 
 	static function init() {
-
+		
 		// Add a custom "every minute" cron schedule
 		add_filter( 'cron_schedules', array( __CLASS__, 'minute_cron_schedule' ) );
 
@@ -33,15 +34,12 @@ class Jetpack_Sync_Actions {
 			return;
 		}
 
+		// publicize filter to prevent publicizing blacklisted post types
+		add_filter( 'publicize_should_publicize_published_post', array( __CLASS__, 'prevent_publicize_blacklisted_posts' ), 10, 2 );
+
 		// cron hooks
-		add_action( 'jetpack_sync_send_db_checksum', array( __CLASS__, 'send_db_checksum' ) );
 		add_action( 'jetpack_sync_full', array( __CLASS__, 'do_full_sync' ), 10, 1 );
 		add_action( 'jetpack_sync_cron', array( __CLASS__, 'do_cron_sync' ) );
-
-		if ( ! wp_next_scheduled( 'jetpack_sync_send_db_checksum' ) ) {
-			// Schedule a job to send DB checksums once an hour
-			wp_schedule_event( time(), 'hourly', 'jetpack_sync_send_db_checksum' );
-		}
 
 		if ( ! wp_next_scheduled( 'jetpack_sync_cron' ) ) {
 			// Schedule a job to send pending queue items once a minute
@@ -102,8 +100,16 @@ class Jetpack_Sync_Actions {
 	}
 
 	static function sync_allowed() {
-		return ( Jetpack::is_active() && ! ( Jetpack::is_development_mode() || Jetpack::is_staging_site() ) )
+		return ( ! Jetpack_Sync_Settings::get_setting( 'disable' ) && Jetpack::is_active() && ! ( Jetpack::is_development_mode() || Jetpack::is_staging_site() ) )
 			   || defined( 'PHPUNIT_JETPACK_TESTSUITE' );
+	}
+
+	static function prevent_publicize_blacklisted_posts( $should_publicize, $post ) {
+		if ( in_array( $post->post_type, Jetpack_Sync_Settings::get_setting( 'post_types_blacklist' ) ) ) {
+			return false;
+		}
+
+		return $should_publicize;
 	}
 
 	static function set_is_importing_true() {
@@ -136,20 +142,59 @@ class Jetpack_Sync_Actions {
 	}
 
 	static function schedule_initial_sync() {
-		// we need this function call here because we have to run this function 
+		// we need this function call here because we have to run this function
 		// reeeeally early in init, before WP_CRON_LOCK_TIMEOUT is defined.
 		wp_functionality_constants();
-		self::schedule_full_sync( array( 'options' => true, 'network_options' => true, 'functions' => true, 'constants' => true, 'users' => true ) );
-	}
 
-	static function schedule_full_sync( $modules = null ) {
-		if ( $modules ) {
-			wp_schedule_single_event( time() + 1, 'jetpack_sync_full', array( $modules ) );
+		if ( is_multisite() ) {
+			// stagger initial syncs for multisite blogs so they don't all pile on top of each other
+			$time_offset = ( rand() / getrandmax() ) * self::INITIAL_SYNC_MULTISITE_INTERVAL * get_blog_count();
 		} else {
-			wp_schedule_single_event( time() + 1, 'jetpack_sync_full' );
+			$time_offset = 1;
 		}
 
-		spawn_cron();
+		self::schedule_full_sync( 
+			array( 
+				'options' => true, 
+				'network_options' => true, 
+				'functions' => true, 
+				'constants' => true, 
+				'users' => 'initial' 
+			),
+			$time_offset
+		);
+	}
+
+	static function schedule_full_sync( $modules = null, $time_offset = 1 ) {
+		if ( ! self::sync_allowed() ) {
+			return false;
+		}
+
+		if ( self::is_scheduled_full_sync() ) {
+			self::unschedule_all_full_syncs();
+		}
+
+		if ( $modules ) {
+			wp_schedule_single_event( time() + $time_offset, 'jetpack_sync_full', array( $modules ) );
+		} else {
+			wp_schedule_single_event( time() + $time_offset, 'jetpack_sync_full' );
+		}
+
+		if ( $time_offset === 1 ) {
+			spawn_cron();
+		}
+
+		return true;
+	}
+
+	static function unschedule_all_full_syncs() {
+		foreach ( _get_cron_array() as $timestamp => $cron ) {
+			if ( ! empty( $cron['jetpack_sync_full'] ) ) {
+				foreach( $cron['jetpack_sync_full'] as $key => $config ) {
+					wp_unschedule_event( $timestamp, 'jetpack_sync_full', $config['args'] );
+				}
+			}
+		}
 	}
 
 	static function is_scheduled_full_sync( $modules = null ) {
@@ -161,7 +206,6 @@ class Jetpack_Sync_Actions {
 					return true;
 				}
 			}
-
 			return false;
 		}
 
@@ -217,13 +261,6 @@ class Jetpack_Sync_Actions {
 
 			$result = self::$sender->do_sync();
 		} while ( $result );
-	}
-
-	static function send_db_checksum() {
-		self::initialize_listener();
-		self::initialize_sender();
-		self::$sender->send_checksum();
-		self::$sender->do_sync();
 	}
 
 	static function initialize_listener() {

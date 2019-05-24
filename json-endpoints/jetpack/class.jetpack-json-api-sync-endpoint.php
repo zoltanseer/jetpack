@@ -20,7 +20,9 @@ class Jetpack_JSON_API_Sync_Endpoint extends Jetpack_JSON_API_Endpoint {
 		}
 
 		foreach ( array( 'posts', 'comments', 'users' ) as $module_name ) {
-			if ( isset( $args[ $module_name ] ) ) {
+			if ( 'users' === $module_name && isset( $args[ $module_name ] ) && 'initial' === $args[ $module_name ] ) {
+				$modules[ 'users' ] = 'initial';
+			} elseif ( isset( $args[ $module_name ] ) ) {
 				$ids = explode( ',', $args[ $module_name ] );
 				if ( count( $ids ) > 0 ) {
 					$modules[ $module_name ] = $ids;
@@ -32,9 +34,7 @@ class Jetpack_JSON_API_Sync_Endpoint extends Jetpack_JSON_API_Endpoint {
 			$modules = null;
 		}
 
-		Jetpack_Sync_Actions::schedule_full_sync( $modules );
-
-		return array( 'scheduled' => true );
+		return array( 'scheduled' => Jetpack_Sync_Actions::schedule_full_sync( $modules ) );
 	}
 }
 
@@ -156,6 +156,12 @@ class Jetpack_JSON_API_Sync_Modify_Settings_Endpoint extends Jetpack_JSON_API_Sy
 				if ( is_numeric( $value ) ) {
 					$value = (int) $value;
 				}
+				
+				// special case for sending empty arrays - a string with value 'empty'
+				if ( $value === 'empty' ) {
+					$value = array();
+				}
+
 				$sync_settings[ $key ] = $value;
 			}
 		}

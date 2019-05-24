@@ -1,6 +1,8 @@
 <?php
 
 class Jetpack_Sync_Module_Users extends Jetpack_Sync_Module {
+	const MAX_INITIAL_SYNC_USERS = 100;
+	
 	function name() {
 		return 'users';
 	}
@@ -51,6 +53,8 @@ class Jetpack_Sync_Module_Users extends Jetpack_Sync_Module {
 	}
 
 	public function sanitize_user( $user ) {
+		// this create a new user object and stops the passing of the object by reference.
+		$user = unserialize( serialize( $user ) );
 		unset( $user->data->user_pass );
 
 		return $user;
@@ -144,28 +148,28 @@ class Jetpack_Sync_Module_Users extends Jetpack_Sync_Module {
 			return;
 		}
 
-		$user = $this->sanitize_user( get_user_by( 'id', $user_id ) );
+		$user =  get_user_by( 'id', $user_id );
 		if ( $meta_key === $user->cap_key ) {
 			/**
 			 * Fires when the client needs to sync an updated user
 			 *
 			 * @since 4.2.0
 			 *
-			 * @param object The WP_User object
+			 * @param object The Sanitized WP_User object
 			 */
-			do_action( 'jetpack_sync_save_user', $user );
+			do_action( 'jetpack_sync_save_user', $this->sanitize_user( $user ) );
 		}
 	}
 
 	public function enqueue_full_sync_actions( $config ) {
 		global $wpdb;
-		return $this->enqueue_all_ids_as_action( 'jetpack_full_sync_users', $wpdb->users, 'ID', $this->get_where_sql( $config ) );
+		return $this->enqueue_all_ids_as_action( 'jetpack_full_sync_users', $wpdb->usermeta, 'user_id', $this->get_where_sql( $config ) );
 	}
 
 	public function estimate_full_sync_actions( $config ) {
 		global $wpdb;
 
-		$query = "SELECT count(*) FROM $wpdb->users";
+		$query = "SELECT count(*) FROM $wpdb->usermeta";
 		
 		if ( $where_sql = $this->get_where_sql( $config ) ) {
 			$query .= ' WHERE ' . $where_sql;
@@ -177,16 +181,32 @@ class Jetpack_Sync_Module_Users extends Jetpack_Sync_Module {
 	}
 
 	private function get_where_sql( $config ) {
+		global $wpdb;
+
+		$query = "meta_key = '{$wpdb->prefix}capabilities'";
+		
 		// config is a list of user IDs to sync
 		if ( is_array( $config ) ) {
-			return 'ID IN (' . implode( ',', array_map( 'intval', $config ) ) . ')';
+			$query .= ' AND user_id IN (' . implode( ',', array_map( 'intval', $config ) ) . ')';
 		}
 
-		return null;
+		return $query;
 	}
 
 	function get_full_sync_actions() {
 		return array( 'jetpack_full_sync_users' );
+	}
+
+	function get_initial_sync_user_config() {
+		global $wpdb;
+
+		$user_ids = $wpdb->get_col( "SELECT user_id FROM $wpdb->usermeta WHERE meta_key = '{$wpdb->prefix}user_level' AND meta_value > 0 LIMIT " . ( self::MAX_INITIAL_SYNC_USERS + 1 ) );
+
+		if ( count( $user_ids ) <= self::MAX_INITIAL_SYNC_USERS ) {
+			return $user_ids;
+		} else {
+			return false;
+		}
 	}
 
 	public function expand_users( $args ) {

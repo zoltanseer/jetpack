@@ -1136,12 +1136,9 @@ class Jetpack {
 	 * @return bool
 	 */
 	public static function is_single_user_site() {
-		$user_query = new WP_User_Query( array(
-			'blog_id' => get_current_blog_id(),
-			'fields'  => 'ID',
-			'number' => 2
-		) );
-		return 1 === (int) $user_query->get_total();
+		global $wpdb;
+		$some_users = $wpdb->get_var( "select count(*) from (select user_id from $wpdb->usermeta where meta_key = '{$wpdb->prefix}capabilities' LIMIT 2) as someusers" );
+		return 1 === (int) $some_users;
 	}
 
 	/**
@@ -2893,17 +2890,23 @@ p {
 	/**
 	 * Return stat data for WPCOM sync
 	 */
-	function get_stat_data() {
+	public static function get_stat_data( $encode = true ) {
 		$heartbeat_data = Jetpack_Heartbeat::generate_stats_array();
-		$additional_data = $this->get_additional_stat_data();
+		$additional_data = self::get_additional_stat_data();
 
-		return json_encode( array_merge( $heartbeat_data, $additional_data ) );
+		$merged_data = array_merge( $heartbeat_data, $additional_data );
+
+		if ( $encode ) {
+			return json_encode( $merged_data );
+		}
+		
+		return $merged_data;
 	}
 
 	/**
 	 * Get additional stat data to sync to WPCOM
 	 */
-	function get_additional_stat_data( $prefix = '' ) {
+	public static function get_additional_stat_data( $prefix = '' ) {
 		$return["{$prefix}themes"]         = Jetpack::get_parsed_theme_data();
 		$return["{$prefix}plugins-extra"]  = Jetpack::get_parsed_plugin_data();
 		$return["{$prefix}users"]          = count_users();
