@@ -111,8 +111,8 @@ EXPECTED;
 	 */
 	public function test_check_identity_crisis_will_report_crisis_if_an_http_site_and_siteurl_mismatch() {
 		// Store master user data
-		Jetpack::update_option( 'master_user', 'test' );
-		Jetpack::update_option( 'user_tokens', array( 'test' => 'herp.derp.test' ) );
+		Jetpack_Options::update_option( 'master_user', 'test' );
+		Jetpack_Options::update_option( 'user_tokens', array( 'test' => 'herp.derp.test' ) );
 		add_filter( 'jetpack_development_mode', '__return_false', 1, 1 );
 
 		// Mock get_cloud_site_options
@@ -179,8 +179,8 @@ EXPECTED;
 	 */
 	public function test_check_identity_crisis_will_not_report_crisis_if_matching_siteurl() {
 		// Store master user data
-		Jetpack::update_option( 'master_user', 'test' );
-		Jetpack::update_option( 'user_tokens', array( 'test' => 'herp.derp.test' ) );
+		Jetpack_Options::update_option( 'master_user', 'test' );
+		Jetpack_Options::update_option( 'user_tokens', array( 'test' => 'herp.derp.test' ) );
 		add_filter( 'jetpack_development_mode', '__return_false', 1, 1 );
 
 		// Mock get_cloud_site_options
@@ -220,8 +220,8 @@ EXPECTED;
 	public function test_check_identity_crisis_will_not_report_crisis_if_a_siteurl_mismatch_when_forcing_ssl() {
 		// Kick in with force ssl and store master user data
 		force_ssl_login( true );
-		Jetpack::update_option( 'master_user', 'test' );
-		Jetpack::update_option( 'user_tokens', array( 'test' => 'herp.derp.test' ) );
+		Jetpack_Options::update_option( 'master_user', 'test' );
+		Jetpack_Options::update_option( 'user_tokens', array( 'test' => 'herp.derp.test' ) );
 		add_filter( 'jetpack_development_mode', '__return_false', 1, 1 );
 
 		// Mock get_cloud_site_options
@@ -279,5 +279,31 @@ EXPECTED;
 		}
 
 		$this->assertTrue( $seen_orig );
+	}
+
+	/**
+	 * @author georgestephanis
+	 * @covers Jetpack::dns_prefetch
+	 * @since 3.3.0
+	 */
+	public function test_dns_prefetch() {
+		// Purge it for a clean start.
+		ob_start();
+		Jetpack::dns_prefetch();
+		ob_clean();
+
+		Jetpack::dns_prefetch( 'http://example1.com/' );
+		Jetpack::dns_prefetch( array(
+			'http://example2.com/',
+			'https://example3.com',
+		) );
+		Jetpack::dns_prefetch( 'https://example2.com' );
+
+		$expected = "\r\n" .
+		            "<link rel='dns-prefetch' href='//example1.com'>\r\n" .
+		            "<link rel='dns-prefetch' href='//example2.com'>\r\n" .
+		            "<link rel='dns-prefetch' href='//example3.com'>\r\n";
+
+		$this->assertEquals( $expected, get_echo( array( 'Jetpack', 'dns_prefetch' ) ) );
 	}
 } // end class

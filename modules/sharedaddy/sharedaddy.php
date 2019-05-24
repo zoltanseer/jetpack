@@ -23,6 +23,13 @@ function sharing_email_send_post( $data ) {
 
 function sharing_add_meta_box() {
 	$post_types = get_post_types( array( 'public' => true ) );
+	/**
+	 * Filter the Sharing Meta Box title.
+	 *
+	 * @since 2.2.0
+	 *
+	 * @param string $var Sharing Meta Box title. Default is "Sharing".
+	 */
 	$title = apply_filters( 'sharing_meta_box_title', __( 'Sharing', 'jetpack' ) );
 	foreach( $post_types as $post_type ) {
 		add_meta_box( 'sharing_meta', $title, 'sharing_meta_box_content', $post_type, 'advanced', 'high' );
@@ -30,6 +37,13 @@ function sharing_add_meta_box() {
 }
 
 function sharing_meta_box_content( $post ) {
+	/**
+	 * Fires before the sharing meta box content.
+	 *
+	 * @since 2.2.0
+	 *
+	 * @param WP_Post $post The post to share.
+	 */
 	do_action( 'start_sharing_meta_box_content', $post );
 
 	$disabled = get_post_meta( $post->ID, 'sharing_disabled', true ); ?>
@@ -43,6 +57,13 @@ function sharing_meta_box_content( $post ) {
 	</p>
 
 	<?php
+	/**
+	 * Fires after the sharing meta box content.
+	 *
+	 * @since 2.2.0
+	 *
+	 * @param WP_Post $post The post to share.
+	*/
 	do_action( 'end_sharing_meta_box_content', $post );
 }
 
@@ -146,6 +167,21 @@ function sharing_email_check( $true, $post, $data ) {
 	$recaptcha_result = recaptcha_check_answer( RECAPTCHA_PRIVATE_KEY, $_SERVER["REMOTE_ADDR"], $data["recaptcha_challenge_field"], $data["recaptcha_response_field"] );
 
 	return $recaptcha_result->is_valid;
+}
+
+add_action( 'init', 'sharing_init' );
+add_action( 'admin_init', 'sharing_add_meta_box' );
+add_action( 'save_post', 'sharing_meta_box_save' );
+add_action( 'sharing_email_send_post', 'sharing_email_send_post' );
+add_action( 'sharing_global_options', 'sharing_global_resources', 30 );
+add_action( 'sharing_admin_update', 'sharing_global_resources_save' );
+add_filter( 'sharing_services', 'sharing_restrict_to_single' );
+add_action( 'plugin_action_links_'.basename( dirname( __FILE__ ) ).'/'.basename( __FILE__ ), 'sharing_plugin_settings', 10, 4 );
+add_filter( 'plugin_row_meta', 'sharing_add_plugin_settings', 10, 2 );
+
+if ( defined( 'RECAPTCHA_PRIVATE_KEY' ) ) {
+	add_action( 'sharing_email_dialog', 'sharing_email_dialog' );
+	add_filter( 'sharing_email_check', 'sharing_email_check', 10, 3 );
 }
 
 add_action( 'init', 'sharing_init' );
