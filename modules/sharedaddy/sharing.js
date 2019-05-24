@@ -221,8 +221,8 @@ var WPCOMSharing = {
 
 			// Email button
 			$( this ).find( 'a.share-email' ).click( function() {
-				var url = $( this ).attr( 'href' );
-
+				var url = $( this ).attr( 'href' ), key;
+				
 				if ( $( '#sharing_email' ).is( ':visible' ) )
 					$( '#sharing_email' ).slideUp( 200 );
 				else {
@@ -233,15 +233,12 @@ var WPCOMSharing = {
 					$( '#sharing_email form input[type=submit]' ).removeAttr( 'disabled' );
 					$( '#sharing_email form a.sharing_cancel' ).show();
 					
-					var key = '';
+					key = '';
 					if ( $( '#recaptcha_public_key' ).length > 0 )
 						key = $( '#recaptcha_public_key' ).val();
 
 					// Update the recaptcha
 					Recaptcha.create( key, 'sharing_recaptcha' );
-
-					// Update the recaptcha
-					Recaptcha.create( '6LcYW8MSAAAAADBAuEH9yaPcF7lWh11Iq62ZKtoo', 'sharing_recaptcha' );
 
 					// Show dialog
 					$( '#sharing_email' ).css( {
