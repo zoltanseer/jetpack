@@ -73,10 +73,6 @@ function stats_load() {
 	add_filter( 'pre_option_db_version', 'stats_ignore_db_version' );
 }
 
-function stats_enqueue_dashboard_head() {
-	add_action( 'admin_head', 'stats_dashboard_head' );
-}
-
 
 	add_filter( 'pre_option_db_version', 'stats_ignore_db_version' );
 }
@@ -90,6 +86,47 @@ function stats_merged_widget_admin_init() {
 		add_action( 'wp_dashboard_setup', 'stats_register_widget_control_callback' ); // hacky but works
 		add_action( 'jetpack_dashboard_widget', 'stats_jetpack_dashboard_widget' );
 	}
+}
+
+function stats_enqueue_dashboard_head() {
+	add_action( 'admin_head', 'stats_dashboard_head' );
+}
+
+/**
+ * Prevent sparkline img requests being redirected to upgrade.php.
+ * See wp-admin/admin.php where it checks $wp_db_version.
+ */
+function stats_ignore_db_version( $version ) {
+	if (
+		is_admin() &&
+		isset( $_GET['page'] ) && $_GET['page'] == 'stats' &&
+		isset( $_GET['chart'] ) && strpos($_GET['chart'], 'admin-bar-hours') === 0
+	) {
+		global $wp_db_version;
+		return $wp_db_version;
+	}
+	return $version;
+}
+
+/**
+ * Maps view_stats cap to read cap as needed
+ *
+ * @return array Possibly mapped capabilities for meta capability
+ */
+function stats_map_meta_caps( $caps, $cap, $user_id, $args ) {
+	// Map view_stats to exists
+	if ( 'view_stats' == $cap ) {
+		$user        = new WP_User( $user_id );
+		$user_role   = array_shift( $user->roles );
+		$stats_roles = stats_get_option( 'roles' );
+
+		// Is the users role in the available stats roles?
+		if ( is_array( $stats_roles ) && in_array( $user_role, $stats_roles ) ) {
+			$caps = array( 'read' );
+		}
+	}
+
+	return $caps;
 }
 
 function stats_enqueue_dashboard_head() {

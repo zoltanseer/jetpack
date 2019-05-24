@@ -54,6 +54,7 @@ function sharing_email_check_for_spam_via_akismet( $data ) {
 }
 
 function sharing_email_send_post_content( $data ) {
+	/* translators: included in e-mail when post is shared via e-mail. First item is sender's name. Second is sender's e-mail address. */
 	$content  = sprintf( __( '%1$s (%2$s) thinks you may be interested in the following post:', 'jetpack' ), $data['name'], $data['source'] );
 	$content .= "\n\n";
 	$content .= $data['post']->post_title."\n";
@@ -229,117 +230,6 @@ add_filter( 'plugin_row_meta', 'sharing_add_plugin_settings', 10, 2 );
 if ( defined( 'RECAPTCHA_PUBLIC_KEY' ) && defined( 'RECAPTCHA_PRIVATE_KEY' ) ) {
 	add_action( 'sharing_email_dialog', 'sharing_email_dialog' );
 	add_filter( 'sharing_email_check', 'sharing_email_check', 10, 3 );
-}
-
-add_action( 'init', 'sharing_init' );
-add_action( 'admin_init', 'sharing_add_meta_box' );
-add_action( 'save_post', 'sharing_meta_box_save' );
-add_action( 'sharing_email_send_post', 'sharing_email_send_post' );
-add_filter( 'sharing_email_can_send', 'sharing_email_check_for_spam_via_akismet' );
-add_action( 'sharing_global_options', 'sharing_global_resources', 30 );
-add_action( 'sharing_admin_update', 'sharing_global_resources_save' );
-add_filter( 'sharing_services', 'sharing_restrict_to_single' );
-add_action( 'plugin_action_links_'.basename( dirname( __FILE__ ) ).'/'.basename( __FILE__ ), 'sharing_plugin_settings', 10, 4 );
-add_filter( 'plugin_row_meta', 'sharing_add_plugin_settings', 10, 2 );
-
-if ( defined( 'RECAPTCHA_PRIVATE_KEY' ) ) {
-	add_action( 'sharing_email_dialog', 'sharing_email_dialog' );
-	add_filter( 'sharing_email_check', 'sharing_email_check', 10, 3 );
-}
-
-function sharing_email_check( $true, $post, $data ) {
-	require_once plugin_dir_path( __FILE__ ).'recaptchalib.php';
-
-	$recaptcha_result = recaptcha_check_answer( RECAPTCHA_PRIVATE_KEY, $_SERVER["REMOTE_ADDR"], $data["recaptcha_challenge_field"], $data["recaptcha_response_field"] );
-
-	return $recaptcha_result->is_valid;
-}
-
-add_action( 'init', 'sharing_init' );
-add_action( 'admin_init', 'sharing_add_meta_box' );
-add_action( 'save_post', 'sharing_meta_box_save' );
-add_action( 'sharing_email_send_post', 'sharing_email_send_post' );
-add_filter( 'sharing_email_can_send', 'sharing_email_check_for_spam_via_akismet' );
-add_action( 'sharing_global_options', 'sharing_global_resources', 30 );
-add_action( 'sharing_admin_update', 'sharing_global_resources_save' );
-add_filter( 'sharing_services', 'sharing_restrict_to_single' );
-add_action( 'plugin_action_links_'.basename( dirname( __FILE__ ) ).'/'.basename( __FILE__ ), 'sharing_plugin_settings', 10, 4 );
-add_filter( 'plugin_row_meta', 'sharing_add_plugin_settings', 10, 2 );
-
-if ( defined( 'RECAPTCHA_PRIVATE_KEY' ) ) {
-	add_action( 'sharing_email_dialog', 'sharing_email_dialog' );
-	add_filter( 'sharing_email_check', 'sharing_email_check', 10, 3 );
-}
-
-add_action( 'init', 'sharing_init' );
-add_action( 'admin_init', 'sharing_add_meta_box' );
-add_action( 'save_post', 'sharing_meta_box_save' );
-add_action( 'sharing_email_send_post', 'sharing_email_send_post' );
-add_filter( 'sharing_email_can_send', 'sharing_email_check_for_spam_via_akismet' );
-add_action( 'sharing_global_options', 'sharing_global_resources', 30 );
-add_action( 'sharing_admin_update', 'sharing_global_resources_save' );
-add_filter( 'sharing_services', 'sharing_restrict_to_single' );
-add_action( 'plugin_action_links_'.basename( dirname( __FILE__ ) ).'/'.basename( __FILE__ ), 'sharing_plugin_settings', 10, 4 );
-add_filter( 'plugin_row_meta', 'sharing_add_plugin_settings', 10, 2 );
-
-if ( defined( 'RECAPTCHA_PRIVATE_KEY' ) ) {
-	add_action( 'sharing_email_dialog', 'sharing_email_dialog' );
-	add_filter( 'sharing_email_check', 'sharing_email_check', 10, 3 );
-}
-
-function sharing_email_check( $true, $post, $data ) {
-	require_once plugin_dir_path( __FILE__ ).'recaptchalib.php';
-
-	$recaptcha_result = recaptcha_check_answer( RECAPTCHA_PRIVATE_KEY, $_SERVER["REMOTE_ADDR"], $data["recaptcha_challenge_field"], $data["recaptcha_response_field"] );
-
-	return $recaptcha_result->is_valid;
-}
-
-add_action( 'init', 'sharing_init' );
-add_action( 'admin_init', 'sharing_add_meta_box' );
-add_action( 'save_post', 'sharing_meta_box_save' );
-add_action( 'sharing_email_send_post', 'sharing_email_send_post' );
-add_filter( 'sharing_email_can_send', 'sharing_email_check_for_spam_via_akismet' );
-add_action( 'sharing_global_options', 'sharing_global_resources', 30 );
-add_action( 'sharing_admin_update', 'sharing_global_resources_save' );
-add_filter( 'sharing_services', 'sharing_restrict_to_single' );
-add_action( 'plugin_action_links_'.basename( dirname( __FILE__ ) ).'/'.basename( __FILE__ ), 'sharing_plugin_settings', 10, 4 );
-add_filter( 'plugin_row_meta', 'sharing_add_plugin_settings', 10, 2 );
-
-if ( defined( 'RECAPTCHA_PRIVATE_KEY' ) ) {
-	add_action( 'sharing_email_dialog', 'sharing_email_dialog' );
-	add_filter( 'sharing_email_check', 'sharing_email_check', 10, 3 );
-}
-
-function sharing_email_check( $true, $post, $data ) {
-	require_once plugin_dir_path( __FILE__ ).'recaptchalib.php';
-
-	$recaptcha_result = recaptcha_check_answer( RECAPTCHA_PRIVATE_KEY, $_SERVER["REMOTE_ADDR"], $data["recaptcha_challenge_field"], $data["recaptcha_response_field"] );
-
-	return $recaptcha_result->is_valid;
-}
-
-add_action( 'init', 'sharing_init' );
-add_action( 'admin_init', 'sharing_add_meta_box' );
-add_action( 'save_post', 'sharing_meta_box_save' );
-add_action( 'sharing_email_send_post', 'sharing_email_send_post' );
-add_action( 'sharing_global_options', 'sharing_global_resources', 30 );
-add_action( 'sharing_admin_update', 'sharing_global_resources_save' );
-add_filter( 'sharing_services', 'sharing_restrict_to_single' );
-add_action( 'plugin_action_links_'.basename( dirname( __FILE__ ) ).'/'.basename( __FILE__ ), 'sharing_plugin_settings', 10, 4 );
-add_filter( 'plugin_row_meta', 'sharing_add_plugin_settings', 10, 2 );
-
-if ( defined( 'RECAPTCHA_PRIVATE_KEY' ) ) {
-	add_action( 'sharing_email_dialog', 'sharing_email_dialog' );
-	add_filter( 'sharing_email_check', 'sharing_email_check', 10, 3 );
-}
-
-function sharing_email_check( $true, $post, $data ) {
-	require_once plugin_dir_path( __FILE__ ).'recaptchalib.php';
-
-	$recaptcha_result = recaptcha_check_answer( RECAPTCHA_PRIVATE_KEY, $_SERVER["REMOTE_ADDR"], $data["recaptcha_challenge_field"], $data["recaptcha_response_field"] );
-
-	return $recaptcha_result->is_valid;
 }
 
 add_action( 'init', 'sharing_init' );
