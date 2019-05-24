@@ -713,9 +713,9 @@ class Share_Twitter extends Sharing_Source {
 		$suffix_length = $this->short_url_length + $strlen( $sig );
 		// $sig is handled by twitter in their 'via' argument.
 		// $post_link is handled by twitter in their 'url' argument.
-		if ( 140 < $strlen( $post_title ) + $suffix_length ) {
+		if ( 280 < $strlen( $post_title ) + $suffix_length ) {
 			// The -1 is for "\xE2\x80\xA6", a UTF-8 ellipsis.
-			$text = $substr( $post_title, 0, 140 - $suffix_length - 1 ) . "\xE2\x80\xA6";
+			$text = $substr( $post_title, 0, 280 - $suffix_length - 1 ) . "\xE2\x80\xA6";
 		} else {
 			$text = $post_title;
 		}
@@ -1174,34 +1174,6 @@ class Share_GooglePlus1 extends Sharing_Source {
 	}
 
 	public function get_display( $post ) {
-		return $this->get_link( $this->get_process_request_url( $post->ID ), _x( 'Press This', 'share to', 'jetpack' ), __( 'Click to Press This!', 'jetpack' ), 'share=press-this' );
-	}
-}
-
-class Share_GooglePlus1 extends Sharing_Source {
-	public $shortname = 'googleplus1';
-	public $genericon = '\f218';
-	private $state = false;
-
-	public function __construct( $id, array $settings ) {
-		parent::__construct( $id, $settings );
-
-		if ( 'official' == $this->button_style ) {
-			$this->smart = true;
-		} else {
-			$this->smart = false;
-		}
-	}
-
-	public function get_name() {
-		return __( 'Google', 'jetpack' );
-	}
-
-	public function has_custom_button_style() {
-		return $this->smart;
-	}
-
-	public function get_display( $post ) {
 
 		if ( $this->smart ) {
 			$share_url = $this->get_share_url( $post->ID );
@@ -1299,10 +1271,6 @@ class Share_Custom extends Sharing_Advanced_Source {
 	public function __construct( $id, array $settings ) {
 		parent::__construct( $id, $settings );
 		
-		$opts = $this->get_options();
-
-		$opts = $this->get_options();
-
 		$opts = $this->get_options();
 
 		$opts = $this->get_options();
