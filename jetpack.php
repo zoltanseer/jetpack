@@ -5,7 +5,7 @@
  * Plugin URI: http://wordpress.org/extend/plugins/jetpack/
  * Description: Bring the power of the WordPress.com cloud to your self-hosted WordPress. Jetpack enables you to connect your blog to a WordPress.com account to use the powerful features normally only available to WordPress.com users.
  * Author: Automattic
- * Version: 1.6
+ * Version: 1.6.1
  * Author URI: http://jetpack.me
  * License: GPL2+
  * Text Domain: jetpack
@@ -17,7 +17,7 @@ define( 'JETPACK__API_VERSION', 1 );
 define( 'JETPACK__MINIMUM_WP_VERSION', '3.2' );
 defined( 'JETPACK_CLIENT__AUTH_LOCATION' ) or define( 'JETPACK_CLIENT__AUTH_LOCATION', 'header' );
 defined( 'JETPACK_CLIENT__HTTPS' ) or define( 'JETPACK_CLIENT__HTTPS', 'AUTO' );
-define( 'JETPACK__VERSION', '1.5' );
+define( 'JETPACK__VERSION', '1.6.1' );
 define( 'JETPACK__PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 /*
 Options:
@@ -105,6 +105,38 @@ class Jetpack {
 			$instance = new Jetpack;
 
 			$instance->plugin_upgrade();
+		}
+
+		// Future: switch on version? If so, think twice before updating version/old_version.
+	}
+
+	/**
+	 * Must never be called statically
+	 */
+	function plugin_upgrade() {
+		// Upgrade: 1.1 -> 1.2
+		if ( get_option( 'jetpack_id' ) ) {
+			// Move individual jetpack options to single array of options
+			$options = array();
+			foreach ( Jetpack::get_option_names() as $option ) {
+				if ( false !== $value = get_option( "jetpack_$option" ) ) {
+					$options[$option] = $value;
+				}
+			}
+
+			if ( $options ) {
+				Jetpack::update_options( $options );
+
+				foreach ( array_keys( $options ) as $option ) {
+					delete_option( "jetpack_$option" );
+				}
+			}
+
+			// Add missing version and old_version options
+			if ( !$version = Jetpack::get_option( 'version' ) ) {
+				$version = $old_version = '1.1:' . time();
+				Jetpack::update_options( compact( 'version', 'old_version' ) );
+			}
 		}
 
 		// Future: switch on version? If so, think twice before updating version/old_version.
@@ -624,6 +656,10 @@ class Jetpack {
 			}
 
 			$r[] = $slug;
+		}
+
+		if ( !$min_version && !$max_version ) {
+			return array_keys( $modules );
 		}
 
 		if ( !$min_version && !$max_version ) {
