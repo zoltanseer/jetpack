@@ -1,14 +1,14 @@
 <?php
 /**
- * Module Name: WordPress.com Stats
- * Module Description: Monitor your stats with clear, concise reports and no additional load on your server.
+ * Module Name: Site Stats
+ * Module Description: Collect traffic stats and insights.
  * Sort Order: 1
  * Recommendation Order: 2
  * First Introduced: 1.1
  * Requires Connection: Yes
  * Auto Activate: Yes
- * Module Tags: WordPress.com Stats, Recommended
- * Feature: Recommended
+ * Module Tags: Site Stats, Recommended
+ * Feature: Recommended, Traffic
  */
 
 if ( defined( 'STATS_VERSION' ) ) {
@@ -70,7 +70,20 @@ function stats_load() {
 		add_action( 'admin_init', 'stats_merged_widget_admin_init' );
 	}
 
-	add_filter( 'pre_option_db_version', 'stats_ignore_db_version' );
+/**
+ * Prevent sparkline img requests being redirected to upgrade.php.
+ * See wp-admin/admin.php where it checks $wp_db_version.
+ */
+function stats_ignore_db_version( $version ) {
+	if (
+		is_admin() &&
+		isset( $_GET['page'] ) && $_GET['page'] == 'stats' &&
+		isset( $_GET['chart'] ) && strpos($_GET['chart'], 'admin-bar-hours') === 0
+	) {
+		global $wp_db_version;
+		return $wp_db_version;
+	}
+	return $version;
 }
 
 
@@ -122,47 +135,6 @@ function stats_map_meta_caps( $caps, $cap, $user_id, $args ) {
 
 		// Is the users role in the available stats roles?
 		if ( is_array( $stats_roles ) && in_array( $user_role, $stats_roles ) ) {
-			$caps = array( 'read' );
-		}
-	}
-
-	return $caps;
-}
-
-function stats_enqueue_dashboard_head() {
-	add_action( 'admin_head', 'stats_dashboard_head' );
-}
-
-/**
- * Prevent sparkline img requests being redirected to upgrade.php.
- * See wp-admin/admin.php where it checks $wp_db_version.
- */
-function stats_ignore_db_version( $version ) {
-	if (
-		is_admin() &&
-		isset( $_GET['page'] ) && $_GET['page'] == 'stats' &&
-		isset( $_GET['chart'] ) && strpos($_GET['chart'], 'admin-bar-hours') === 0
-	) {
-		global $wp_db_version;
-		return $wp_db_version;
-	}
-	return $version;
-}
-
-/**
- * Maps view_stats cap to read cap as needed
- *
- * @return array Possibly mapped capabilities for meta capability
- */
-function stats_map_meta_caps( $caps, $cap, $user_id, $args ) {
-	// Map view_stats to exists
-	if ( 'view_stats' == $cap ) {
-		$user        = new WP_User( $user_id );
-		$user_role   = array_shift( $user->roles );
-		$stats_roles = stats_get_option( 'roles' );
-
-		// Is the users role in the available stats roles?
-		if ( in_array( $user_role, $stats_roles ) ) {
 			$caps = array( 'read' );
 		}
 	}
@@ -308,6 +280,13 @@ function stats_upgrade_options( $options ) {
 }
 
 function stats_array( $kvs ) {
+	/**
+	 * Filter the options added to the JavaScript Stats tracking code.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @param array $kvs Array of options about the site and page you're on.
+	 */
 	$kvs = apply_filters( 'stats_array', $kvs );
 	$kvs = array_map( 'addslashes', $kvs );
 	foreach ( $kvs as $k => $v )
