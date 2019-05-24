@@ -141,10 +141,9 @@ function sharing_add_meta_box() {
 	 * @param string $var Sharing Meta Box title. Default is "Sharing".
 	 */
 	$title = apply_filters( 'sharing_meta_box_title', __( 'Sharing', 'jetpack' ) );
-	$back_compat = Jetpack_Constants::is_true( 'JETPACK_BETA_BLOCKS' ); // TODO: remove once the Sharing extension is done with it's beta.
 	if ( $post->ID !== get_option( 'page_for_posts' ) ) {
 		foreach( $post_types as $post_type ) {
-			add_meta_box( 'sharing_meta', $title, 'sharing_meta_box_content', $post_type, 'side', 'default', array( '__back_compat_meta_box' => $back_compat ) );
+			add_meta_box( 'sharing_meta', $title, 'sharing_meta_box_content', $post_type, 'side', 'default', array( '__back_compat_meta_box' => true ) );
 		}
 	}
 }
@@ -204,13 +203,6 @@ function sharing_meta_box_save( $post_id ) {
   	
   	return $post_id;
 }
-
-  	return $post_id;
-}
-
-function sharing_meta_box_protected( $protected, $meta_key, $meta_type ) {
-	if ( 'sharing_disabled' == $meta_key )
-		$protected = true;
 
   	return $post_id;
 }
@@ -301,16 +293,6 @@ add_filter( 'plugin_row_meta', 'sharing_add_plugin_settings', 10, 2 );
 if ( defined( 'RECAPTCHA_PUBLIC_KEY' ) && defined( 'RECAPTCHA_PRIVATE_KEY' ) ) {
 	add_action( 'sharing_email_dialog', 'sharing_email_dialog' );
 	add_filter( 'sharing_email_check', 'sharing_email_check', 10, 3 );
-}
-
-function sharing_email_check( $true, $post, $data ) {
-	require_once plugin_dir_path( __FILE__ ) . 'recaptcha.php';
-
-	$recaptcha = new Jetpack_ReCaptcha( RECAPTCHA_PUBLIC_KEY, RECAPTCHA_PRIVATE_KEY );
-	$response  = ! empty( $_POST['g-recaptcha-response'] ) ? $_POST['g-recaptcha-response'] : '';
-	$result    = $recaptcha->verify( $response, $_SERVER['REMOTE_ADDR'] );
-
-	return ( true === $result );
 }
 
 add_action( 'init', 'sharing_init' );
