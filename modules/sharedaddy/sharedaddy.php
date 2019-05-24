@@ -218,13 +218,6 @@ function sharing_meta_box_protected( $protected, $meta_key, $meta_type ) {
 	if ( 'sharing_disabled' == $meta_key )
 		$protected = true;
 
-  	return $post_id;
-}
-
-function sharing_meta_box_protected( $protected, $meta_key, $meta_type ) {
-	if ( 'sharing_disabled' == $meta_key )
-		$protected = true;
-
 	return $protected;
 }
 

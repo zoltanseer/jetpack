@@ -14,5 +14,6 @@ languages/messages.pot
 npm-debug.log
 tests/php/files/jetpack-150x150.jpg
 *.unison.tmp
+.eslintcache
 
 /_inc/client

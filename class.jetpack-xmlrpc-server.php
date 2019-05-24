@@ -74,13 +74,127 @@ class Jetpack_XMLRPC_Server {
 		return array(
 			'jetpack.verifyRegistration' => array( $this, 'verify_registration' ),
 			'jetpack.remoteAuthorize' => array( $this, 'remote_authorize' ),
+			'jetpack.remoteProvision' => array( $this, 'remote_provision' ),
 		);
 	}
 
 	function authorize_xmlrpc_methods() {
 		return array(
 			'jetpack.remoteAuthorize' => array( $this, 'remote_authorize' ),
+			'jetpack.remoteProvision' => array( $this, 'remote_provision' ),
 		);
+	}
+
+	function remote_authorize( $request ) {
+		$user = get_user_by( 'id', $request['state'] );
+		JetpackTracking::record_user_event( 'jpc_remote_authorize_begin', array(), $user );
+
+		foreach( array( 'secret', 'state', 'redirect_uri', 'code' ) as $required ) {
+			if ( ! isset( $request[ $required ] ) || empty( $request[ $required ] ) ) {
+				return $this->error( new Jetpack_Error( 'missing_parameter', 'One or more parameters is missing from the request.', 400 ), 'jpc_remote_authorize_fail' );
+			}
+		}
+
+		if ( ! $user ) {
+			return $this->error( new Jetpack_Error( 'user_unknown', 'User not found.', 404 ), 'jpc_remote_authorize_fail' );
+		}
+
+		if ( Jetpack::is_active() && Jetpack::is_user_connected( $request['state'] ) ) {
+			return $this->error( new Jetpack_Error( 'already_connected', 'User already connected.', 400 ), 'jpc_remote_authorize_fail' );
+		}
+
+		$verified = $this->verify_action( array( 'authorize', $request['secret'], $request['state'] ) );
+
+		if ( is_a( $verified, 'IXR_Error' ) ) {
+			return $this->error( $verified, 'jpc_remote_authorize_fail' );
+		}
+
+		wp_set_current_user( $request['state'] );
+
+		$client_server = new Jetpack_Client_Server;
+		$result = $client_server->authorize( $request );
+
+		if ( is_wp_error( $result ) ) {
+			return $this->error( $result, 'jpc_remote_authorize_fail' );
+		}
+
+		JetpackTracking::record_user_event( 'jpc_remote_authorize_success' );
+
+		$response = array(
+			'result' => $result,
+		);
+		return $response;
+	}
+
+	function remote_provision( $request ) {
+		if ( ! isset( $request['access_token'] ) ) {
+			return $this->error( new Jetpack_Error( 'access_token_missing', sprintf( 'The required "%s" parameter is missing.', 'access_token' ), 400 ), 'jpc_remote_provision_fail' );
+		}
+
+		if ( ! isset( $request['local_username'] ) ) {
+			return $this->error( new Jetpack_Error( 'local_username_missing', sprintf( 'The required "%s" parameter is missing.', 'local_username' ), 400 ), 'jpc_remote_provision_fail' );
+		}
+
+		$access_token = $request['access_token'];
+		$local_username = $request['local_username'];
+
+		$user = get_user_by( 'login', $local_username );
+
+		if ( ! $user ) {
+			$user = get_user_by( 'email', $local_username );
+		}
+
+		if ( ! $user ) {
+			return $this->error( new Jetpack_Error( 'user_unknown', 'User not found.', 404 ) );
+		}
+
+		require_once JETPACK__PLUGIN_DIR . '_inc/class.jetpack-provision.php';
+
+		wp_set_current_user( $user->ID );
+
+		// filter allowed parameters
+		$allowed_provision_args = array( 'access_token', 'wpcom_user_id', 'wpcom_user_email', 'local_username', 'plan', 'force_register', 'force_connect', 'onboarding', 'partner_tracking_id' );
+		$args = array_intersect_key(
+			$request,
+			array_flip( $allowed_provision_args )
+		);
+
+		$result = Jetpack_Provision::partner_provision( $access_token, $args );
+
+		if ( is_wp_error( $result ) ) {
+			return $this->error( $result, 'jpc_remote_provision_fail' );
+		}
+
+		// this is to prevent us from returning the access_token secret via a potentially unsecured channel.
+		if ( isset( $result->access_token ) && ! empty( $result->access_token ) ) {
+			unset( $result->access_token );
+		}
+
+		return $result;
+	}
+
+	private function tracks_record_error( $name, $error, $user = null ) {
+		if ( is_wp_error( $error ) ) {
+			JetpackTracking::record_user_event( $name, array(
+				'error_code' => $error->get_error_code(),
+				'error_message' => $error->get_error_message()
+			), $user );
+		} elseif( is_a( $error, 'IXR_Error' ) ) {
+			JetpackTracking::record_user_event( $name, array(
+				'error_code' => $error->code,
+				'error_message' => $error->message
+			), $user );
+		}
+
+		return $error;
+	}
+
+	/**
+	* Verifies that Jetpack.WordPress.com received a registration request from this site
+	*/
+	function verify_registration( $data ) {
+		// failure modes will be recorded in tracks in the verify_action method
+		return $this->verify_action( array( 'register', $data[0], $data[1] ) );
 	}
 
 	function remote_authorize( $request ) {
@@ -212,7 +326,7 @@ class Jetpack_XMLRPC_Server {
 		Jetpack::delete_secrets( $action, $state );
 
 		JetpackTracking::record_user_event( 'jpc_verify_' . $action . '_success', array(), $user );
-		
+
 		return $secrets['secret_2'];
 	}
 
