@@ -115,6 +115,42 @@
 	z-index: 2;
 }
 
+.pre-mp6.toplevel_page_jetpack.jetpack-connected.folded #wpwrap,
+.pre-mp6.jetpack-pagestyles.jetpack-connected.folded #wpwrap {
+	background-position: -68px 0;
+}
+
+@media only screen and (max-width: 900px) {
+
+	.toplevel_page_jetpack.jetpack-disconnected.auto-fold #wpwrap,
+	.jetpack-pagestyles.jetpack-disconnected.auto-fold #wpwrap {
+		background-position: -257px -60px;
+	}
+
+	.pre-mp6.toplevel_page_jetpack.jetpack-disconnected.auto-fold #wpwrap,
+	.pre-mp6.jetpack-pagestyles.jetpack-disconnected.auto-fold #wpwrap {
+		background-position: -263px -60px;
+	}
+
+	.toplevel_page_jetpack.jetpack-connected.auto-fold #wpwrap,
+	.jetpack-pagestyles.jetpack-connected.auto-fold #wpwrap {
+		background-position: -68px 0;
+	}
+
+	.pre-mp6.toplevel_page_jetpack.jetpack-connected.auto-fold #wpwrap,
+	.pre-mp6.jetpack-pagestyles.jetpack-connected.auto-fold #wpwrap {
+		background-position: -62px 0;
+	}
+
+}
+
+.toplevel_page_jetpack.screen-meta-wrap {
+	position: absolute;
+	top: 0;
+	width: 100%;
+	z-index: 2;
+}
+
 /*
  * Jetpack:
  */
@@ -669,8 +705,8 @@ p.jp-help {
 	border-top-left-radius: 3px;
 	border-bottom-left-radius: 3px;
 	background-repeat: no-repeat;
-	background-image: url(images/module-icons-sprite.png?v2.6);
-	background-size: 3155px 50px; /* remember to update this every time a new module is added! */
+	background-image: url(images/module-icons-sprite.png?v2.8);
+	background-size: 3315px 50px; /* remember to update this every time a new module is added! */
 }
 
 @media only screen and (-moz-min-device-pixel-ratio: 1.5),
@@ -679,7 +715,7 @@ p.jp-help {
 	only screen and (min-device-pixel-ratio: 1.5) {
 
 	.jetpack-module div.module-image {
-		background-image: url(images/module-icons-sprite-2x.png?v2.6);
+		background-image: url(images/module-icons-sprite-2x.png?v2.8);
 	}
 
 }
@@ -809,9 +845,16 @@ p.jp-help {
 	background-position: -2980px 5px;
 }
 
-
 #sso.jetpack-module div.module-image {
 	background-position: -3070px 5px;
+}
+
+#markdown.jetpack-module div.module-image {
+	background-position: -3161px 5px;
+}
+
+#related-posts.jetpack-module div.module-image {
+	background-position: -3235px 5px;
 }
 
 .jetpack-module div.module-image p {
@@ -1066,7 +1109,6 @@ p#news-sub {
 .error,
 .updated {
 	position: relative;
-	z-index: 100;
 }
 
 .toplevel_page_jetpack .wrap {
