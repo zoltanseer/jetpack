@@ -64,13 +64,7 @@ function stats_load() {
 		add_action( 'admin_init', 'stats_merged_widget_admin_init' );
 	}
 
-	// Add an icon to see stats in WordPress.com for a particular post
-	add_action( 'admin_print_styles-edit.php', 'jetpack_stats_load_admin_css' );
-	add_filter( 'manage_posts_columns', 'jetpack_stats_post_table' );
-	add_filter( 'manage_pages_columns', 'jetpack_stats_post_table' );
-	add_action( 'manage_posts_custom_column', 'jetpack_stats_post_table_cell', 10, 2 );
-	add_action( 'manage_pages_custom_column', 'jetpack_stats_post_table_cell', 10, 2 );
-}
+	add_filter( 'pre_option_db_version', 'stats_ignore_db_version' );
 
 	add_filter( 'pre_option_db_version', 'stats_ignore_db_version' );
 
@@ -119,7 +113,7 @@ function jetpack_is_dnt_enabled() {
 	 * @module stats
 	 * @since 6.1.0
 	 *
-	 * @param bool false If config honors DNT and client doesn't want to tracked, false if not.
+	 * @param bool false Honors DNT for clients who don't want to be tracked. Defaults to false. Set to true to enable.
 	 */
 	if ( false === apply_filters( 'jetpack_honor_dnt_header_for_stats', false ) ) {
 		return false;
@@ -901,6 +895,10 @@ function stats_admin_bar_head() {
 		return;
 
 	if ( ! current_user_can( 'view_stats' ) )
+		return;
+	}
+
+	if ( function_exists( 'is_admin_bar_showing' ) && ! is_admin_bar_showing() ) {
 		return;
 	}
 

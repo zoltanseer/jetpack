@@ -131,6 +131,53 @@ class Jetpack_XMLRPC_Server {
 		return array(
 			'result' => $result,
 		);
+	}
+
+	function provision_xmlrpc_methods() {
+		return array(
+			'jetpack.remoteRegister' => array( $this, 'remote_register' ),
+			'jetpack.remoteProvision'   => array( $this, 'remote_provision' ),
+		);
+	}
+
+	function remote_authorize( $request ) {
+		$user = get_user_by( 'id', $request['state'] );
+		JetpackTracking::record_user_event( 'jpc_remote_authorize_begin', array(), $user );
+
+		foreach( array( 'secret', 'state', 'redirect_uri', 'code' ) as $required ) {
+			if ( ! isset( $request[ $required ] ) || empty( $request[ $required ] ) ) {
+				return $this->error( new Jetpack_Error( 'missing_parameter', 'One or more parameters is missing from the request.', 400 ), 'jpc_remote_authorize_fail' );
+			}
+		}
+
+		if ( ! $user ) {
+			return $this->error( new Jetpack_Error( 'user_unknown', 'User not found.', 404 ), 'jpc_remote_authorize_fail' );
+		}
+
+		if ( Jetpack::is_active() && Jetpack::is_user_connected( $request['state'] ) ) {
+			return $this->error( new Jetpack_Error( 'already_connected', 'User already connected.', 400 ), 'jpc_remote_authorize_fail' );
+		}
+
+		$verified = $this->verify_action( array( 'authorize', $request['secret'], $request['state'] ) );
+
+		if ( is_a( $verified, 'IXR_Error' ) ) {
+			return $this->error( $verified, 'jpc_remote_authorize_fail' );
+		}
+
+		wp_set_current_user( $request['state'] );
+
+		$client_server = new Jetpack_Client_Server;
+		$result = $client_server->authorize( $request );
+
+		if ( is_wp_error( $result ) ) {
+			return $this->error( $result, 'jpc_remote_authorize_fail' );
+		}
+
+		JetpackTracking::record_user_event( 'jpc_remote_authorize_success' );
+
+		return array(
+			'result' => $result,
+		);
 
 		$result = Jetpack_Provision::partner_provision( $access_token, $args );
 
@@ -160,14 +207,6 @@ class Jetpack_XMLRPC_Server {
 		}
 
 		return $error;
-	}
-
-	/**
-	* Verifies that Jetpack.WordPress.com received a registration request from this site
-	*/
-	function verify_registration( $data ) {
-		// failure modes will be recorded in tracks in the verify_action method
-		return $this->verify_action( array( 'register', $data[0], $data[1] ) );
 	}
 
 	/**

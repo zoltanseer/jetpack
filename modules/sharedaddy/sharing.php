@@ -28,32 +28,6 @@ class Sharing_Admin {
 
 		require_once WP_SHARING_PLUGIN_DIR . 'sharing-service.php';
 
-		require_once WP_SHARING_PLUGIN_DIR . 'sharing-service.php';
-
-		require_once WP_SHARING_PLUGIN_DIR . 'sharing-service.php';
-
-		require_once WP_SHARING_PLUGIN_DIR . 'sharing-service.php';
-
-		require_once WP_SHARING_PLUGIN_DIR . 'sharing-service.php';
-
-		require_once WP_SHARING_PLUGIN_DIR . 'sharing-service.php';
-
-		require_once WP_SHARING_PLUGIN_DIR . 'sharing-service.php';
-
-		require_once WP_SHARING_PLUGIN_DIR . 'sharing-service.php';
-
-		require_once WP_SHARING_PLUGIN_DIR . 'sharing-service.php';
-
-		require_once WP_SHARING_PLUGIN_DIR . 'sharing-service.php';
-
-		require_once WP_SHARING_PLUGIN_DIR . 'sharing-service.php';
-
-		require_once WP_SHARING_PLUGIN_DIR . 'sharing-service.php';
-
-		require_once WP_SHARING_PLUGIN_DIR . 'sharing-service.php';
-
-		require_once WP_SHARING_PLUGIN_DIR . 'sharing-service.php';
-
 		require_once WP_SHARING_PLUGIN_DIR.'sharing-service.php';
 
 		add_action( 'admin_init', array( $this, 'admin_init' ) );
@@ -71,7 +45,7 @@ class Sharing_Admin {
 			'sharing-js',
 			Jetpack::get_file_url_for_environment(
 				'_inc/build/sharedaddy/admin-sharing.min.js',
-				WP_SHARING_PLUGIN_URL . 'admin-sharing.js'
+				'modules/sharedaddy/admin-sharing.js'
 			),
 			array( 'jquery-ui-draggable', 'jquery-ui-droppable', 'jquery-ui-sortable', 'jquery-form' ),
 			2
