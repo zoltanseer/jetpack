@@ -109,7 +109,7 @@ add_filter( 'pre_kses', 'youtube_embed_to_short_code' );
  * @return string The content with embeds instead of URLs
  */
 function youtube_link( $content ) {
-	return preg_replace_callback( '!(?:\n|\A)https?://(?:www\.)?(?:youtube.com/(?:v/|playlist|watch[/\#?])|youtu\.be/)[^\s]+?(?:\n|\Z)!i', 'youtube_link_callback', $content );
+	return jetpack_preg_replace_callback_outside_tags( '!(?:\n|\A)https?://(?:www\.)?(?:youtube.com/(?:v/|playlist|watch[/\#?])|youtu\.be/)[^\s]+?(?:\n|\Z)!i', 'youtube_link_callback', $content, 'youtube.com/' );
 }
 
 /**
@@ -119,6 +119,29 @@ function youtube_link( $content ) {
 function youtube_link_callback( $matches ) {
 	return "\n" . youtube_id( $matches[0] ) . "\n";
 }
+
+/**
+ * Normalizes a YouTube URL to include a v= parameter and a query string free of encoded ampersands.
+ *
+ * @param string $url
+ * @return string The normalized URL
+ */
+if ( ! function_exists( 'youtube_sanitize_url' ) ) :
+function youtube_sanitize_url( $url ) {
+	$url = trim( $url, ' "' );
+	$url = trim( $url );
+	$url = str_replace( array( 'youtu.be/', '/v/', '#!v=', '&amp;', '&#038;', 'playlist' ), array( 'youtu.be/?v=', '/?v=', '?v=', '&', '&', 'videoseries' ), $url );
+
+	// Replace any extra question marks with ampersands - the result of a URL like "http://www.youtube.com/v/9FhMMmqzbD8?fs=1&hl=en_US" being passed in.
+	$query_string_start = strpos( $url, "?" );
+
+	if ( false !== $query_string_start ) {
+		$url = substr( $url, 0, $query_string_start + 1 ) . str_replace( "?", "&", substr( $url, $query_string_start + 1 ) );
+	}
+
+	return $url;
+}
+endif;
 
 /**
  * Normalizes a YouTube URL to include a v= parameter and a query string free of encoded ampersands.

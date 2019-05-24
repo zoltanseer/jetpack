@@ -270,10 +270,11 @@ function vimeo_link( $content ) {
 	 */
 	$plain_url = "(?:[^'\">]?\/?(?:https?:\/\/)?vimeo\.com[^0-9]+)([0-9]+)(?:[^'\"0-9<]|$)";
 
-	return preg_replace_callback(
+	return jetpack_preg_replace_callback_outside_tags(
 			sprintf( '#%s|%s#i', $shortcode, $plain_url ),
 			'vimeo_link_callback',
-		$content
+			$content,
+			'vimeo'
 	);
 }
 
