@@ -718,6 +718,14 @@ if ( sharing_js_options && sharing_js_options.counts ) {
 					// Update the recaptcha
 					Recaptcha.create( key, 'sharing_recaptcha', { lang : sharing_js_options.lang } );
 
+					key = '';
+					if ( $( '#recaptcha_public_key' ).length > 0 ) {
+						key = $( '#recaptcha_public_key' ).val();
+					}
+
+					// Update the recaptcha
+					Recaptcha.create( key, 'sharing_recaptcha', { lang : sharing_js_options.lang } );
+
 					// Show dialog
 					$sharing_email.css( {
 						left: $( this ).offset().left + 'px',

@@ -157,7 +157,7 @@ EXPECTED;
 		$style_handle = 'jetpack-carousel';
 		wp_enqueue_style( 'jetpack-carousel', plugins_url( 'jetpack-carousel.css', __FILE__ ) );
 
-		Jetpack::init()->implode_frontend_css();
+		Jetpack::init()->implode_frontend_css( true );
 
 		$seen_bundle = false;
 		foreach ( $wp_styles->registered as $handle => $handle_obj ) {
@@ -290,7 +290,7 @@ EXPECTED;
 		// Purge it for a clean start.
 		ob_start();
 		Jetpack::dns_prefetch();
-		ob_clean();
+		ob_end_clean();
 
 		Jetpack::dns_prefetch( 'http://example1.com/' );
 		Jetpack::dns_prefetch( array(
