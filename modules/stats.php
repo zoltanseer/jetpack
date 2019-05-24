@@ -983,6 +983,10 @@ function stats_admin_bar_head() {
 		return;
 	}
 
+	if ( function_exists( 'is_admin_bar_showing' ) && ! is_admin_bar_showing() ) {
+		return;
+	}
+
 	add_action( 'admin_bar_menu', 'stats_admin_bar_menu', 100 );
 ?>
 
@@ -1717,7 +1721,7 @@ function stats_get_remote_csv( $url ) {
  */
 function stats_str_getcsv( $csv ) {
 	if ( function_exists( 'str_getcsv' ) ) {
-		$lines = str_getcsv( $csv, "\n" );
+		$lines = str_getcsv( $csv, "\n" ); // phpcs:ignore PHPCompatibility
 		return array_map( 'str_getcsv', $lines );
 	}
 	if ( ! $temp = tmpfile() ) { // The tmpfile() automatically unlinks.
