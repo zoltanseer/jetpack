@@ -93,6 +93,9 @@ function sharing_meta_box_save( $post_id ) {
   	return $post_id;
 }
 
+  	return $post_id;
+}
+
 function sharing_meta_box_protected( $protected, $meta_key, $meta_type ) {
 	if ( 'sharing_disabled' == $meta_key )
 		$protected = true;
@@ -167,6 +170,21 @@ function sharing_email_check( $true, $post, $data ) {
 	$recaptcha_result = recaptcha_check_answer( RECAPTCHA_PRIVATE_KEY, $_SERVER["REMOTE_ADDR"], $data["recaptcha_challenge_field"], $data["recaptcha_response_field"] );
 
 	return $recaptcha_result->is_valid;
+}
+
+add_action( 'init', 'sharing_init' );
+add_action( 'admin_init', 'sharing_add_meta_box' );
+add_action( 'save_post', 'sharing_meta_box_save' );
+add_action( 'sharing_email_send_post', 'sharing_email_send_post' );
+add_action( 'sharing_global_options', 'sharing_global_resources', 30 );
+add_action( 'sharing_admin_update', 'sharing_global_resources_save' );
+add_filter( 'sharing_services', 'sharing_restrict_to_single' );
+add_action( 'plugin_action_links_'.basename( dirname( __FILE__ ) ).'/'.basename( __FILE__ ), 'sharing_plugin_settings', 10, 4 );
+add_filter( 'plugin_row_meta', 'sharing_add_plugin_settings', 10, 2 );
+
+if ( defined( 'RECAPTCHA_PRIVATE_KEY' ) ) {
+	add_action( 'sharing_email_dialog', 'sharing_email_dialog' );
+	add_filter( 'sharing_email_check', 'sharing_email_check', 10, 3 );
 }
 
 add_action( 'init', 'sharing_init' );
