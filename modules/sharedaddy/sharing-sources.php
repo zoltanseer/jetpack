@@ -1187,34 +1187,6 @@ class Share_GooglePlus1 extends Sharing_Source {
 	}
 
 	public function get_display( $post ) {
-		return $this->get_link( $this->get_process_request_url( $post->ID ), _x( 'Press This', 'share to', 'jetpack' ), __( 'Click to Press This!', 'jetpack' ), 'share=press-this' );
-	}
-}
-
-class Share_GooglePlus1 extends Sharing_Source {
-	public $shortname = 'googleplus1';
-	public $icon = '\f218';
-	private $state = false;
-
-	public function __construct( $id, array $settings ) {
-		parent::__construct( $id, $settings );
-
-		if ( 'official' == $this->button_style ) {
-			$this->smart = true;
-		} else {
-			$this->smart = false;
-		}
-	}
-
-	public function get_name() {
-		return __( 'Google', 'jetpack' );
-	}
-
-	public function has_custom_button_style() {
-		return $this->smart;
-	}
-
-	public function get_display( $post ) {
 
 		if ( $this->smart ) {
 			$share_url = $this->get_share_url( $post->ID );
