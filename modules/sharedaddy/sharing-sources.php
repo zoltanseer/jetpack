@@ -708,7 +708,9 @@ class Share_Facebook extends Sharing_Source {
 				'fi_FI' => 100,
 				'it_IT' => 100,
 				'ja_JP' => 100,
+				'pl_PL' => 100,
 				'nl_NL' => 130,
+				'ro_RO' => 100,
 				'ru_RU' => 128,
 			);
 
@@ -907,8 +909,6 @@ class Share_Custom extends Sharing_Advanced_Source {
 	public function __construct( $id, array $settings ) {
 		parent::__construct( $id, $settings );
 		
-		$opts = $this->get_options();
-
 		$opts = $this->get_options();
 
 		$opts = $this->get_options();

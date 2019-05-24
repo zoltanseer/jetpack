@@ -115,29 +115,6 @@
 	z-index: 2;
 }
 
-}
-
-.toplevel_page_jetpack.screen-meta-wrap {
-	position: absolute;
-	top: 0;
-	width: 100%;
-	z-index: 2;
-}
-
-.toplevel_page_jetpack.screen-meta-wrap {
-	position: absolute;
-	top: 0;
-	width: 100%;
-	z-index: 2;
-}
-
-#jp-info p,
-.more-info p,
-.more-info ul,
-.jetpack-module-description p {
-	font-family: Georgia, "Times New Roman", "Bitstream Charter", Times, serif;
-}
-
 /*
  * Jetpack:
  */
