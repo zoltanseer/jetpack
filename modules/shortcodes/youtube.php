@@ -143,6 +143,29 @@ function youtube_sanitize_url( $url ) {
 }
 endif;
 
+/**
+ * Normalizes a YouTube URL to include a v= parameter and a query string free of encoded ampersands.
+ *
+ * @param string $url
+ * @return string The normalized URL
+ */
+if ( ! function_exists( 'youtube_sanitize_url' ) ) :
+function youtube_sanitize_url( $url ) {
+	$url = trim( $url, ' "' );
+	$url = trim( $url );
+	$url = str_replace( array( 'youtu.be/', '/v/', '#!v=', '&amp;', '&#038;', 'playlist' ), array( 'youtu.be/?v=', '/?v=', '?v=', '&', '&', 'videoseries' ), $url );
+
+	// Replace any extra question marks with ampersands - the result of a URL like "http://www.youtube.com/v/9FhMMmqzbD8?fs=1&hl=en_US" being passed in.
+	$query_string_start = strpos( $url, "?" );
+
+	if ( false !== $query_string_start ) {
+		$url = substr( $url, 0, $query_string_start + 1 ) . str_replace( "?", "&", substr( $url, $query_string_start + 1 ) );
+	}
+
+	return $url;
+}
+endif;
+
 /*
  * url can be:
  *    http://www.youtube.com/embed/videoseries?list=PL94269DA08231042B&amp;hl=en_US
@@ -182,14 +205,17 @@ function youtube_id( $url ) {
 	$input_w = ( isset( $qargs['w'] ) && intval( $qargs['w'] ) ) ? intval( $qargs['w'] ) : 0;
 	$input_h = ( isset( $qargs['h'] ) && intval( $qargs['h'] ) ) ? intval( $qargs['h'] ) : 0;
 
-	$default_width = get_option('embed_size_w');
+	// If we have $content_width, use it.
+	if ( ! empty( $content_width ) ) {
+		$default_width = $content_width;
+	} else {
+		// Otherwise get default width from the old, now deprecated embed_size_w option.
+		$default_width = get_option('embed_size_w');
+	}
 
+	// If we don't know those 2 values use a hardcoded width.h
 	if ( empty( $default_width ) ) {
-		if ( ! empty( $content_width ) ) {
-			$default_width = $content_width;
-		} else {
-			$default_width = 640;
-		}
+		$default_width = 640;
 	}
 
 	if ( $input_w > 0 && $input_h > 0 ) {
@@ -368,12 +394,10 @@ add_action( 'init', 'wpcom_youtube_embed_crazy_url_init' );
  *
  * @param int get_option('embed_autourls') Option to automatically embed all plain text URLs.
  */
-if ( apply_filters( 'jetpack_comments_allow_oembed', get_option('embed_autourls') ) ) {
+if ( ! is_admin() && apply_filters( 'jetpack_comments_allow_oembed', true ) ) {
 	// We attach wp_kses_post to comment_text in default-filters.php with priority of 10 anyway, so the iframe gets filtered out.
-	if ( ! is_admin() ) {
-		// Higher priority because we need it before auto-link and autop get to it
-		add_filter( 'comment_text', 'youtube_link', 1 );
-	}
+	// Higher priority because we need it before auto-link and autop get to it
+	add_filter( 'comment_text', 'youtube_link', 1 );
 }
 
 /**

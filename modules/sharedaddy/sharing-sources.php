@@ -329,15 +329,13 @@ abstract class Sharing_Source {
 		$opts = implode( ',', $opts );
 		?>
 		<script type="text/javascript">
-			var windowOpen;
-		jQuery(document).on( 'ready post-load', function(){
-			jQuery( 'a.share-<?php echo $name; ?>' ).on( 'click', function() {
-				if ( 'undefined' !== typeof windowOpen ){ // If there's another sharing window open, close it.
-					windowOpen.close();
-				}
-				windowOpen = window.open( jQuery(this).attr( 'href' ), 'wpcom<?php echo $name; ?>', '<?php echo $opts; ?>' );
-				return false;
-			});
+		var windowOpen;
+		jQuery(document.body).on('click', 'a.share-<?php echo $name; ?>', function() {
+			if ( 'undefined' !== typeof windowOpen ){ // If there's another sharing window open, close it.
+				windowOpen.close();
+			}
+			windowOpen = window.open( jQuery(this).attr( 'href' ), 'wpcom<?php echo $name; ?>', '<?php echo $opts; ?>' );
+			return false;
 		});
 		</script>
 		<?php
@@ -1161,6 +1159,33 @@ class Share_GooglePlus1 extends Sharing_Source {
 	}
 
 	public function get_display( $post ) {
+		return $this->get_link( $this->get_process_request_url( $post->ID ), _x( 'Press This', 'share to', 'jetpack' ), __( 'Click to Press This!', 'jetpack' ), 'share=press-this' );
+	}
+}
+
+class Share_GooglePlus1 extends Sharing_Source {
+	public $shortname = 'googleplus1';
+	public $genericon = '\f218';
+	private $state = false;
+
+	public function __construct( $id, array $settings ) {
+		parent::__construct( $id, $settings );
+
+		if ( 'official' == $this->button_style )
+			$this->smart = true;
+		else
+			$this->smart = false;
+	}
+
+	public function get_name() {
+		return __( 'Google', 'jetpack' );
+	}
+
+	public function has_custom_button_style() {
+		return $this->smart;
+	}
+
+	public function get_display( $post ) {
 
 		if ( $this->smart ) {
 			$share_url = $this->get_share_url( $post->ID );
@@ -1601,7 +1626,7 @@ class Share_Pinterest extends Sharing_Source {
 			</script>
 		<?php elseif ( 'buttonPin' != $this->get_widget_type() ) : ?>
 			<script type="text/javascript">
-				jQuery(document).on('ready', function(){
+				jQuery(document).ready( function(){
 					jQuery('body').on('click', 'a.share-pinterest', function(e){
 						e.preventDefault();
 						// Load Pinterest Bookmarklet code
@@ -1673,7 +1698,7 @@ class Share_Pocket extends Sharing_Source {
 		function jetpack_sharing_pocket_init() {
 			jQuery.getScript( 'https://widgets.getpocket.com/v1/j/btn.js?v=1' );
 		}
-		jQuery( document ).on( 'ready', jetpack_sharing_pocket_init );
+		jQuery( document ).ready( jetpack_sharing_pocket_init );
 		jQuery( document.body ).on( 'post-load', jetpack_sharing_pocket_init );
 		</script>
 		<?php
@@ -1724,7 +1749,7 @@ class Jetpack_Share_WhatsApp extends Sharing_Source {
 	}
 
 	public function get_display( $post ) {
-		return $this->get_link( 'whatsapp://send?text=' . rawurlencode( $this->get_share_title( $post->ID ) ) . ' ' . rawurlencode( get_permalink( $post->ID ) ), _x( 'WhatsApp', 'share to', 'jetpack' ), __( 'Click to share on WhatsApp', 'jetpack' ) );
+		return $this->get_link( 'whatsapp://send?text=' . rawurlencode( $this->get_share_title( $post->ID ) ) . ' ' . rawurlencode( $this->get_share_url( $post->ID ) ), _x( 'WhatsApp', 'share to', 'jetpack' ), __( 'Click to share on WhatsApp', 'jetpack' ) );
 	}
 }
 

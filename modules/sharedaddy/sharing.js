@@ -129,7 +129,7 @@ var updateLinkedInCount = function( data ) {
 	} );
 
 	$body = $( document.body ).on( 'post-load', WPCOMSharing_do );
-	$( document ).on( 'ready', function() {
+	$( document ).ready( function() {
 		$sharing_email = $( '#sharing_email' );
 		$body.append( $sharing_email );
 		WPCOMSharing_do();
@@ -699,6 +699,11 @@ var updateLinkedInCount = function( data ) {
 
 					// Update the recaptcha
 					Recaptcha.create( key, 'sharing_recaptcha', { lang : sharing_js_options.lang } );
+
+					// Reset reCATPCHA if exists.
+					if ( 'object' === typeof grecaptcha && 'function' === typeof grecaptcha.reset ) {
+						grecaptcha.reset();
+					}
 
 					// Reset reCATPCHA if exists.
 					if ( 'object' === typeof grecaptcha && 'function' === typeof grecaptcha.reset ) {

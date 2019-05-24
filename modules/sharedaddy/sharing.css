@@ -24,10 +24,6 @@ div.sharedaddy h3.sd-title {
 	line-height: 1.2;
 	font-size: 9pt;
 	font-weight: bold;
-	width: 15.625%; /* 100px / 640px */ float: left;
-	position: static;
-	background: none;
-	border: none;
 }
 
 div.sharedaddy h3.sd-title:before {
@@ -81,7 +77,6 @@ body.highlander-dark h3.sd-title:before {
 .sd-social-official .sd-content>ul>li .digg_button >a {		/* official Digg button no longer works, needs cleaning */
 	text-decoration: none !important;
 	display: inline-block;
-	margin: 0 5px 5px 0;
 	font-size: 12px;
 	font-family: "Open Sans", sans-serif;
 	font-weight: normal;
@@ -186,7 +181,7 @@ body.highlander-dark h3.sd-title:before {
 }
 
 .sd-content ul li {
-	margin: 0 !important;
+	margin: 0 5px 5px 0;
 	padding: 0;
 }
 
@@ -432,13 +427,6 @@ body .sd-social-official li.share-press-this a
 	top: 0;
 }
 
-.sd-social-official .sd-content ul:after {
-	content: ".";
-	display: block;
-	height: 0;
-	clear: both;
-	visibility: hidden;
-}
 
 /* Custom icons */
 body .sd-social-icon .sd-content li.share-custom>a {
