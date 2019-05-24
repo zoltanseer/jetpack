@@ -42,7 +42,9 @@ if ( sharing_js_options && sharing_js_options.counts ) {
 						jQuery.getScript( service_request );
 					}
 
-					WPCOMSharing.bump_sharing_count_stat( service );
+					if ( sharing_js_options.is_stats_active ) {
+						WPCOMSharing.bump_sharing_count_stat( service );
+					}
 				}
 
 				WPCOMSharing.done_urls[ id ] = true;
@@ -849,6 +851,11 @@ if ( sharing_js_options && sharing_js_options.counts ) {
 
 					// Reset reCATPCHA if exists.
 					if ( 'object' === typeof grecaptcha && 'function' === typeof grecaptcha.reset ) {
+						grecaptcha.reset();
+					}
+
+					// Reset reCATPCHA if exists.
+					if ( 'object' === typeof grecaptcha && 'function' === typeof grecaptcha.reset && window.___grecaptcha_cfg.count ) {
 						grecaptcha.reset();
 					}
 

@@ -88,7 +88,14 @@ class Sharing_Admin {
 			}
 		}
 
-		add_submenu_page( 'options-general.php', __( 'Sharing Settings', 'jetpack' ), __( 'Sharing', 'jetpack' ), 'publish_posts', 'sharing', array( &$this, 'management_page' ) );
+		add_submenu_page(
+			'options-general.php',
+			__( 'Sharing Settings', 'jetpack' ),
+			__( 'Sharing', 'jetpack' ),
+			'publish_posts',
+			'sharing',
+			array( &$this, 'wrapper_admin_page' )
+		);
 	}
 
 	public function ajax_save_services() {
@@ -174,6 +181,10 @@ class Sharing_Admin {
 		<?php endif; ?>
 	</li>
 <?php
+	}
+
+	public function wrapper_admin_page() {
+		Jetpack_Admin_Page::wrap_ui( array( &$this, 'management_page' ), array( 'is-wide' =>true ) );
 	}
 
 	public function management_page() {
