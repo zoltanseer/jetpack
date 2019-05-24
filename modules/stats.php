@@ -4,6 +4,7 @@
  * Module Description: Simple, concise site stats with no additional load on your server.
  * Sort Order: 1
  * First Introduced: 1.1
+ * Requires Connection: Yes
  */
 
 if ( defined( 'STATS_VERSION' ) ) {
@@ -50,6 +51,8 @@ function stats_load() {
 	add_action( 'template_redirect', 'stats_template_redirect', 1 );
 
 	add_action( 'wp_head', 'stats_admin_bar_head', 100 );
+
+	add_action( 'wp_head', 'stats_hide_smile_css' );
 
 	add_action( 'jetpack_admin_menu', 'stats_admin_menu' );
 
@@ -547,6 +550,14 @@ function stats_configuration_screen() {
 		</form>
 	</div>
 	<?php
+}
+
+function stats_hide_smile_css() {
+	$options = stats_get_options();
+	if ( isset( $options['hide_smile'] ) && $options['hide_smile'] ) {
+	?>
+<style type='text/css'>img#wpstats{display:none}</style><?php
+	}
 }
 
 function stats_admin_bar_head() {
