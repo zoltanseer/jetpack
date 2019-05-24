@@ -727,9 +727,7 @@ class Share_Facebook extends Sharing_Source {
 
 			$locale = $this->guess_locale_from_lang( get_locale() );
 			if ( $locale ) {
-				if ( 'en_US' != $locale ) {
-					$url .= '&amp;locale=' . $locale;
-				}
+				$url .= '&amp;locale=' . $locale;
 
 				if ( isset( $widths[$locale] ) ) {
 					$inner_w = $widths[$locale];
@@ -1081,6 +1079,148 @@ class Share_Custom extends Sharing_Advanced_Source {
 		<?php echo $link ; ?>
 		</div><?php
 	}
+}
+
+
+class Share_Tumblr extends Sharing_Source {
+	var $shortname = 'tumblr';
+	public function __construct( $id, array $settings ) {
+		parent::__construct( $id, $settings );
+		if ( 'official' == $this->button_style )
+			$this->smart = true;
+		else
+			$this->smart = false;
+	}
+
+	public function get_name() {
+		return __( 'Tumblr', 'jetpack' );
+	}
+
+	public function get_display( $post ) {
+		if ( $this->smart ) {
+			$target = '';
+			if ( 'new' == $this->open_links )
+				$target = '_blank';
+
+			return '<a target="' . $target . '" href="http://www.tumblr.com/share/link/?url=' . rawurlencode( $this->get_share_url( $post->ID ) ) . '&name=' . rawurlencode( $post->post_title ) . '" title="Share on Tumblr" style="display:inline-block; text-indent:-9999px; overflow:hidden; width:62px; height:20px; background:url(\'http://platform.tumblr.com/v1/share_2.png\') top left no-repeat transparent;">Share on Tumblr</a>';
+		 } else {
+			return $this->get_link( get_permalink( $post->ID ), _x( 'Tumblr', 'share to', 'jetpack' ), __( 'Click to share on Tumblr', 'jetpack' ), 'share=tumblr' );
+		}
+	}
+
+	public function process_request( $post, array $post_data ) {
+		// Record stats
+		parent::process_request( $post, $post_data );
+
+		// Redirect to Tumblr's sharing endpoint (a la their bookmarklet)
+		$url = 'http://www.tumblr.com/share?v=3&u=' . rawurlencode( $this->get_share_url( $post->ID ) ) . '&t=' . rawurlencode( $post->post_title ) . '&s=';
+		wp_redirect( $url );
+		die();
+	}
+	// http://www.tumblr.com/share?v=3&u=URL&t=TITLE&s=
+	public function display_footer() {
+		if ( $this->smart ) {
+			?><script type="text/javascript" src="http://platform.tumblr.com/v1/share.js"></script><?php
+		} else {
+			$this->js_dialog( $this->shortname, array( 'width' => 450, 'height' => 450 ) );
+		}
+	}
+}
+
+class Share_Pinterest extends Sharing_Source {
+	var $shortname = 'pinterest';
+
+	public function __construct( $id, array $settings ) {
+		parent::__construct( $id, $settings );
+
+		if ( 'official' == $this->button_style )
+			$this->smart = true;
+		else
+			$this->smart = false;
+	}
+
+	public function get_name() {
+		return __( 'Pinterest', 'jetpack' );
+	}
+
+	public function get_post_image( $content ) {
+		$image = '';
+
+		if ( class_exists( 'Jetpack_PostImages' ) ) {
+			global $post;
+			$img = Jetpack_PostImages::from_html( $post->ID );
+			if ( !empty( $img['src'] ) )
+				return $img['src'];
+		}
+
+		if ( function_exists('has_post_thumbnail') && has_post_thumbnail() ) {
+			$thumb_id = get_post_thumbnail_id();
+			$thumb = wp_get_attachment_image_src( $thumb_id, 'full' );
+
+			// This shouldn't be necessary, since has_post_thumbnail() is true,
+			// but... see http://wordpress.org/support/topic/jetpack-youtube-embeds
+			if ( ! $thumb ) return '';
+
+			$image = remove_query_arg( array('w', 'h'), $thumb[0] );
+		} else if ( preg_match_all('/<img (.+?)>/', $content, $matches) ) {
+			foreach ( $matches[1] as $attrs ) {
+				$media = $img = array();
+				foreach ( wp_kses_hair( $attrs, array( 'http', 'https' ) ) as $attr )
+					$img[$attr['name']] = $attr['value'];
+				if ( !isset( $img['src'] ) || 0 !== strpos( $img['src'], 'http' ) ) {
+					continue;
+				}
+				else {
+					$image = htmlspecialchars_decode( $img['src'] );
+					break;
+				}
+			}
+		}
+
+		return $image;
+	}
+
+	public function get_display( $post ) {
+		if ( $this->smart )
+			return '<div class="pinterest_button"><a href="' . esc_url( 'http://pinterest.com/pin/create/button/?url='. rawurlencode( $this->get_share_url( $post->ID ) ) . '&description=' . rawurlencode( $post->post_title ) . '&media=' . rawurlencode( esc_url_raw( $this->get_post_image( $post->post_content ) ) ) ) . '" class="pin-it-button" count-layout="horizontal"> '. __( 'Pin It', 'jetpack') .'</a></div>';
+		else
+			return $this->get_link( get_permalink( $post->ID ), _x( 'Pinterest', 'share to', 'jetpack' ), __( 'Click to share on Pinterest', 'jetpack' ), 'share=pinterest' );
+	}
+
+	public function process_request( $post, array $post_data ) {
+		$pinterest_url = esc_url_raw( 'http://pinterest.com/pin/create/button/?url=' . rawurlencode( $this->get_share_url( $post->ID ) ) . '&description=' . rawurlencode( $post->post_title ) . '&media=' . rawurlencode( esc_url_raw( $this->get_post_image( $post->post_content ) ) ) );
+
+		// Record stats
+		parent::process_request( $post, $post_data );
+
+		// Redirect to Pinterest
+		wp_redirect( $pinterest_url );
+		die();
+	}
+
+	public function display_footer() {
+		if ( !$this->smart ) {
+			$this->js_dialog( $this->shortname, array( 'width' => 650, 'height' => 280 ) );
+		} else {
+?>
+	<script type="text/javascript">
+	function pinterest_async_load() {
+		var s = document.createElement("script");
+		s.type = "text/javascript";
+		s.async = true;
+		s.src = window.location.protocol + "//assets.pinterest.com/js/pinit.js";
+		var x = document.getElementsByTagName("script")[0];
+		x.parentNode.insertBefore(s, x);
+	}
+	jQuery(document).on('ready post-load', function() {
+        	pinterest_async_load();
+	});
+	</script>
+<?php
+		}
+	}
+
+
 }
 
 
