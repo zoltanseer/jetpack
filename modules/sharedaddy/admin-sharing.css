@@ -699,6 +699,49 @@
 	height: 20px;
 }
 
+.preview-pinterest .option-smart-on {
+	background: #FFF url(images/smart-pinterest.png) no-repeat top left;
+	background-size: 58px 20px;
+	width: 58px;
+	height: 20px;
+}
+
+.preview-pocket .option-smart-on {
+	background: #FFF url(images/smart-pocket.png) no-repeat top left;
+	background-size: 60px 20px;
+	width: 60px;
+	height: 20px;
+}
+
+.preview-linkedin .option-smart-on {
+	background: #FFF url(images/linkedin-smart.png) no-repeat top center;
+	background-size: 99px 18px;
+	width:99px;
+	height:18px;
+	margin-top: 1px;
+}
+
+.preview-google-plus-1 .option-smart-on {
+	background: #FFF url(images/smart-googleplus1.png) no-repeat top left;
+	background-size: 60px 20px;
+	width: 60px;
+	height: 20px;
+}
+
+.preview-tumblr .option-smart-on {
+	background: #FFF url(images/smart-tumblr.png) no-repeat top left;
+	background-size: 62px 20px;
+	width: 62px;
+	height: 20px;
+}
+
+.preview-pinterest .option-smart-on {
+	background: #FFF url(images/smart-pinterest.png) no-repeat top left;
+	background-size: 58px 20px;
+	width: 58px;
+	height: 20px;
+}
+
 .preview-linkedin .option-smart-on {
 	background: #FFF url(images/linkedin-smart.png) no-repeat top center;
 	background-size: 99px 18px;
