@@ -261,46 +261,6 @@ function notes_more_info() { ?>
 }
 add_action( 'jetpack_module_more_info_widgets', 'jetpack_widgets_more_info' );
 
-function jetpack_widgets_more_info_connected() { ?>
-	<div class="jp-info-img">
-		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/_inc/images/screenshots/widgets.png' ) ?>" alt="<?php esc_attr_e( 'Widgets Screenshot', 'jetpack' ) ?>" width="300" height="150" />
-	</div>
-
-	<h4><?php esc_html_e( 'Sharing' , 'jetpack' ); ?></h4>
-	<?php
-	if ( class_exists( 'Sharing_Admin' ) ) {
-		?>
-
-		<p><?php printf( __( 'To configure your sharing settings, go to the Settings &rarr; <a href="%s">Sharing</a> menu.', 'jetpack' ), 'options-general.php?page=sharing' ); ?></p>
-		<p><?php esc_html_e( 'Drag and drop sharing services into the enabled section to have them show up on your site, and drag them into the hidden section to have them hidden behind a button.', 'jetpack' ); ?>
-
-		<?php
-	}
-	?>
-
-	<p><?php printf( __( 'Full details can be found on the <a href="%s">Sharing support page</a>. This video also gives a swish run-down of how to use the Sharing feature. Watch it in HD for extra snazz!', 'jetpack' ), 'http://support.wordpress.com/sharing/' ); ?></p>
-<?php
-}
-add_action( 'jetpack_module_more_info_connected_widgets', 'jetpack_widgets_more_info_connected' );
-
-function sharedaddy_load_more_link( $description ) {
-	echo '<a class="button-secondary more-info-link" href="http://support.wordpress.com/sharing/">' . esc_html__( 'Learn More', 'jetpack' ) . '</a>';
-}
-add_action( 'jetpack_module_more_info_subscriptions', 'jetpack_subscriptions_more_info' );
-add_action( 'jetpack_module_more_info_connected_subscriptions', 'jetpack_subscriptions_more_info' );
-
-function jetpack_subscriptions_load_more_link() {
-	echo '<a class="button-secondary more-info-link" href="http://en.support.wordpress.com/following/">' . esc_html__( 'Learn More', 'jetpack' ) . '</a>';
-}
-add_action( 'jetpack_learn_more_button_subscriptions', 'jetpack_subscriptions_load_more_link' );
-
-// Enhanced Distribution
-
-function jetpack_enhanced_distribution_more_info() { ?>
-	<h4><?php esc_html_e( 'Enhanced Distribution' , 'jetpack' ); ?></h4>
-
-	<p><?php esc_html_e( 'Jetpack will automatically take the great published content from your blog or website and share it instantly with third party services like search engines, increasing your reach and traffic.', 'jetpack' ); ?></p>
-
 	<h4><?php esc_html_e( 'Notifications' , 'jetpack' ); ?></h4>
 	<p><?php esc_html_e( 'Keep up with the latest happenings on all your WordPress sites and interact with other WordPress.com users.', 'jetpack' ) ?></p>
 <?php
@@ -425,6 +385,74 @@ add_action( 'jetpack_module_more_info_connected_widgets', 'jetpack_widgets_more_
 
 function sharedaddy_load_more_link( $description ) {
 	echo '<a class="button-secondary more-info-link" href="http://support.wordpress.com/sharing/">' . esc_html__( 'Learn More', 'jetpack' ) . '</a>';
+}
+add_filter( 'jetpack_learn_more_button_widgets', 'jetpack_widgets_load_more_link' );
+
+// Subscriptions
+function jetpack_subscriptions_more_info() { ?>
+	<div class="jp-info-img">
+		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/_inc/images/screenshots/subscriptions.png' ) ?>" alt="<?php esc_attr_e( 'Subsriptions Screenshot', 'jetpack' ) ?>" width="300" height="150" />
+	</div>
+
+	<h4><?php esc_html_e( 'Subscriptions' , 'jetpack' ); ?></h4>
+
+	<p><?php esc_html_e( 'Easily allow any visitor to subscribe to all of your posts via email through a widget in your blog&#8217;s sidebar.  Every time you publish a post, WordPress.com will send a notification to all your subscribers.', 'jetpack' ); ?></p>
+	<p><?php esc_html_e( 'When leaving comments, your visitors can also subscribe to a post&#8217;s comments to keep up with the conversation.', 'jetpack' ); ?></p>
+
+<?php
+
+	if ( 'jetpack_module_more_info_connected_subscriptions' == current_filter() )
+		printf( '<p>' . __( 'To use the Subscriptions widget, go to Appearance &#8594; <a href="%s">Widgets</a>. Drag the widget labeled &#8220;Blog Subscriptions (Jetpack)&#8221; into one of your sidebars and configure away.', 'jetpack' ) . '</p>', admin_url( 'widgets.php' ) );
+		printf( '<p>' . __( 'You can also make changes to your Subscription settings at the bottom of the <a href="%s">Discussion Settings</a> page.', 'jetpack' ) . '</p>', admin_url( 'options-discussion.php#jetpack-subscriptions-settings' ) );
+}
+add_action( 'jetpack_module_more_info_subscriptions', 'jetpack_subscriptions_more_info' );
+add_action( 'jetpack_module_more_info_connected_subscriptions', 'jetpack_subscriptions_more_info' );
+
+function jetpack_subscriptions_load_more_link() {
+	echo '<a class="button-secondary more-info-link" href="http://en.support.wordpress.com/following/">' . esc_html__( 'Learn More', 'jetpack' ) . '</a>';
+}
+add_action( 'jetpack_learn_more_button_subscriptions', 'jetpack_subscriptions_load_more_link' );
+
+// Enhanced Distribution
+
+function jetpack_enhanced_distribution_more_info() { ?>
+	<h4><?php esc_html_e( 'Enhanced Distribution' , 'jetpack' ); ?></h4>
+
+	<p><?php esc_html_e( 'Jetpack will automatically take the great published content from your blog or website and share it instantly with third party services like search engines, increasing your reach and traffic.', 'jetpack' ); ?></p>
+
+<?php
+}
+
+add_action( 'jetpack_module_more_info_enhanced-distribution', 'jetpack_enhanced_distribution_more_info' );
+add_action( 'jetpack_module_more_info_connected_enhanced-distribution', 'jetpack_enhanced_distribution_more_info' );
+
+function jetpack_enhanced_distribution_more_link() {
+	echo '<a class="button-secondary more-info-link" href="http://en.wordpress.com/firehose/">' . esc_html__( 'Learn More', 'jetpack' ) . '</a>';
+}
+add_action( 'jetpack_learn_more_button_enhanced-distribution', 'jetpack_enhanced_distribution_more_link' );
+
+// JSON API
+function jetpack_json_api_more_info() { ?>
+	<h4><?php esc_html_e( 'JSON API' , 'jetpack' ); ?></h4>
+
+	<p><?php esc_html_e( 'Jetpack will allow you to authorize applications and services to securely connect to your blog and allow them to use your content in new ways and offer you new functionality.', 'jetpack' ); ?>
+
+	<p><?php _e( "Developers can use WordPress.com's <a href='http://developer.wordpress.com/docs/oauth2/'>OAuth2</a> authentication system and <a href='http://developer.wordpress.com/docs/api/'>WordPress.com REST API</a> to manage and access your site's content.", 'jetpack' ); ?></p>
+
+<?php
+}
+
+add_action( 'jetpack_module_more_info_json-api', 'jetpack_json_api_more_info' );
+add_action( 'jetpack_module_more_info_connected_json-api', 'jetpack_json_api_more_info' );
+
+function jetpack_json_api_more_link() {
+	echo '<a class="button-secondary more-info-link" href="http://jetpack.me/support/json-api/">' . esc_html__( 'Learn More', 'jetpack' ) . '</a>';
+}
+add_action( 'jetpack_learn_more_button_json-api', 'jetpack_json_api_more_link' );
+
+// Contact Form: START
+function jetpack_contact_form_learn_more_button() {
+    echo '<a class="button-secondary more-info-link" href="http://support.wordpress.com/contact-form/">' . __( 'Learn More', 'jetpack' ) . '</a>';
 }
 
 function jetpack_contact_form_more_info() {
@@ -640,7 +668,7 @@ function jetpack_carousel_learn_more_button() {
 function jetpack_carousel_more_info() {
 ?>
 	<div class="jp-info-img">
-		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/screenshot-6.png' ) ?>" alt="<?php esc_attr_e( 'Gallery Carousel Screenshot', 'jetpack' ) ?>" width="300" height="188" />
+		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/_inc/images/screenshots/carousel.png' ) ?>" alt="<?php esc_attr_e( 'Gallery Carousel Screenshot', 'jetpack' ) ?>" width="300" height="188" />
 	</div>
 
 	<h4><?php esc_html_e( 'Carousel', 'jetpack' ); ?></h4>
@@ -807,7 +835,7 @@ add_action( 'jetpack_learn_more_button_post-by-email', 'jetpack_post_by_email_mo
 function jetpack_photon_more_info() { ?>
 	<h4><?php esc_html_e( 'Photon' , 'jetpack' ); ?></h4>
 
-	<p><?php esc_html_e( "Give your site a boost by loading images in post and posts' featured images from the WordPress.com content delivery network. We cache your images and serve them from our super-fast network, reducing the burden on your web host with the click of a button.", 'jetpack' ); ?></p>
+	<p><?php esc_html_e( "Give your site a boost by loading images in posts from the WordPress.com content delivery network. We cache your images and serve them from our super-fast network, reducing the burden on your Web host with the click of a button.", 'jetpack' ); ?></p>
 <?php
 }
 add_action( 'jetpack_module_more_info_photon', 'jetpack_photon_more_info' );
@@ -823,3 +851,24 @@ function jetpack_photon_more_link() {
 }
 add_action( 'jetpack_learn_more_button_photon', 'jetpack_photon_more_link' );
 // Photon: STOP
+
+// Tiled Galleries: START
+function jetpack_tiled_gallery_more_info() { ?>
+	<h4><?php esc_html_e( 'Tiled Galleries' , 'jetpack' ); ?></h4>
+
+	<div class="jp-info-img">
+		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/_inc/images/screenshots/tiled-gallery.png' ) ?>" alt="<?php esc_attr_e( 'Tiled Galleries', 'jetpack' ) ?>" width="300" height="150" />
+	</div>
+
+	<p><?php esc_html_e( 'Create elegant magazine-style mosaic layouts for your photos without having to use an external graphic editor.', 'jetpack' ); ?></p>
+	<p><?php printf( __( 'When adding a gallery to your post, you now have the option to select a layout style for your images. We\'ve added support for Rectangular, Square, and Circular galleries. By default, galleries will continue to display using the standard thumbnail grid layout. To make the rectangular layout the default for all of your site\'s galleries, head over to <a href="%s">Settings &rarr; Media</a> and check the box next to "Display all your gallery pictures in a cool mosaic."', 'jetpack' ), admin_url( 'options-media.php' ) ); ?></p>
+	<p><em><?php esc_html_e( 'Note: Images in tiled galleries require extra-special processing, so they will be served from WordPress.com\'s CDN even if the Photon module is disabled.', 'jetpack' ); ?></em></p>
+<?php
+}
+add_action( 'jetpack_module_more_info_tiled-gallery', 'jetpack_tiled_gallery_more_info' );
+
+function jetpack_tiled_gallery_more_link() {
+	echo '<a class="button-secondary more-info-link" href="#">' . __( 'Learn More', 'jetpack' ) . '</a>';
+}
+add_action( 'jetpack_learn_more_button_tiled-gallery', 'jetpack_tiled_gallery_more_link' );
+// Tiled Galleries: STOP
