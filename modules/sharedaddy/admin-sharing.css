@@ -273,6 +273,32 @@
 	height: 20px;
 }
 
+.preview-linkedin .option-smart-on {
+	background: #FFF url(images/linkedin-smart.png) no-repeat top center;
+	width:99px;
+	height:22px;
+	margin-top: 1px;
+}
+
+.preview-google-plus-1 .option-smart-on {
+	background: #FFF url(images/smart-googleplus1.png) no-repeat top left;
+	max-width: 70px;
+	width: 60px;
+	height: 20px;
+}
+
+.preview-tumblr .option-smart-on {
+	background: #FFF url(images/smart-tumblr.png) no-repeat top left;
+	width: 62px;
+	height: 20px;
+}
+
+.preview-pinterest .option-smart-on {
+	background: #FFF url(images/smart-pinterest.png) no-repeat top left;
+	width: 58px;
+	height: 20px;
+}
+
 div.sharedaddy .preview-google-plus-1 .no-text { width: 60px; }
 
 .services .preview li.share-custom {
