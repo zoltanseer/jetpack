@@ -821,6 +821,60 @@ class Share_PressThis extends Sharing_Source {
 		die();
 	}
 
+	public function display_footer() {
+		global $post;
+
+		if ( $this->smart ) { ?>
+			<script type="text/javascript">
+			  (function() {
+			    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+			    po.src = 'https://apis.google.com/js/plusone.js';
+			    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+			  })();
+			</script>
+			<?php
+		} else {
+			$this->js_dialog( 'google-plus-1', array( 'width' => 480, 'height' => 550 ) );
+		}
+	}
+
+	public function get_total( $post = false ) {
+		global $wpdb, $blog_id;
+
+		$name = strtolower( $this->get_id() );
+
+		if ( $post == false ) {
+			// get total number of shares for service
+			return $wpdb->get_var( $wpdb->prepare( "SELECT SUM( count ) FROM sharing_stats WHERE blog_id = %d AND share_service = %s", $blog_id, $name ) );
+		}
+
+		//get total shares for a post
+		return $wpdb->get_var( $wpdb->prepare( "SELECT count FROM sharing_stats WHERE blog_id = %d AND post_id = %d AND share_service = %s", $blog_id, $post->ID, $name ) );
+	}
+}
+
+class Share_GooglePlus1 extends Sharing_Source {
+	var $shortname = 'googleplus1';
+	var $genericon = '\f218';
+	private $state = false;
+
+	public function __construct( $id, array $settings ) {
+		parent::__construct( $id, $settings );
+
+		if ( 'official' == $this->button_style )
+			$this->smart = true;
+		else
+			$this->smart = false;
+	}
+
+	public function get_name() {
+		return __( 'Google', 'jetpack' );
+	}
+
+	public function has_custom_button_style() {
+		return $this->smart;
+	}
+
 	public function get_display( $post ) {
 		return $this->get_link( $this->get_process_request_url( $post->ID ), _x( 'Press This', 'share to', 'jetpack' ), __( 'Click to Press This!', 'jetpack' ), 'share=press-this' );
 	}
@@ -908,88 +962,6 @@ class Share_GooglePlus1 extends Sharing_Source {
 	}
 }
 
-class Share_GooglePlus1 extends Sharing_Source {
-	var $shortname = 'googleplus1';
-	var $genericon = '\f218';
-	private $state = false;
-
-	public function __construct( $id, array $settings ) {
-		parent::__construct( $id, $settings );
-
-		if ( 'official' == $this->button_style )
-			$this->smart = true;
-		else
-			$this->smart = false;
-	}
-
-	public function get_name() {
-		return __( 'Google', 'jetpack' );
-	}
-
-	public function has_custom_button_style() {
-		return $this->smart;
-	}
-
-	public function get_display( $post ) {
-
-		if ( $this->smart ) {
-			$share_url = $this->get_share_url( $post->ID );
-			return '<div class="googleplus1_button"><div class="g-plus" data-action="share" data-annotation="bubble" data-href="' . esc_url( $share_url ) . '"></div></div>';
-		} else {
-			return $this->get_link( get_permalink( $post->ID ), _x( 'Google', 'share to', 'jetpack' ), __( 'Click to share on Google+', 'jetpack' ), 'share=google-plus-1', 'sharing-google-' . $post->ID );
-		}
-	}
-
-	public function get_state() {
-		return $this->state;
-	}
-
-	public function process_request( $post, array $post_data ) {
-
-		if ( isset( $post_data['state'] ) ) {
-			$this->state = $post_data['state'];
-		}
-		// Record stats
-		parent::process_request( $post, $post_data );
-
-		// Redirect to Google +'s sharing endpoint
-		$url = 'https://plus.google.com/share?url=' . rawurlencode( $this->get_share_url( $post->ID ) );
-		wp_redirect( $url );
-		die();
-	}
-
-	public function display_footer() {
-		global $post;
-
-		if ( $this->smart ) { ?>
-			<script type="text/javascript">
-			  (function() {
-			    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
-			    po.src = 'https://apis.google.com/js/plusone.js';
-			    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
-			  })();
-			</script>
-			<?php
-		} else {
-			$this->js_dialog( 'google-plus-1', array( 'width' => 480, 'height' => 550 ) );
-		}
-	}
-
-	public function get_total( $post = false ) {
-		global $wpdb, $blog_id;
-
-		$name = strtolower( $this->get_id() );
-
-		if ( $post == false ) {
-			// get total number of shares for service
-			return $wpdb->get_var( $wpdb->prepare( "SELECT SUM( count ) FROM sharing_stats WHERE blog_id = %d AND share_service = %s", $blog_id, $name ) );
-		}
-
-		//get total shares for a post
-		return $wpdb->get_var( $wpdb->prepare( "SELECT count FROM sharing_stats WHERE blog_id = %d AND post_id = %d AND share_service = %s", $blog_id, $post->ID, $name ) );
-	}
-}
-
 class Share_Custom extends Sharing_Advanced_Source {
 	private $name;
 	private $icon;
@@ -1004,6 +976,8 @@ class Share_Custom extends Sharing_Advanced_Source {
 	public function __construct( $id, array $settings ) {
 		parent::__construct( $id, $settings );
 		
+		$opts = $this->get_options();
+
 		$opts = $this->get_options();
 
 		$opts = $this->get_options();
@@ -1269,13 +1243,13 @@ class Share_Pinterest extends Sharing_Source {
 
 	public function get_widget_type() {
 		/**
-		 * Filters the Pinterest widget type used in official sharing button output.
+		 * Filters the Pinterest widget type.
 		 *
 		 * @since 3.6
 		 *
 		 * @link https://business.pinterest.com/en/widget-builder
 		 *
-		 * @param string $type Pinterest widget type.
+		 * @param string $type Pinterest widget type. Default of 'buttonPin' for single-image selection. 'buttonBookmark' for multi-image modal.
 		 */
 		return apply_filters( 'jetpack_sharing_pinterest_widget_type', 'buttonPin' );
 	}
@@ -1420,52 +1394,6 @@ class Share_Pocket extends Sharing_Source {
 
 	}
 
-}
-
-class Share_Tumblr extends Sharing_Source {
-	var $shortname = 'tumblr';
-	var $genericon = '\f214';
-	public function __construct( $id, array $settings ) {
-		parent::__construct( $id, $settings );
-		if ( 'official' == $this->button_style )
-			$this->smart = true;
-		else
-			$this->smart = false;
-	}
-
-	public function get_name() {
-		return __( 'Tumblr', 'jetpack' );
-	}
-
-	public function get_display( $post ) {
-		if ( $this->smart ) {
-			$target = '';
-			if ( true == $this->open_link_in_new )
-				$target = '_blank';
-
-			return '<a target="' . $target . '" href="http://www.tumblr.com/share/link/?url=' . rawurlencode( $this->get_share_url( $post->ID ) ) . '&name=' . rawurlencode( $this->get_share_title( $post->ID ) ) . '" title="' . __( 'Share on Tumblr', 'jetpack' ) . '" style="display:inline-block; text-indent:-9999px; overflow:hidden; width:62px; height:20px; background:url(\'//platform.tumblr.com/v1/share_2.png\') top left no-repeat transparent;">' . __( 'Share on Tumblr', 'jetpack' ) . '</a>';
-		 } else {
-			return $this->get_link( get_permalink( $post->ID ), _x( 'Tumblr', 'share to', 'jetpack' ), __( 'Click to share on Tumblr', 'jetpack' ), 'share=tumblr' );
-		}
-	}
-
-	public function process_request( $post, array $post_data ) {
-		// Record stats
-		parent::process_request( $post, $post_data );
-
-		// Redirect to Tumblr's sharing endpoint (a la their bookmarklet)
-		$url = 'http://www.tumblr.com/share?v=3&u=' . rawurlencode( $this->get_share_url( $post->ID ) ) . '&t=' . rawurlencode( $this->get_share_title( $post->ID ) ) . '&s=';
-		wp_redirect( $url );
-		die();
-	}
-	// http://www.tumblr.com/share?v=3&u=URL&t=TITLE&s=
-	public function display_footer() {
-		if ( $this->smart ) {
-			?><script type="text/javascript" src="//platform.tumblr.com/v1/share.js"></script><?php
-		} else {
-			$this->js_dialog( $this->shortname, array( 'width' => 450, 'height' => 450 ) );
-		}
-	}
 }
 
 class Share_Pinterest extends Sharing_Source {
