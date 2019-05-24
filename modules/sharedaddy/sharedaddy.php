@@ -25,7 +25,10 @@ function sharing_email_send_post( $data ) {
 	$headers[] = sprintf( 'From: %1$s <%2$s>', $data['name'], $from_email );
 	$headers[] = sprintf( 'Reply-To: %1$s <%2$s>', $data['name'], $data['source'] );
 
-	wp_mail( $data['target'], '['.__( 'Shared Post', 'jetpack' ).'] '.$data['post']->post_title, $content, $headers );
+	// Make sure to pass the title through the normal sharing filters.
+	$title = $data['sharing_source']->get_share_title( $data['post']->ID );
+
+	wp_mail( $data['target'], '[' . __( 'Shared Post', 'jetpack' ) . '] ' . $title, $content, $headers );
 }
 
 
@@ -39,7 +42,7 @@ function sharing_email_check_for_spam_via_akismet( $data ) {
 	// Prepare the body_request for akismet
 	$body_request = array(
 		'blog'                  => get_option( 'home' ),
-		'permalink'             => get_permalink( $data['post']->ID ),
+		'permalink'             => $data['sharing_source']->get_share_url( $data['post']->ID ),
 		'comment_type'          => 'share',
 		'comment_author'        => $data['name'],
 		'comment_author_email'  => $data['source'],
@@ -67,8 +70,9 @@ function sharing_email_send_post_content( $data ) {
 	/* translators: included in email when post is shared via email. First item is sender's name. Second is sender's email address. */
 	$content  = sprintf( __( '%1$s (%2$s) thinks you may be interested in the following post:', 'jetpack' ), $data['name'], $data['source'] );
 	$content .= "\n\n";
-	$content .= $data['post']->post_title."\n";
-	$content .= get_permalink( $data['post']->ID )."\n";
+	// Make sure to pass the title and URL through the normal sharing filters.
+	$content .= $data['sharing_source']->get_share_title( $data['post']->ID ) . "\n";
+	$content .= $data['sharing_source']->get_share_url( $data['post']->ID ) . "\n";
 	return $content;
 }
 
@@ -169,9 +173,6 @@ function sharing_meta_box_save( $post_id ) {
   	return $post_id;
 }
 
-  	return $post_id;
-}
-
 function sharing_meta_box_protected( $protected, $meta_key, $meta_type ) {
 	if ( 'sharing_disabled' == $meta_key )
 		$protected = true;
@@ -251,6 +252,22 @@ function sharing_email_check( $true, $post, $data ) {
 	$result    = $recaptcha->verify( $response, $_SERVER['REMOTE_ADDR'] );
 
 	return ( true === $result );
+}
+
+add_action( 'init', 'sharing_init' );
+add_action( 'add_meta_boxes', 'sharing_add_meta_box' );
+add_action( 'save_post', 'sharing_meta_box_save' );
+add_action( 'sharing_email_send_post', 'sharing_email_send_post' );
+add_filter( 'sharing_email_can_send', 'sharing_email_check_for_spam_via_akismet' );
+add_action( 'sharing_global_options', 'sharing_global_resources', 30 );
+add_action( 'sharing_admin_update', 'sharing_global_resources_save' );
+add_filter( 'sharing_services', 'sharing_restrict_to_single' );
+add_action( 'plugin_action_links_'.basename( dirname( __FILE__ ) ).'/'.basename( __FILE__ ), 'sharing_plugin_settings', 10, 4 );
+add_filter( 'plugin_row_meta', 'sharing_add_plugin_settings', 10, 2 );
+
+if ( defined( 'RECAPTCHA_PUBLIC_KEY' ) && defined( 'RECAPTCHA_PRIVATE_KEY' ) ) {
+	add_action( 'sharing_email_dialog', 'sharing_email_dialog' );
+	add_filter( 'sharing_email_check', 'sharing_email_check', 10, 3 );
 }
 
 add_action( 'init', 'sharing_init' );
