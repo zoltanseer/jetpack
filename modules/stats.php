@@ -71,10 +71,6 @@ function stats_load() {
 		add_action( 'admin_init', 'stats_merged_widget_admin_init' );
 	}
 
-function stats_enqueue_dashboard_head() {
-	add_action( 'admin_head', 'stats_dashboard_head' );
-}
-
 /**
  * Prevent sparkline img requests being redirected to upgrade.php.
  * See wp-admin/admin.php where it checks $wp_db_version.
