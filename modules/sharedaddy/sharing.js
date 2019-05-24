@@ -922,6 +922,11 @@ var updateLinkedInCount = function( data ) {
 						grecaptcha.reset();
 					}
 
+					// Reset reCATPCHA if exists.
+					if ( 'object' === typeof grecaptcha && 'function' === typeof grecaptcha.reset && window.___grecaptcha_cfg.count ) {
+						grecaptcha.reset();
+					}
+
 					// Show dialog
 					$sharing_email.css( {
 						left: $( this ).offset().left + 'px',
