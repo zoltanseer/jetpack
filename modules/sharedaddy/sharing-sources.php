@@ -1159,33 +1159,6 @@ class Share_GooglePlus1 extends Sharing_Source {
 	public function __construct( $id, array $settings ) {
 		parent::__construct( $id, $settings );
 
-		if ( 'official' == $this->button_style )
-			$this->smart = true;
-		else
-			$this->smart = false;
-	}
-
-	public function get_name() {
-		return __( 'Google', 'jetpack' );
-	}
-
-	public function has_custom_button_style() {
-		return $this->smart;
-	}
-
-	public function get_display( $post ) {
-		return $this->get_link( $this->get_process_request_url( $post->ID ), _x( 'Press This', 'share to', 'jetpack' ), __( 'Click to Press This!', 'jetpack' ), 'share=press-this' );
-	}
-}
-
-class Share_GooglePlus1 extends Sharing_Source {
-	public $shortname = 'googleplus1';
-	public $genericon = '\f218';
-	private $state = false;
-
-	public function __construct( $id, array $settings ) {
-		parent::__construct( $id, $settings );
-
 		if ( 'official' == $this->button_style ) {
 			$this->smart = true;
 		} else {
@@ -1256,7 +1229,7 @@ class Share_GooglePlus1 extends Sharing_Source {
 
 			(function() {
 				var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
-				po.src = 'https://apis.google.com/js/plusone.min.js';
+				po.src = 'https://apis.google.com/js/platform.js';
 				po.innerHTML = '{"parsetags": "explicit"}';
 				po.onload = renderGooglePlus1;
 				var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
@@ -1299,10 +1272,6 @@ class Share_Custom extends Sharing_Advanced_Source {
 	public function __construct( $id, array $settings ) {
 		parent::__construct( $id, $settings );
 		
-		$opts = $this->get_options();
-
-		$opts = $this->get_options();
-
 		$opts = $this->get_options();
 
 		$opts = $this->get_options();
