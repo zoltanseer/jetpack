@@ -517,7 +517,7 @@ function stats_reports_css() {
 }
 
 #jp-stats-wrap {
-	max-width: 720px;
+	max-width: 1040px;
 	margin: 0 auto;
 	overflow: hidden;
 }
@@ -550,10 +550,6 @@ document.cookie = 'stnojs=0; expires=Wed, 9 Mar 2011 16:55:50 UTC; path=<?php ec
 </script>
 <?php
 }
-</style>
-<?php
-}
-
 
 /**
  * Normal page load.  Load page content via JS.
@@ -976,14 +972,6 @@ function stats_hide_smile_css() {
  */
 function stats_admin_bar_head() {
 	if ( ! stats_get_option( 'admin_bar' ) )
-		return;
-	}
-
-	if ( function_exists( 'is_admin_bar_showing' ) && ! is_admin_bar_showing() ) {
-		return;
-	}
-
-	if ( function_exists( 'is_admin_bar_showing' ) && ! is_admin_bar_showing() ) {
 		return;
 	}
 
