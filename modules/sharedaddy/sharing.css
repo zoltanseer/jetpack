@@ -39,6 +39,15 @@ div.sharedaddy h3.sd-title:before {
 	margin-bottom: 1em;
 }
 
+div.sharedaddy h3.sd-title:before {
+	content: "";
+	display: block;
+	width: 100%;
+	min-width: 30px;
+	border-top: 1px solid #ddd;
+	margin-bottom: 1em;
+}
+
 body.highlander-light h3.sd-title:before {
 	border-top: 1px solid rgba(0,0,0,.2);
 }
