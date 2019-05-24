@@ -259,12 +259,12 @@ function notes_more_info() { ?>
 	<p><?php esc_html_e( 'Additionally you can define your own custom services.', 'jetpack' ); ?></p>
 <?php
 }
-add_action( 'jetpack_module_more_info_widgets', 'jetpack_widgets_more_info' );
 
-function jetpack_widgets_more_info_connected() { ?>
-	<div class="jp-info-img">
-		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/_inc/images/screenshots/widgets.png' ) ?>" alt="<?php esc_attr_e( 'Widgets Screenshot', 'jetpack' ) ?>" width="300" height="150" />
-	</div>
+function jpatd_load_more_link( $description ) {
+	echo '<a class="button-secondary more-info-link" href="http://en.support.wordpress.com/proofreading/">' . esc_html__( 'Learn More', 'jetpack' ) . '</a>';
+}
+add_filter( 'jetpack_learn_more_button_after-the-deadline', 'jpatd_load_more_link' );
+
 
 	<h4><?php esc_html_e( 'Notifications' , 'jetpack' ); ?></h4>
 	<p><?php esc_html_e( 'Keep up with the latest happenings on all your WordPress sites and interact with other WordPress.com users.', 'jetpack' ) ?></p>
@@ -283,6 +283,10 @@ function notes_more_info_connected() { ?>
 	<p><?php esc_html_e( 'Keep up with the latest happenings on all your WordPress sites and interact with other WordPress.com users.', 'jetpack' ) ?></p>
 	<p><?php printf( __( 'You can view your notifications in the Toolbar and <a href="%s">on WordPress.com</a>.', 'jetpack' ), 'http://wordpress.com/#!/notifications/' ); ?></p>
 <?php
+
+	if ( 'jetpack_module_more_info_connected_subscriptions' == current_filter() )
+		printf( '<p>' . __( 'To use the Subscriptions widget, go to Appearance &#8594; <a href="%s">Widgets</a>. Drag the widget labeled &#8220;Blog Subscriptions (Jetpack)&#8221; into one of your sidebars and configure away.', 'jetpack' ) . '</p>', admin_url( 'widgets.php' ) );
+		printf( '<p>' . __( 'You can also make changes to your Subscription settings at the bottom of the <a href="%s">Discussion Settings</a> page.', 'jetpack' ) . '</p>', admin_url( 'options-discussion.php#jetpack-subscriptions-settings' ) );
 }
 add_filter( 'jetpack_module_more_info_connected_notes', 'notes_more_info_connected' );
 
@@ -291,27 +295,6 @@ function notes_load_more_link( $description ) {
 }
 add_filter( 'jetpack_learn_more_button_notes', 'notes_load_more_link' );
 
-function jetpack_contact_form_more_info() {
-    echo '<div class="jp-info-img">';
-    echo '<a href="http://support.wordpress.com/contact-form/">';
-    echo '<img class="jp-info-img" src="' . plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/_inc/images/screenshots/contactform.png' ) . '" alt="' . esc_attr__( 'Contact Form', 'jetpack' ) . '" width="300" height="150" />';
-    echo '</a>';
-    echo '</div>';
-
-    echo '<h4>' . esc_html__( 'Contact Form', 'jetpack' ) . '</h4>';
-
-    echo '<p>';
-    _e( 'A contact form is a great way to offer your readers the ability to get in touch, without giving out your personal email address.', 'jetpack' );
-    echo '</p>';
-
-    echo '<p>';    _e( 'Each contact form can easily be customized to fit your needs. When a user submits your contact form, the feedback will be filtered through <a href="http://akismet.com/">Akismet</a> (if it is active on your site) to make sure it’s not spam. Any legitimate feedback will then be emailed to you, and added to your feedback management area.', 'jetpack' );
-    echo '</p>';
-}
-
-add_action( 'jetpack_learn_more_button_contact-form', 'jetpack_contact_form_learn_more_button' );
-add_action( 'jetpack_module_more_info_contact-form', 'jetpack_contact_form_more_info' );
-add_action( 'jetpack_module_more_info_connected_contact-form', 'jetpack_contact_form_more_info' );
-// Contact Form: STOP
 
 // LaTeX
 function latex_more_info() { ?>
@@ -334,30 +317,16 @@ function latex_more_info() { ?>
 	<p><?php esc_html_e( 'Additionally you can define your own custom services.', 'jetpack' ); ?></p>
 <?php
 }
+add_action( 'jetpack_module_more_info_widgets', 'jetpack_widgets_more_info' );
 
-function jpatd_load_more_link( $description ) {
-	echo '<a class="button-secondary more-info-link" href="http://en.support.wordpress.com/proofreading/">' . esc_html__( 'Learn More', 'jetpack' ) . '</a>';
-}
-add_filter( 'jetpack_learn_more_button_after-the-deadline', 'jpatd_load_more_link' );
-
-
-// RSS Links Widget, Image Widget, Twitter Widget
-function jetpack_widgets_more_info() { ?>
+function jetpack_widgets_more_info_connected() { ?>
 	<div class="jp-info-img">
 		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/_inc/images/screenshots/widgets.png' ) ?>" alt="<?php esc_attr_e( 'Widgets Screenshot', 'jetpack' ) ?>" width="300" height="150" />
 	</div>
 
-	<h4><?php esc_html_e( 'Sharing' , 'jetpack' ); ?></h4>
-	<?php
-	if ( class_exists( 'Sharing_Admin' ) ) {
-		?>
-
-		<p><?php printf( __( 'To configure your sharing settings, go to the Settings &rarr; <a href="%s">Sharing</a> menu.', 'jetpack' ), 'options-general.php?page=sharing' ); ?></p>
-		<p><?php esc_html_e( 'Drag and drop sharing services into the enabled section to have them show up on your site, and drag them into the hidden section to have them hidden behind a button.', 'jetpack' ); ?>
-
-	<h4><img src="//l.wordpress.com/latex.php?latex=%5CLaTeX&amp;bg=transparent&amp;fg=000&amp;s=1" alt="LaTeX logo" title="LaTeX" style="vertical-align: -27%" /> Makes Beautiful Math</h4>
-	<p><?php printf( esc_html__( '%s is a powerful markup language for writing complex mathematical equations, formulas, etc.', 'jetpack' ), '<a href="http://www.latex-project.org/" target="_blank"><img src="//l.wordpress.com/latex.php?latex=%5CLaTeX&amp;bg=transparent&amp;fg=000&amp;s=-1" alt="LaTeX logo" title="LaTeX" style="vertical-align: -25%" /></a>' ); ?></p>
-	<p><?php printf( esc_html__( 'Jetpack combines the power of %s and the simplicity of WordPress to give you the ultimate in math blogging platforms.', 'jetpack' ), '<img src="//l.wordpress.com/latex.php?latex=%5CLaTeX&amp;bg=transparent&amp;fg=000&amp;s=-1" alt="LaTeX logo" title="LaTeX" style="vertical-align: -25%" />' ); ?></p>
+	<h4><img src="//s0.wp.com/latex.php?latex=%5CLaTeX&amp;bg=transparent&amp;fg=000&amp;s=1" alt="LaTeX logo" title="LaTeX" style="vertical-align: -27%" /> Makes Beautiful Math</h4>
+	<p><?php printf( esc_html__( '%s is a powerful markup language for writing complex mathematical equations, formulas, etc.', 'jetpack' ), '<a href="http://www.latex-project.org/" target="_blank"><img src="//s0.wp.com/latex.php?latex=%5CLaTeX&amp;bg=transparent&amp;fg=000&amp;s=-1" alt="LaTeX logo" title="LaTeX" style="vertical-align: -25%" /></a>' ); ?></p>
+	<p><?php printf( esc_html__( 'Jetpack combines the power of %s and the simplicity of WordPress to give you the ultimate in math blogging platforms.', 'jetpack' ), '<img src="//s0.wp.com/latex.php?latex=%5CLaTeX&amp;bg=transparent&amp;fg=000&amp;s=-1" alt="LaTeX logo" title="LaTeX" style="vertical-align: -25%" />' ); ?></p>
 	<p><?php esc_html_e( 'Wow, that sounds nerdy.', 'jetpack' ) ?></p>
 <?php
 }
@@ -370,9 +339,9 @@ function latex_more_info_connected() { ?>
 		</a>
 	</div>
 
-	<h4><img src="//l.wordpress.com/latex.php?latex=%5CLaTeX&amp;bg=transparent&amp;fg=000&amp;s=1" alt="LaTeX logo" title="LaTeX" style="vertical-align: -27%;" /> Makes Beautiful Math</h4>
-	<p><?php printf( esc_html__( '%s is a powerful markup language for writing complex mathematical equations, formulas, etc.', 'jetpack' ), '<a href="http://www.latex-project.org/" target="_blank"><img src="//l.wordpress.com/latex.php?latex=%5CLaTeX&amp;bg=transparent&amp;fg=000&amp;s=-1" alt="LaTeX logo" title="LaTeX" style="vertical-align: -25%" /></a>' ); ?></p>
-	<p><?php printf( __( 'Use <code>$latex your latex code here$</code> or <code>[latex]your latex code here[/latex]</code> to include %s in your posts and comments. There are <a href="%s" target="_blank">all sorts of options</a> available.', 'jetpack' ), '<img src="//l.wordpress.com/latex.php?latex=%5CLaTeX&amp;bg=transparent&amp;fg=000&amp;s=-1" alt="LaTeX logo" title="LaTeX" style="vertical-align: -25%" />', 'http://support.wordpress.com/latex/' ); ?></p>
+	<h4><img src="//s0.wp.com/latex.php?latex=%5CLaTeX&amp;bg=transparent&amp;fg=000&amp;s=1" alt="LaTeX logo" title="LaTeX" style="vertical-align: -27%;" /> Makes Beautiful Math</h4>
+	<p><?php printf( esc_html__( '%s is a powerful markup language for writing complex mathematical equations, formulas, etc.', 'jetpack' ), '<a href="http://www.latex-project.org/" target="_blank"><img src="//s0.wp.com/latex.php?latex=%5CLaTeX&amp;bg=transparent&amp;fg=000&amp;s=-1" alt="LaTeX logo" title="LaTeX" style="vertical-align: -25%" /></a>' ); ?></p>
+	<p><?php printf( __( 'Use <code>$latex your latex code here$</code> or <code>[latex]your latex code here[/latex]</code> to include %s in your posts and comments. There are <a href="%s" target="_blank">all sorts of options</a> available.', 'jetpack' ), '<img src="//s0.wp.com/latex.php?latex=%5CLaTeX&amp;bg=transparent&amp;fg=000&amp;s=-1" alt="LaTeX logo" title="LaTeX" style="vertical-align: -25%" />', 'http://support.wordpress.com/latex/' ); ?></p>
 <?php
 
 	if ( 'jetpack_module_more_info_connected_subscriptions' == current_filter() )
@@ -385,87 +354,6 @@ function latex_load_more_link( $description ) {
 	echo '<a class="button-secondary more-info-link" href="http://support.wordpress.com/latex/">' . esc_html__( 'Learn More', 'jetpack' ) . '</a>';
 }
 add_filter( 'jetpack_learn_more_button_latex', 'latex_load_more_link' );
-
-
-// RSS Links Widget, Image Widget, Twitter Widget
-function jetpack_widgets_more_info() { ?>
-	<div class="jp-info-img">
-		<a href="http://en.support.wordpress.com/sharing/">
-			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/_inc/images/screenshots/sharing.png' ) ?>" alt="<?php esc_attr_e( 'Sharing', 'jetpack' ) ?>" width="300" height="150" />
-		</a>
-	</div>
-	<h4><?php esc_html_e( 'Sharing' , 'jetpack' ); ?></h4>
-	<p><?php esc_html_e( 'Share your posts with Twitter, Facebook, and a host of other services. You can configure services to appear as icons, text, or both. Some services have additional options to display smart buttons, such as Twitter, which will update the number of times the post has been shared.', 'jetpack' ); ?></p>
-
-	<p><?php
-		if ( is_multisite() ) {
-			esc_html_e( 'The following services are included: Twitter, Facebook, Reddit, StumbleUpon, PressThis, Digg, LinkedIn, Google +1, Print, and Email.' , 'jetpack' );
-		} else {
-			esc_html_e( 'The following services are included: Twitter, Facebook, Reddit, StumbleUpon, Digg, LinkedIn, Google +1, Print, and Email.' , 'jetpack' );
-		}
-	?></p>
-
-	<p><?php esc_html_e( 'Additionally you can define your own custom services.', 'jetpack' ); ?></p>
-<?php
-}
-add_action( 'jetpack_module_more_info_widgets', 'jetpack_widgets_more_info' );
-
-function jetpack_widgets_more_info_connected() { ?>
-	<div class="jp-info-img">
-		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/_inc/images/screenshots/widgets.png' ) ?>" alt="<?php esc_attr_e( 'Widgets Screenshot', 'jetpack' ) ?>" width="300" height="150" />
-	</div>
-
-	<h4><?php esc_html_e( 'Sharing' , 'jetpack' ); ?></h4>
-	<?php
-	if ( class_exists( 'Sharing_Admin' ) ) {
-		?>
-
-		<p><?php printf( __( 'To configure your sharing settings, go to the Settings &rarr; <a href="%s">Sharing</a> menu.', 'jetpack' ), 'options-general.php?page=sharing' ); ?></p>
-		<p><?php esc_html_e( 'Drag and drop sharing services into the enabled section to have them show up on your site, and drag them into the hidden section to have them hidden behind a button.', 'jetpack' ); ?>
-
-		<?php
-	}
-	?>
-
-	<p><?php printf( __( 'Full details can be found on the <a href="%s">Sharing support page</a>. This video also gives a swish run-down of how to use the Sharing feature. Watch it in HD for extra snazz!', 'jetpack' ), 'http://support.wordpress.com/sharing/' ); ?></p>
-<?php
-}
-add_action( 'jetpack_module_more_info_connected_widgets', 'jetpack_widgets_more_info_connected' );
-
-function sharedaddy_load_more_link( $description ) {
-	echo '<a class="button-secondary more-info-link" href="http://support.wordpress.com/sharing/">' . esc_html__( 'Learn More', 'jetpack' ) . '</a>';
-}
-add_filter( 'jetpack_learn_more_button_widgets', 'jetpack_widgets_load_more_link' );
-
-// Subscriptions
-function jetpack_subscriptions_more_info() { ?>
-	<div class="jp-info-img">
-		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/_inc/images/screenshots/subscriptions.png' ) ?>" alt="<?php esc_attr_e( 'Subsriptions Screenshot', 'jetpack' ) ?>" width="300" height="150" />
-	</div>
-
-	<h4><?php esc_html_e( 'Subscriptions' , 'jetpack' ); ?></h4>
-
-	<p><?php esc_html_e( 'Easily allow any visitor to subscribe to all of your posts via email through a widget in your blog&#8217;s sidebar.  Every time you publish a post, WordPress.com will send a notification to all your subscribers.', 'jetpack' ); ?></p>
-	<p><?php esc_html_e( 'When leaving comments, your visitors can also subscribe to a post&#8217;s comments to keep up with the conversation.', 'jetpack' ); ?></p>
-
-<?php
-
-	if ( 'jetpack_module_more_info_connected_subscriptions' == current_filter() )
-		printf( '<p>' . __( 'To use the Subscriptions widget, go to Appearance &#8594; <a href="%s">Widgets</a>. Drag the widget labeled &#8220;Blog Subscriptions (Jetpack)&#8221; into one of your sidebars and configure away.', 'jetpack' ) . '</p>', admin_url( 'widgets.php' ) );
-		printf( '<p>' . __( 'You can also make changes to your Subscription settings at the bottom of the <a href="%s">Discussion Settings</a> page.', 'jetpack' ) . '</p>', admin_url( 'options-discussion.php#jetpack-subscriptions-settings' ) );
-}
-add_action( 'jetpack_module_more_info_subscriptions', 'jetpack_subscriptions_more_info' );
-add_action( 'jetpack_module_more_info_connected_subscriptions', 'jetpack_subscriptions_more_info' );
-
-function jetpack_subscriptions_load_more_link() {
-	echo '<a class="button-secondary more-info-link" href="http://en.support.wordpress.com/following/">' . esc_html__( 'Learn More', 'jetpack' ) . '</a>';
-}
-add_action( 'jetpack_learn_more_button_subscriptions', 'jetpack_subscriptions_load_more_link' );
-
-// Enhanced Distribution
-
-function jetpack_enhanced_distribution_more_info() { ?>
-	<h4><?php esc_html_e( 'Enhanced Distribution' , 'jetpack' ); ?></h4>
 
 	<p><?php esc_html_e( 'Jetpack will automatically take the great published content from your blog or website and share it instantly with third party services like search engines, increasing your reach and traffic.', 'jetpack' ); ?></p>
 
@@ -534,6 +422,67 @@ function jetpack_comments_learn_more_button() {
 function jetpack_comments_more_info() {
 ?>
 	<div class="jp-info-img">
+		<a href="http://en.support.wordpress.com/sharing/">
+			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/_inc/images/screenshots/sharing.png' ) ?>" alt="<?php esc_attr_e( 'Sharing', 'jetpack' ) ?>" width="300" height="150" />
+		</a>
+	</div>
+	<h4><?php esc_html_e( 'Sharing' , 'jetpack' ); ?></h4>
+	<p><?php esc_html_e( 'Share your posts with Twitter, Facebook, and a host of other services. You can configure services to appear as icons, text, or both. Some services have additional options to display smart buttons, such as Twitter, which will update the number of times the post has been shared.', 'jetpack' ); ?></p>
+
+	<p><?php
+		if ( is_multisite() ) {
+			esc_html_e( 'The following services are included: Twitter, Facebook, Reddit, StumbleUpon, PressThis, Digg, LinkedIn, Google +1, Print, and Email.' , 'jetpack' );
+		} else {
+			esc_html_e( 'The following services are included: Twitter, Facebook, Reddit, StumbleUpon, Digg, LinkedIn, Google +1, Print, and Email.' , 'jetpack' );
+		}
+	?></p>
+
+	<p><?php esc_html_e( 'Additionally you can define your own custom services.', 'jetpack' ); ?></p>
+<?php
+}
+
+function jpatd_load_more_link( $description ) {
+	echo '<a class="button-secondary more-info-link" href="http://en.support.wordpress.com/proofreading/">' . esc_html__( 'Learn More', 'jetpack' ) . '</a>';
+}
+add_filter( 'jetpack_learn_more_button_after-the-deadline', 'jpatd_load_more_link' );
+
+
+// RSS Links Widget, Image Widget, Twitter Widget
+function jetpack_widgets_more_info() { ?>
+	<div class="jp-info-img">
+		<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/_inc/images/screenshots/widgets.png' ) ?>" alt="<?php esc_attr_e( 'Widgets Screenshot', 'jetpack' ) ?>" width="300" height="150" />
+	</div>
+
+	<h4><?php esc_html_e( 'Sharing' , 'jetpack' ); ?></h4>
+	<?php
+	if ( class_exists( 'Sharing_Admin' ) ) {
+		?>
+
+		<p><?php printf( __( 'To configure your sharing settings, go to the Settings &rarr; <a href="%s">Sharing</a> menu.', 'jetpack' ), 'options-general.php?page=sharing' ); ?></p>
+		<p><?php esc_html_e( 'Drag and drop sharing services into the enabled section to have them show up on your site, and drag them into the hidden section to have them hidden behind a button.', 'jetpack' ); ?>
+
+		<?php
+	}
+	?>
+
+	<p><?php printf( __( 'Full details can be found on the <a href="%s">Sharing support page</a>. This video also gives a swish run-down of how to use the Sharing feature. Watch it in HD for extra snazz!', 'jetpack' ), 'http://support.wordpress.com/sharing/' ); ?></p>
+<?php
+}
+add_action( 'jetpack_module_more_info_widgets', 'jetpack_widgets_more_info' );
+
+function sharedaddy_load_more_link( $description ) {
+	echo '<a class="button-secondary more-info-link" href="http://support.wordpress.com/sharing/">' . esc_html__( 'Learn More', 'jetpack' ) . '</a>';
+}
+add_action( 'jetpack_module_more_info_connected_widgets', 'jetpack_widgets_more_info_connected' );
+
+function jetpack_widgets_load_more_link( $description ) {
+	echo '<a class="button-secondary more-info-link" href="http://en.support.wordpress.com/widgets/">' . esc_html__( 'Learn More', 'jetpack' ) . '</a>';
+}
+add_filter( 'jetpack_learn_more_button_widgets', 'jetpack_widgets_load_more_link' );
+
+// Subscriptions
+function jetpack_subscriptions_more_info() { ?>
+	<div class="jp-info-img">
 		<a href="http://en.support.wordpress.com/proofreading/">
 			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/_inc/images/screenshots/spelling.png' ) ?>" alt="<?php esc_attr_e( 'Spelling and Grammar', 'jetpack' ) ?>" width="300" height="150" />
 		</a>
@@ -544,7 +493,13 @@ function jetpack_comments_more_info() {
 	<p><?php printf( __( "The <a href='%s'>After&nbsp;the&nbsp;Deadline</a> Proofreading service improves your writing by using artificial intelligence to find your errors and offer smart suggestions.", 'jetpack' ), 'http://www.afterthedeadline.com/' ); ?></p>
 	<p><?php printf( __( 'After the Deadline provides a number of <a href="%s">customization options</a>, which you can edit in your profile.', 'jetpack' ), esc_url( get_edit_profile_url( get_current_user_id() ) ) . '#atd' ); ?></p>
 <?php
+
+	if ( 'jetpack_module_more_info_connected_subscriptions' == current_filter() )
+		printf( '<p>' . __( 'To use the Subscriptions widget, go to Appearance &#8594; <a href="%s">Widgets</a>. Drag the widget labeled &#8220;Blog Subscriptions (Jetpack)&#8221; into one of your sidebars and configure away.', 'jetpack' ) . '</p>', admin_url( 'widgets.php' ) );
+		printf( '<p>' . __( 'You can also make changes to your Subscription settings at the bottom of the <a href="%s">Discussion Settings</a> page.', 'jetpack' ) . '</p>', admin_url( 'options-discussion.php#jetpack-subscriptions-settings' ) );
 }
+add_action( 'jetpack_module_more_info_subscriptions', 'jetpack_subscriptions_more_info' );
+add_action( 'jetpack_module_more_info_connected_subscriptions', 'jetpack_subscriptions_more_info' );
 
 function jpatd_load_more_link( $description ) {
 	echo '<a class="button-secondary more-info-link" href="http://en.support.wordpress.com/proofreading/">' . esc_html__( 'Learn More', 'jetpack' ) . '</a>';
@@ -921,3 +876,29 @@ function jetpack_tiled_gallery_more_link() {
 }
 add_action( 'jetpack_learn_more_button_tiled-gallery', 'jetpack_tiled_gallery_more_link' );
 // Tiled Galleries: STOP
+
+// Likes: START
+function jetpack_likes_more_info() { ?>
+
+	<div class="jp-info-img">
+		<a href="http://jetpack.me/support/likes/">
+			<img class="jp-info-img" src="<?php echo plugins_url( basename( dirname( dirname( __FILE__ ) ) ) . '/_inc/images/screenshots/likes.png' ) ?>" alt="<?php esc_attr_e( 'Likes', 'jetpack' ) ?>" width="323" height="69" />
+		</a>
+	</div>
+
+	<h4><?php esc_html_e( 'Likes' , 'jetpack' ); ?></h4>
+
+	<p><?php esc_html_e( 'Likes allow your readers to show their appreciation for your posts and other published content using their WordPress.com accounts. Your readers will then be able to review their liked posts from WordPress.com.', 'jetpack' ) ?></p>
+	<p><?php esc_html_e( 'Displayed below your posts will be how many people have liked your posts and the Gravatars of those who have liked them.', 'jetpack' ); ?></p>
+
+	<p>&rarr; <a href="http://jetpack.me/support/likes/"><?php esc_html_e( 'More information on using Likes.', 'jetpack' ); ?></a></p>
+
+<?php
+}
+add_action( 'jetpack_module_more_info_likes', 'jetpack_likes_more_info' );
+
+function jetpack_likes_more_link() {
+	echo '<a class="button-secondary more-info-link" href="#">' . __( 'Learn More', 'jetpack' ) . '</a>';
+}
+add_action( 'jetpack_learn_more_button_likes', 'jetpack_likes_more_link' );
+// Likes: STOP
