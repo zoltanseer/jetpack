@@ -946,11 +946,11 @@ function stats_admin_bar_head() {
 		return;
 	}
 
-	if ( ! current_user_can( 'view_stats' ) )
+	if ( function_exists( 'is_admin_bar_showing' ) && ! is_admin_bar_showing() ) {
 		return;
 	}
 
-	if ( function_exists( 'is_admin_bar_showing' ) && ! is_admin_bar_showing() ) {
+	if ( ! current_user_can( 'view_stats' ) )
 		return;
 	}
 
