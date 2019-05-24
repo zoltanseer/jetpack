@@ -550,6 +550,10 @@ document.cookie = 'stnojs=0; expires=Wed, 9 Mar 2011 16:55:50 UTC; path=<?php ec
 </script>
 <?php
 }
+</style>
+<?php
+}
+
 
 /**
  * Normal page load.  Load page content via JS.
@@ -973,16 +977,17 @@ function stats_hide_smile_css() {
 function stats_admin_bar_head() {
 	if ( ! stats_get_option( 'admin_bar' ) )
 		return;
+	}
+
+	if ( function_exists( 'is_admin_bar_showing' ) && ! is_admin_bar_showing() ) {
+		return;
+	}
+
+	if ( function_exists( 'is_admin_bar_showing' ) && ! is_admin_bar_showing() ) {
+		return;
+	}
 
 	if ( ! current_user_can( 'view_stats' ) )
-		return;
-	}
-
-	if ( function_exists( 'is_admin_bar_showing' ) && ! is_admin_bar_showing() ) {
-		return;
-	}
-
-	if ( function_exists( 'is_admin_bar_showing' ) && ! is_admin_bar_showing() ) {
 		return;
 	}
 
