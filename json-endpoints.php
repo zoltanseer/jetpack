@@ -7,6 +7,24 @@
 
 $json_endpoints_dir = dirname( __FILE__ ) . '/json-endpoints/';
 
+error_log("requiring endpoints ".memory_get_usage());
+
+class WPCOM_JSON_API_Deferred_Endpoint extends WPCOM_JSON_API_Endpoint {
+	function __construct( $class, $path, $args ) {
+		$this->class_name = $class_name;
+		$this->path = $path;
+		self::parent( $args );
+	}
+
+	function callback( $path = '') {
+		return 'got it';
+	}
+}
+
+function jetpack_define_endpoint( $class_name, $path, $args ) {
+	new WPCOM_JSON_API_Deferred_Endpoint( $class_name, $path, $args );
+}
+
 //abstract endpoints
 require_once( $json_endpoints_dir . 'class.wpcom-json-api-post-endpoint.php' );
 require_once( $json_endpoints_dir . 'class.wpcom-json-api-post-v1-1-endpoint.php' ); // v1.1
@@ -15,9 +33,37 @@ require_once( $json_endpoints_dir . 'class.wpcom-json-api-taxonomy-endpoint.php'
 require_once( $json_endpoints_dir . 'class.wpcom-json-api-render-endpoint.php' );
 
 
+
 // **********
 // v1
 // **********
+
+// jetpack_define_endpoint(
+// 	'WPCOM_JSON_API_GET_Site_Endpoint',
+// 	$json_endpoints_dir . 'class.wpcom-json-api-delete-media-endpoint.php',
+// 	array(
+// 		'description' => 'Get information about a site.',
+// 		'group'       => 'sites',
+// 		'stat'        => 'sites:X',
+// 		'allowed_if_flagged' => true,
+// 		'method'      => 'GET',
+// 		'max_version' => '1.1',
+// 		'new_version' => '1.2',
+// 		'path'        => '/sites/%s',
+// 		'path_labels' => array(
+// 			'$site' => '(int|string) Site ID or domain',
+// 		),
+// 		'allow_jetpack_site_auth' => true,
+// 		'query_parameters' => array(
+// 			'context' => false,
+// 			'options' => '(string) Optional. Returns specified options only. Comma-separated list. Example: options=login_url,timezone',
+// 		),
+
+// 		'response_format' => WPCOM_JSON_API_GET_Site_Endpoint::$site_format,
+
+// 		'example_request' => 'https://public-api.wordpress.com/rest/v1/sites/en.blog.wordpress.com/',
+// 	)
+// );
 
 require_once( $json_endpoints_dir . 'class.wpcom-json-api-delete-media-endpoint.php' );
 require_once( $json_endpoints_dir . 'class.wpcom-json-api-get-comment-endpoint.php' );
@@ -29,7 +75,11 @@ require_once( $json_endpoints_dir . 'class.wpcom-json-api-list-shortcodes-endpoi
 require_once( $json_endpoints_dir . 'class.wpcom-json-api-render-embed-reversal-endpoint.php' );
 require_once( $json_endpoints_dir . 'class.wpcom-json-api-render-embed-endpoint.php' );
 require_once( $json_endpoints_dir . 'class.wpcom-json-api-list-embeds-endpoint.php' );
+
 require_once( $json_endpoints_dir . 'class.wpcom-json-api-get-site-endpoint.php' );
+// jetpack_define_endpoint( $json_endpoints_dir . 'class.wpcom-json-api-get-site-endpoint.php' );
+
+
 require_once( $json_endpoints_dir . 'class.wpcom-json-api-get-taxonomies-endpoint.php' );
 require_once( $json_endpoints_dir . 'class.wpcom-json-api-get-taxonomy-endpoint.php' );
 require_once( $json_endpoints_dir . 'class.wpcom-json-api-get-term-endpoint.php' );
@@ -130,3 +180,4 @@ require_once( $json_endpoints_dir . 'class.wpcom-json-api-site-settings-v1-3-end
 
 require_once( $json_endpoints_dir . 'class.wpcom-json-api-site-settings-v1-4-endpoint.php' );
 
+error_log("DONE requiring endpoints ".memory_get_usage());

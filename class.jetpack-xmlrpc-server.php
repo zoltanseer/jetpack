@@ -699,6 +699,10 @@ class Jetpack_XMLRPC_Server {
 	}
 
 	function json_api( $args = array() ) {
+		error_log("Memory before API init: " . memory_get_usage() );
+		error_log("Classes before API init: " . count( get_declared_classes() ) );
+		$start_time = microtime(TRUE);
+
 		$json_api_args = $args[0];
 		$verify_api_user_args = $args[1];
 
@@ -784,9 +788,11 @@ class Jetpack_XMLRPC_Server {
 		require_once JETPACK__PLUGIN_DIR . 'class.json-api-endpoints.php';
 
 		$display_errors = ini_set( 'display_errors', 0 );
+		error_log("Memory before API serve: " . memory_get_usage() );
 		ob_start();
 		$content_type = $api->serve( false );
 		$output = ob_get_clean();
+		error_log("Memory after API serve: " . memory_get_usage() );
 		ini_set( 'display_errors', $display_errors );
 
 		$nonce = wp_generate_password( 10, false );
@@ -794,6 +800,9 @@ class Jetpack_XMLRPC_Server {
 
 		wp_set_current_user( isset( $old_user->ID ) ? $old_user->ID : 0 );
 
+		error_log("Memory after API init: " . memory_get_usage() );
+		error_log("Classes after API init: " . count( get_declared_classes() ) );
+		error_log("API duration: " . ( microtime( true ) - $start_time ) );
 		return array(
 			(string) $output,
 			(string) $nonce,

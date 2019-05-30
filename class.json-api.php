@@ -44,6 +44,7 @@ class WPCOM_JSON_API {
 	}
 
 	function add( WPCOM_JSON_API_Endpoint $endpoint ) {
+		// error_log("Adding " . get_class( $endpoint ) );
 		$path_versions = serialize( array (
 			$endpoint->path,
 			$endpoint->min_version,
