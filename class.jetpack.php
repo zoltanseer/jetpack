@@ -4436,6 +4436,7 @@ p {
 	 * Builds a URL to the Jetpack connection auth page
 	 *
 	 * @since 3.9.5
+     * @deprecated 7.5 Use Connection_Manager instead.
 	 *
 	 * @param bool $raw If true, URL will not be escaped.
 	 * @param bool|string $redirect If true, will redirect back to Jetpack wp-admin landing page after connection.
@@ -4446,131 +4447,7 @@ p {
 	 * @return string Connect URL
 	 */
 	function build_connect_url( $raw = false, $redirect = false, $from = false, $register = false ) {
-		$site_id = Jetpack_Options::get_option( 'id' );
-		$blog_token = Jetpack_Data::get_access_token();
-
-		if ( $register || ! $blog_token || ! $site_id ) {
-			$url = Jetpack::nonce_url_no_esc( Jetpack::admin_url( 'action=register' ), 'jetpack-register' );
-
-			if ( ! empty( $redirect ) ) {
-				$url = add_query_arg(
-					'redirect',
-					urlencode( wp_validate_redirect( esc_url_raw( $redirect ) ) ),
-					$url
-				);
-			}
-
-			if( is_network_admin() ) {
-				$url = add_query_arg( 'is_multisite', network_admin_url( 'admin.php?page=jetpack-settings' ), $url );
-			}
-		} else {
-
-			// Let's check the existing blog token to see if we need to re-register. We only check once per minute
-			// because otherwise this logic can get us in to a loop.
-			$last_connect_url_check = intval( Jetpack_Options::get_raw_option( 'jetpack_last_connect_url_check' ) );
-			if ( ! $last_connect_url_check || ( time() - $last_connect_url_check ) > MINUTE_IN_SECONDS ) {
-				Jetpack_Options::update_raw_option( 'jetpack_last_connect_url_check', time() );
-
-				$response = Jetpack_Client::wpcom_json_api_request_as_blog(
-					sprintf( '/sites/%d', $site_id ) .'?force=wpcom',
-					'1.1'
-				);
-
-				if ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
-
-					// Generating a register URL instead to refresh the existing token
-					return $this->build_connect_url( $raw, $redirect, $from, true );
-				}
-			}
-
-			if ( defined( 'JETPACK__GLOTPRESS_LOCALES_PATH' ) && include_once JETPACK__GLOTPRESS_LOCALES_PATH ) {
-				$gp_locale = GP_Locales::by_field( 'wp_locale', get_locale() );
-			}
-
-			$role = self::translate_current_user_to_role();
-			$signed_role = self::sign_role( $role );
-
-			$user = wp_get_current_user();
-
-			$jetpack_admin_page = esc_url_raw( admin_url( 'admin.php?page=jetpack' ) );
-			$redirect = $redirect
-				? wp_validate_redirect( esc_url_raw( $redirect ), $jetpack_admin_page )
-				: $jetpack_admin_page;
-
-			if( isset( $_REQUEST['is_multisite'] ) ) {
-				$redirect = Jetpack_Network::init()->get_url( 'network_admin_page' );
-			}
-
-			$secrets = Jetpack::generate_secrets( 'authorize', false, 2 * HOUR_IN_SECONDS );
-
-			/**
-			 * Filter the type of authorization.
-			 * 'calypso' completes authorization on wordpress.com/jetpack/connect
-			 * while 'jetpack' ( or any other value ) completes the authorization at jetpack.wordpress.com.
-			 *
-			 * @since 4.3.3
-			 *
-			 * @param string $auth_type Defaults to 'calypso', can also be 'jetpack'.
-			 */
-			$auth_type = apply_filters( 'jetpack_auth_type', 'calypso' );
-
-			$tracks_identity = jetpack_tracks_get_identity( get_current_user_id() );
-
-			$args = urlencode_deep(
-				array(
-					'response_type' => 'code',
-					'client_id'     => Jetpack_Options::get_option( 'id' ),
-					'redirect_uri'  => add_query_arg(
-						array(
-							'action'   => 'authorize',
-							'_wpnonce' => wp_create_nonce( "jetpack-authorize_{$role}_{$redirect}" ),
-							'redirect' => urlencode( $redirect ),
-						),
-						esc_url( admin_url( 'admin.php?page=jetpack' ) )
-					),
-					'state'         => $user->ID,
-					'scope'         => $signed_role,
-					'user_email'    => $user->user_email,
-					'user_login'    => $user->user_login,
-					'is_active'     => Jetpack::is_active(),
-					'jp_version'    => JETPACK__VERSION,
-					'auth_type'     => $auth_type,
-					'secret'        => $secrets['secret_1'],
-					'locale'        => ( isset( $gp_locale ) && isset( $gp_locale->slug ) ) ? $gp_locale->slug : '',
-					'blogname'      => get_option( 'blogname' ),
-					'site_url'      => site_url(),
-					'home_url'      => home_url(),
-					'site_icon'     => get_site_icon_url(),
-					'site_lang'     => get_locale(),
-					'_ui'           => $tracks_identity['_ui'],
-					'_ut'           => $tracks_identity['_ut'],
-					'site_created'  => Jetpack::get_assumed_site_creation_date(),
-				)
-			);
-
-			self::apply_activation_source_to_args( $args );
-
-			$url = add_query_arg( $args, Jetpack::api_url( 'authorize' ) );
-		}
-
-		if ( $from ) {
-			$url = add_query_arg( 'from', $from, $url );
-		}
-
-		// Ensure that class to get the affiliate code is loaded
-		if ( ! class_exists( 'Jetpack_Affiliate' ) ) {
-			require_once JETPACK__PLUGIN_DIR . 'class.jetpack-affiliate.php';
-		}
-		// Get affiliate code and add it to the URL
-		$url = Jetpack_Affiliate::init()->add_code_as_query_arg( $url );
-
-		$calypso_env = $this->get_calypso_env();
-
-		if ( ! empty( $calypso_env ) ) {
-			$url = add_query_arg( 'calypso_env', $calypso_env, $url );
-		}
-
-		return $raw ? esc_url_raw( $url ) : esc_url( $url );
+		return self::connection()->build_connect_url( $raw, $redirect, $from, $register );
 	}
 
 	/**
