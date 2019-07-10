@@ -555,11 +555,12 @@ class Manager implements Manager_Interface {
 		}
 
 		// Ensure that class to get the affiliate code is loaded
-		if ( ! class_exists( 'Jetpack_Affiliate' ) ) {
+		if ( ! class_exists( 'Jetpack_Affiliate' ) && defined( 'JETPACK__PLUGIN_DIR' ) ) {
 			require_once JETPACK__PLUGIN_DIR . 'class.jetpack-affiliate.php';
+
+			// Get affiliate code and add it to the URL
+			$url = \Jetpack_Affiliate::init()->add_code_as_query_arg( $url );
 		}
-		// Get affiliate code and add it to the URL
-		$url = \Jetpack_Affiliate::init()->add_code_as_query_arg( $url );
 
 		$calypso_env = $this->get_calypso_env();
 
