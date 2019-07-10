@@ -442,7 +442,7 @@ class Manager implements Manager_Interface {
 	 */
 	public function build_connect_url( $raw = false, $redirect = false, $from = false, $register = false ) {
 		$site_id    = \Jetpack_Options::get_option( 'id' );
-		$blog_token = \Jetpack_Data::get_access_token();
+		$blog_token = $this->get_access_token();
 
 		if ( $register || ! $blog_token || ! $site_id ) {
 			$url = $this->nonce_url_no_esc( $this->admin_url( 'action=register' ), 'jetpack-register' );
@@ -611,7 +611,7 @@ class Manager implements Manager_Interface {
 			return false;
 		}
 
-		$token = \Jetpack_Data::get_access_token();
+		$token = $this->get_access_token();
 		if ( ! $token || is_wp_error( $token ) ) {
 			return false;
 		}
