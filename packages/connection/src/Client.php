@@ -16,6 +16,15 @@ class Client {
 	const WPCOM_JSON_API_VERSION = '1.1';
 
 	/**
+	 * Returns the requested Jetpack API URL
+	 *
+	 * @return string
+	 */
+	public static function api_url( $relative_url ) {
+		return trailingslashit( JETPACK__API_BASE . $relative_url  ) . JETPACK__API_VERSION . '/';
+	}
+
+	/**
 	 * Makes an authorized remote request using Jetpack_Signature
 	 *
 	 * @param Array        $args the arguments for the remote request.
