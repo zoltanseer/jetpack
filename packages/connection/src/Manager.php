@@ -8,6 +8,7 @@
 namespace Automattic\Jetpack\Connection;
 
 use Automattic\Jetpack\Constants;
+use Automattic\Jetpack\Tracking;
 
 /**
  * The Jetpack Connection Manager class that is used as a single gateway between WordPress.com
@@ -20,6 +21,26 @@ class Manager implements Manager_Interface {
 	const SECRETS_OPTION_NAME    = 'jetpack_secrets';
 	const MAGIC_NORMAL_TOKEN_KEY = ';normal;';
 	const JETPACK_MASTER_USER    = true;
+
+	static $capability_translations = array(
+		'administrator' => 'manage_options',
+		'editor'        => 'edit_others_posts',
+		'author'        => 'publish_posts',
+		'contributor'   => 'edit_posts',
+		'subscriber'    => 'read',
+	);
+
+	public static function apply_activation_source_to_args( &$args ) {
+		list( $activation_source_name, $activation_source_keyword ) = get_option( 'jetpack_activation_source' );
+
+		if ( $activation_source_name ) {
+			$args['_as'] = urlencode( $activation_source_name );
+		}
+
+		if ( $activation_source_keyword ) {
+			$args['_ak'] = urlencode( $activation_source_keyword );
+		}
+	}
 
 	/**
 	 * The procedure that should be run to generate secrets.
@@ -41,6 +62,12 @@ class Manager implements Manager_Interface {
 	 */
 	public function initialize( $methods ) {
 		$methods;
+	}
+
+	public static function admin_url( $args = null ) {
+		$args = wp_parse_args( $args, array( 'page' => 'jetpack' ) );
+		$url  = add_query_arg( $args, admin_url( 'admin.php' ) );
+		return $url;
 	}
 
 	/**
@@ -413,8 +440,144 @@ class Manager implements Manager_Interface {
 	 *
 	 * @return string Connect URL
 	 */
-	public function build_connect_url( $raw, $redirect, $from, $register ) {
-		return array( $raw, $redirect, $from, $register );
+	public function build_connect_url( $raw = false, $redirect = false, $from = false, $register = false ) {
+		$site_id    = \Jetpack_Options::get_option( 'id' );
+		$blog_token = \Jetpack_Data::get_access_token();
+
+		if ( $register || ! $blog_token || ! $site_id ) {
+			$url = $this->nonce_url_no_esc( $this->admin_url( 'action=register' ), 'jetpack-register' );
+
+			if ( ! empty( $redirect ) ) {
+				$url = add_query_arg(
+					'redirect',
+					urlencode( wp_validate_redirect( esc_url_raw( $redirect ) ) ),
+					$url
+				);
+			}
+
+			if ( is_network_admin() ) {
+				$url = add_query_arg( 'is_multisite', network_admin_url( 'admin.php?page=jetpack-settings' ), $url );
+			}
+		} else {
+
+			// Let's check the existing blog token to see if we need to re-register. We only check once per minute
+			// because otherwise this logic can get us in to a loop.
+			$last_connect_url_check = intval( \Jetpack_Options::get_raw_option( 'jetpack_last_connect_url_check' ) );
+			if ( ! $last_connect_url_check || ( time() - $last_connect_url_check ) > MINUTE_IN_SECONDS ) {
+				\Jetpack_Options::update_raw_option( 'jetpack_last_connect_url_check', time() );
+
+				$response = Client::wpcom_json_api_request_as_blog(
+					sprintf( '/sites/%d', $site_id ) . '?force=wpcom',
+					'1.1'
+				);
+
+				if ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
+
+					// Generating a register URL instead to refresh the existing token
+					return $this->build_connect_url( $raw, $redirect, $from, true );
+				}
+			}
+
+			if ( defined( 'JETPACK__GLOTPRESS_LOCALES_PATH' ) && include_once JETPACK__GLOTPRESS_LOCALES_PATH ) {
+				$gp_locale = \GP_Locales::by_field( 'wp_locale', get_locale() );
+			}
+
+			$role        = self::translate_current_user_to_role();
+			$signed_role = self::sign_role( $role );
+
+			$user = wp_get_current_user();
+
+			$jetpack_admin_page = esc_url_raw( admin_url( 'admin.php?page=jetpack' ) );
+			$redirect           = $redirect
+				? wp_validate_redirect( esc_url_raw( $redirect ), $jetpack_admin_page )
+				: $jetpack_admin_page;
+
+			if ( isset( $_REQUEST['is_multisite'] ) ) {
+				$redirect = Jetpack_Network::init()->get_url( 'network_admin_page' );
+			}
+
+			$secrets = $this->generate_secrets( 'authorize', false, 2 * HOUR_IN_SECONDS );
+
+			/**
+			 * Filter the type of authorization.
+			 * 'calypso' completes authorization on wordpress.com/jetpack/connect
+			 * while 'jetpack' ( or any other value ) completes the authorization at jetpack.wordpress.com.
+			 *
+			 * @since 4.3.3
+			 *
+			 * @param string $auth_type Defaults to 'calypso', can also be 'jetpack'.
+			 */
+			$auth_type = apply_filters( 'jetpack_auth_type', 'calypso' );
+
+			$tracks          = new Tracking();
+			$client          = new Client();
+			$tracks_identity = $tracks->tracks_get_identity( get_current_user_id() );
+
+			$args = urlencode_deep(
+				array(
+					'response_type' => 'code',
+					'client_id'     => \Jetpack_Options::get_option( 'id' ),
+					'redirect_uri'  => add_query_arg(
+						array(
+							'action'   => 'authorize',
+							'_wpnonce' => wp_create_nonce( "jetpack-authorize_{$role}_{$redirect}" ),
+							'redirect' => urlencode( $redirect ),
+						),
+						esc_url( admin_url( 'admin.php?page=jetpack' ) )
+					),
+					'state'         => $user->ID,
+					'scope'         => $signed_role,
+					'user_email'    => $user->user_email,
+					'user_login'    => $user->user_login,
+					'is_active'     => $this->is_active(),
+					'jp_version'    => JETPACK__VERSION,
+					'auth_type'     => $auth_type,
+					'secret'        => $secrets['secret_1'],
+					'locale'        => ( isset( $gp_locale ) && isset( $gp_locale->slug ) ) ? $gp_locale->slug : '',
+					'blogname'      => get_option( 'blogname' ),
+					'site_url'      => site_url(),
+					'home_url'      => home_url(),
+					'site_icon'     => get_site_icon_url(),
+					'site_lang'     => get_locale(),
+					'_ui'           => $tracks_identity['_ui'],
+					'_ut'           => $tracks_identity['_ut'],
+					'site_created'  => $this->get_assumed_site_creation_date(),
+				)
+			);
+
+			$this->apply_activation_source_to_args( $args );
+
+			$url = add_query_arg( $args, $client::api_url( 'authorize' ) );
+		}
+
+		if ( $from ) {
+			$url = add_query_arg( 'from', $from, $url );
+		}
+
+		// Ensure that class to get the affiliate code is loaded
+		if ( ! class_exists( 'Jetpack_Affiliate' ) ) {
+			require_once JETPACK__PLUGIN_DIR . 'class.jetpack-affiliate.php';
+		}
+		// Get affiliate code and add it to the URL
+		$url = \Jetpack_Affiliate::init()->add_code_as_query_arg( $url );
+
+		$calypso_env = $this->get_calypso_env();
+
+		if ( ! empty( $calypso_env ) ) {
+			$url = add_query_arg( 'calypso_env', $calypso_env, $url );
+		}
+
+		return $raw ? esc_url_raw( $url ) : esc_url( $url );
+	}
+
+	static function translate_current_user_to_role() {
+		foreach ( self::$capability_translations as $role => $cap ) {
+			if ( current_user_can( $role ) || current_user_can( $cap ) ) {
+				return $role;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -425,6 +588,10 @@ class Manager implements Manager_Interface {
 
 	}
 
+	public static function nonce_url_no_esc( $actionurl, $action = -1, $name = '_wpnonce' ) {
+		$actionurl = str_replace( '&amp;', '&', $actionurl );
+		return add_query_arg( $name, wp_create_nonce( $action ), $actionurl );
+	}
 	/**
 	 * The Base64 Encoding of the SHA1 Hash of the Input.
 	 *
@@ -433,6 +600,23 @@ class Manager implements Manager_Interface {
 	 */
 	public function sha1_base64( $text ) {
 		return base64_encode( sha1( $text, true ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+	}
+
+	static function sign_role( $role, $user_id = null ) {
+		if ( empty( $user_id ) ) {
+			$user_id = (int) get_current_user_id();
+		}
+
+		if ( ! $user_id ) {
+			return false;
+		}
+
+		$token = \Jetpack_Data::get_access_token();
+		if ( ! $token || is_wp_error( $token ) ) {
+			return false;
+		}
+
+		return $role . ':' . hash_hmac( 'md5', "{$role}|{$user_id}", $token->secret );
 	}
 
 	/**
@@ -659,5 +843,71 @@ class Manager implements Manager_Interface {
 			'secret'           => $valid_token,
 			'external_user_id' => (int) $user_id,
 		);
+	}
+
+	/**
+	 * Get our assumed site creation date.
+	 * Calculated based on the earlier date of either:
+	 * - Earliest admin user registration date.
+	 * - Earliest date of post of any post type.
+	 *
+	 * @since 7.2.0
+	 *
+	 * @return string Assumed site creation date and time.
+	 */
+	public static function get_assumed_site_creation_date() {
+		$earliest_registered_users  = get_users(
+			array(
+				'role'    => 'administrator',
+				'orderby' => 'user_registered',
+				'order'   => 'ASC',
+				'fields'  => array( 'user_registered' ),
+				'number'  => 1,
+			)
+		);
+		$earliest_registration_date = $earliest_registered_users[0]->user_registered;
+
+		$earliest_posts = get_posts(
+			array(
+				'posts_per_page' => 1,
+				'post_type'      => 'any',
+				'post_status'    => 'any',
+				'orderby'        => 'date',
+				'order'          => 'ASC',
+			)
+		);
+
+		// If there are no posts at all, we'll count only on user registration date.
+		if ( $earliest_posts ) {
+			$earliest_post_date = $earliest_posts[0]->post_date;
+		} else {
+			$earliest_post_date = PHP_INT_MAX;
+		}
+
+		return min( $earliest_registration_date, $earliest_post_date );
+	}
+
+	/**
+	 * Return Calypso environment value; used for developing Jetpack and pairing
+	 * it with different Calypso enrionments, such as localhost.
+	 *
+	 * @since 7.4.0
+	 *
+	 * @return string Calypso environment
+	 */
+	public static function get_calypso_env() {
+		if ( isset( $_GET['calypso_env'] ) ) {
+			return sanitize_key( $_GET['calypso_env'] );
+		}
+
+		if ( getenv( 'CALYPSO_ENV' ) ) {
+			return sanitize_key( getenv( 'CALYPSO_ENV' ) );
+		}
+
+		if ( defined( 'CALYPSO_ENV' ) && CALYPSO_ENV ) {
+			return sanitize_key( CALYPSO_ENV );
+		}
+
+		return '';
 	}
 }
