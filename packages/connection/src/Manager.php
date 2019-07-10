@@ -22,7 +22,7 @@ class Manager implements Manager_Interface {
 	const MAGIC_NORMAL_TOKEN_KEY = ';normal;';
 	const JETPACK_MASTER_USER    = true;
 
-	static $capability_translations = array(
+	public $capability_translations = array(
 		'administrator' => 'manage_options',
 		'editor'        => 'edit_others_posts',
 		'author'        => 'publish_posts',
@@ -30,7 +30,7 @@ class Manager implements Manager_Interface {
 		'subscriber'    => 'read',
 	);
 
-	public static function apply_activation_source_to_args( &$args ) {
+	public function apply_activation_source_to_args( &$args ) {
 		list( $activation_source_name, $activation_source_keyword ) = get_option( 'jetpack_activation_source' );
 
 		if ( $activation_source_name ) {
@@ -64,7 +64,7 @@ class Manager implements Manager_Interface {
 		$methods;
 	}
 
-	public static function admin_url( $args = null ) {
+	public function admin_url( $args = null ) {
 		$args = wp_parse_args( $args, array( 'page' => 'jetpack' ) );
 		$url  = add_query_arg( $args, admin_url( 'admin.php' ) );
 		return $url;
@@ -570,7 +570,7 @@ class Manager implements Manager_Interface {
 		return $raw ? esc_url_raw( $url ) : esc_url( $url );
 	}
 
-	static function translate_current_user_to_role() {
+	function translate_current_user_to_role() {
 		foreach ( self::$capability_translations as $role => $cap ) {
 			if ( current_user_can( $role ) || current_user_can( $cap ) ) {
 				return $role;
@@ -588,7 +588,7 @@ class Manager implements Manager_Interface {
 
 	}
 
-	public static function nonce_url_no_esc( $actionurl, $action = -1, $name = '_wpnonce' ) {
+	public function nonce_url_no_esc( $actionurl, $action = -1, $name = '_wpnonce' ) {
 		$actionurl = str_replace( '&amp;', '&', $actionurl );
 		return add_query_arg( $name, wp_create_nonce( $action ), $actionurl );
 	}
@@ -602,7 +602,7 @@ class Manager implements Manager_Interface {
 		return base64_encode( sha1( $text, true ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 	}
 
-	static function sign_role( $role, $user_id = null ) {
+	function sign_role( $role, $user_id = null ) {
 		if ( empty( $user_id ) ) {
 			$user_id = (int) get_current_user_id();
 		}
@@ -855,7 +855,7 @@ class Manager implements Manager_Interface {
 	 *
 	 * @return string Assumed site creation date and time.
 	 */
-	public static function get_assumed_site_creation_date() {
+	public function get_assumed_site_creation_date() {
 		$earliest_registered_users  = get_users(
 			array(
 				'role'    => 'administrator',
@@ -895,7 +895,7 @@ class Manager implements Manager_Interface {
 	 *
 	 * @return string Calypso environment
 	 */
-	public static function get_calypso_env() {
+	public function get_calypso_env() {
 		if ( isset( $_GET['calypso_env'] ) ) {
 			return sanitize_key( $_GET['calypso_env'] );
 		}
