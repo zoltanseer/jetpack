@@ -91,10 +91,9 @@ class Jetpack_Core_Json_Api_Endpoints {
 			'callback' => __CLASS__ . '::delete_jitm_message'
 		) );
 
-		register_rest_route( 'jetpack/v4', '/json-api/(.+)', array(
+		register_rest_route( 'jetpack/json-api', '/(.+)', array(
 			'methods' => array(
-				WP_REST_Server::READABLE,
-				WP_REST_Server::EDITABLE,
+				'GET', 'POST', 'PUT', 'PATH',
 			),
 			'callback' => __CLASS__ . '::wrap_json_api_request',
 		) );
@@ -630,21 +629,20 @@ class Jetpack_Core_Json_Api_Endpoints {
 	public static function wrap_json_api_request( $request ) {
 		require_once JETPACK__PLUGIN_DIR . 'class.jetpack-xmlrpc-server.php';
 
-		$method       = (string) 'GET';
-		$url          = (string) 'https://public-api.wordpress.com/rest' . substr( $request->get_route(), 20 );
+		
+		$method       = (string) $request->get_method();;
+		$url          = (string) 'https://public-api.wordpress.com/rest' . substr( $request->get_route(), 17 );
 		$post_body    = $request->get_body();
 		$user_details = (array) [];
 		$locale       = (string) get_user_locale();
 
-		/* debugging
+		/* Debugging */
 		error_log( "-- begin json api via jetpack debugging -- " );
 		error_log( "METHOD: $method" );
 		error_log( "URL: $url" );
 		error_log( "POST BODY: $post_body" );
-		error_log( "VERIFY_ARGS: " . print_r( $verify_api_user_args, 1 ) );
-		error_log( "VERIFIED USER_ID: " . (int) $user_id );
 		error_log( "-- end json api via jetpack debugging -- " );
-		*/
+		/* Debugging */
 
 		if ( 'en' !== $locale ) {
 			// .org mo files are named slightly different from .com, and all we have is this the locale -- try to guess them.
