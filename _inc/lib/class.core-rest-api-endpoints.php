@@ -91,7 +91,7 @@ class Jetpack_Core_Json_Api_Endpoints {
 			'callback' => __CLASS__ . '::delete_jitm_message'
 		) );
 
-		register_rest_route( 'jetpack/json-api', '/(.+)', array(
+		register_rest_route( 'wpcom/v1', '/(.+)', array(
 			'methods' => array(
 				'GET', 'POST', 'PUT', 'PATH',
 			),
@@ -631,7 +631,7 @@ class Jetpack_Core_Json_Api_Endpoints {
 
 		
 		$method       = (string) $request->get_method();;
-		$url          = (string) 'https://public-api.wordpress.com/rest' . substr( $request->get_route(), 17 );
+		$url          = (string) 'https://public-api.wordpress.com/rest' . substr( $request->get_route(), 9 );
 		$post_body    = $request->get_body();
 		$user_details = (array) [];
 		$locale       = (string) get_user_locale();
