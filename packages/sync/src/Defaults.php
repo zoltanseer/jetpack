@@ -14,6 +14,7 @@ class Defaults {
 
 	static $default_options_whitelist = array(
 		'stylesheet',
+		'template',
 		'blogname',
 		'blogdescription',
 		'blog_charset',
