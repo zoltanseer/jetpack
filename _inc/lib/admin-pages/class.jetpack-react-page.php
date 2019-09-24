@@ -163,6 +163,8 @@ class Jetpack_React_Page extends Jetpack_Admin_Page {
 			wp_enqueue_script( 'jp-tracks', '//stats.wp.com/w.js', array(), gmdate( 'YW' ), true );
 		}
 
+		wp_set_script_translations( 'react-plugin', 'jetpack', JETPACK__PLUGIN_DIR . '/languages/json/' );
+
 		// Add objects to be passed to the initial state of the app.
 		wp_localize_script( 'react-plugin', 'Initial_State', $this->get_initial_state() );
 	}
