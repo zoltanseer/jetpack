@@ -124,6 +124,7 @@ class Jetpack_Carousel {
 			// Add metadata to gallery containers.
 			add_filter( 'the_content', array( $this, 'check_content_for_galleries' ), 1 );
 			add_filter( 'jetpack_tiled_galleries_block_content', array( $this, 'add_data_img_tags_and_enqueue_assets' ) );
+			add_filter( 'do_shortcode_tag', array( $this, 'maybe_add_data_gallery_shortcode' ), 10, 4 );
 
 			// Add metadata to each image.
 			add_filter( 'wp_get_attachment_image_attributes', array( $this, 'add_data_to_images' ), 10, 2 );
@@ -282,6 +283,22 @@ class Jetpack_Carousel {
 		$this->enqueue_assets();
 
 		return $output;
+	}
+
+	/**
+	 * Check if our shortcode is a Gallery.
+	 * If so, add Carousel metadata.
+	 *
+	 * @param string       $output Shortcode output.
+	 * @param string       $tag    Shortcode name.
+	 * @param array|string $attr   Shortcode attributes array or empty string.
+	 * @param array        $m      Regular expression match array.
+	 */
+	public function maybe_add_data_gallery_shortcode( $output, $tag, $attr, $m ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+		if ( 'gallery' !== $tag ) {
+			return $output;
+		}
+		return $this->add_data_to_container( $output );
 	}
 
 	/**
