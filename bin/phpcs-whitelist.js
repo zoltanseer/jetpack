@@ -15,6 +15,7 @@ module.exports = [
 	'_inc/lib/debugger/',
 	'_inc/lib/plans.php',
 	'load-jetpack.php',
+	'modules/carousel/jetpack-carousel.php',
 	'modules/masterbar/',
 	'modules/memberships/',
 	'modules/module-extras.php',
