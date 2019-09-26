@@ -115,14 +115,19 @@ class Jetpack_Carousel {
 			$this->prebuilt_widths = apply_filters( 'jp_carousel_widths', $this->prebuilt_widths );
 
 			/*
+			 * Check if other plugins may be modifying the gallery shortcode.
 			 * Load later than other callbacks hooked it
 			 * (e.g. 3rd party plugins handling gallery shortcode)
 			 */
 			add_filter( 'post_gallery', array( $this, 'maybe_enqueue_assets' ), 1000, 2 );
-			add_filter( 'gallery_style', array( $this, 'add_data_to_container' ) );
-			add_filter( 'wp_get_attachment_image_attributes', array( $this, 'add_data_to_images' ), 10, 2 );
-			add_filter( 'the_content', array( $this, 'check_content_for_blocks' ), 1 );
+
+			// Add metadata to gallery containers.
+			add_filter( 'the_content', array( $this, 'check_content_for_galleries' ), 1 );
 			add_filter( 'jetpack_tiled_galleries_block_content', array( $this, 'add_data_img_tags_and_enqueue_assets' ) );
+
+			// Add metadata to each image.
+			add_filter( 'wp_get_attachment_image_attributes', array( $this, 'add_data_to_images' ), 10, 2 );
+
 			if ( $this->single_image_gallery_enabled ) {
 				add_filter( 'the_content', array( $this, 'add_data_img_tags_and_enqueue_assets' ) );
 			}
@@ -253,7 +258,6 @@ class Jetpack_Carousel {
 			! apply_filters( 'jp_carousel_force_enable', false )
 		) {
 			// Bail because someone is overriding the [gallery] shortcode.
-			remove_filter( 'gallery_style', array( $this, 'add_data_to_container' ) );
 			remove_filter( 'wp_get_attachment_image_attributes', array( $this, 'add_data_to_images' ) );
 			remove_filter( 'the_content', array( $this, 'add_data_img_tags_and_enqueue_assets' ) );
 			// Display message that carousel has bailed, if user is super_admin, and if we're not on WordPress.com.
@@ -281,7 +285,9 @@ class Jetpack_Carousel {
 	}
 
 	/**
-	 * Check if the content of a post uses gallery blocks. To be used by 'the_content' filter.
+	 * Check if the content of a post uses a gallery.
+	 * It could be a gallery block, a tiled gallery block, or a gallery using the Gallery shortcode.
+	 * To be used by 'the_content' filter.
 	 *
 	 * @since 6.8.0
 	 *
@@ -289,7 +295,7 @@ class Jetpack_Carousel {
 	 *
 	 * @return string $content Post content.
 	 */
-	public function check_content_for_blocks( $content ) {
+	public function check_content_for_galleries( $content ) {
 		if (
 			class_exists( 'Jetpack_AMP_Support' )
 			&& Jetpack_AMP_Support::is_amp_request()
@@ -297,8 +303,11 @@ class Jetpack_Carousel {
 			return $content;
 		}
 
-		if ( has_block( 'gallery', $content ) || has_block( 'jetpack/tiled-gallery', $content ) ) {
-			$this->enqueue_assets();
+		if (
+			has_block( 'gallery', $content )
+			|| has_block( 'jetpack/tiled-gallery', $content )
+			|| true === has_shortcode( $content, 'gallery' )
+		) {
 			$content = $this->add_data_to_container( $content );
 		}
 		return $content;
