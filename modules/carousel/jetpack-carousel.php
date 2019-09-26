@@ -20,8 +20,6 @@ class Jetpack_Carousel {
 
 	public $first_run = true;
 
-	public $in_gallery = false;
-
 	public $in_jetpack = true;
 
 	public $single_image_gallery_enabled = false;
@@ -74,7 +72,6 @@ class Jetpack_Carousel {
 			$this->prebuilt_widths = apply_filters( 'jp_carousel_widths', $this->prebuilt_widths );
 			// below: load later than other callbacks hooked it (e.g. 3rd party plugins handling gallery shortcode)
 			add_filter( 'post_gallery', array( $this, 'check_if_shortcode_processed_and_enqueue_assets' ), 1000, 2 );
-			add_filter( 'post_gallery', array( $this, 'set_in_gallery' ), -1000 );
 			add_filter( 'gallery_style', array( $this, 'add_data_to_container' ) );
 			add_filter( 'wp_get_attachment_image_attributes', array( $this, 'add_data_to_images' ), 10, 2 );
 			add_filter( 'the_content', array( $this, 'check_content_for_blocks' ), 1 );
@@ -357,17 +354,6 @@ class Jetpack_Carousel {
 
 			$this->first_run = false;
 		}
-	}
-
-	function set_in_gallery( $output ) {
-		if (
-			class_exists( 'Jetpack_AMP_Support' )
-			&& Jetpack_AMP_Support::is_amp_request()
-		) {
-			return $output;
-		}
-		$this->in_gallery = true;
-		return $output;
 	}
 
 	/**
