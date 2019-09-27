@@ -687,8 +687,6 @@ class Jetpack_Carousel {
 				// Let's grab all containers from the HTML.
 				$dom_doc = new DOMDocument();
 
-				$dom_doc->encoding = $charset;
-
 				/*
 				 * The @ is not enough to suppress errors when dealing with libxml,
 				 * we have to tell it directly how we want to handle errors.
