@@ -50,6 +50,11 @@ export const settings = {
 	},
 	edit,
 	save: () => null,
+	example: {
+		attributes: {
+			submitButtonText: __( '$100 Contribution', 'jetpack' ),
+		},
+	},
 	supports: {
 		html: false,
 		align: true,
