@@ -33,9 +33,6 @@ __( "Jetpack Daily Backup Plan", "jetpack" ), // _inc/client/my-plan/my-plan-hea
 __( "Your plan: Jetpack Free + Real-time Backup", "jetpack" ), // _inc/client/my-plan/my-plan-header/index.js:194
 __( "Worried about security? Get automated security fixes and more: {{a}}Upgrade now{{/a}}", "jetpack" ), // _inc/client/my-plan/my-plan-header/index.js:195
 __( "Jetpack Real-time Backup Plan", "jetpack" ), // _inc/client/my-plan/my-plan-header/index.js:210
-__( "Resetting Jetpack options…", "jetpack" ), // _inc/client/state/dev-version/actions.js:29
-__( "Options reset.", "jetpack" ), // _inc/client/state/dev-version/actions.js:39
-__( "Options failed to reset.", "jetpack" ), // _inc/client/state/dev-version/actions.js:52
 __( "Testing Jetpack Connection", "jetpack" ), // _inc/client/state/connection/actions.js:42
 __( "There was an error testing Jetpack. Error: %(error)s", "jetpack" ), // _inc/client/state/connection/actions.js:67
 __( "Disconnecting Jetpack", "jetpack" ), // _inc/client/state/connection/actions.js:129
@@ -43,6 +40,9 @@ __( "There was an error disconnecting Jetpack. Error: %(error)s", "jetpack" ), /
 __( "Unlinking from WordPress.com", "jetpack" ), // _inc/client/state/connection/actions.js:173
 __( "Unlinked from WordPress.com.", "jetpack" ), // _inc/client/state/connection/actions.js:184
 __( "Error unlinking from WordPress.com. %(error)s", "jetpack" ), // _inc/client/state/connection/actions.js:199
+__( "Resetting Jetpack options…", "jetpack" ), // _inc/client/state/dev-version/actions.js:29
+__( "Options reset.", "jetpack" ), // _inc/client/state/dev-version/actions.js:39
+__( "Options failed to reset.", "jetpack" ), // _inc/client/state/dev-version/actions.js:52
 __( "Sending login email…", "jetpack" ), // _inc/client/state/mobile/actions.js:22
 __( "Login email sent", "jetpack" ), // _inc/client/state/mobile/actions.js:34
 __( "Failed to send login email", "jetpack" ), // _inc/client/state/mobile/actions.js:49
@@ -301,25 +301,17 @@ __( "Speed up image load times", "jetpack" ), // _inc/client/performance/speed-u
 __( "Speed up static file load times", "jetpack" ), // _inc/client/performance/speed-up-site.jsx:269
 __( "Lazy-loading images will improve your site’s speed and create a smoother viewing experience. Images will load as visitors scroll down the screen, instead of all at once.", "jetpack" ), // _inc/client/performance/speed-up-site.jsx:286
 __( "Enable Lazy Loading for images", "jetpack" ), // _inc/client/performance/speed-up-site.jsx:300
-__( "Explore our Jetpack plans", "jetpack" ), // _inc/client/plans-prompt/index.jsx:30
-__( "Now that you're set up, pick a plan that fits your needs.", "jetpack" ), // _inc/client/plans-prompt/index.jsx:32
-__( "Start with free", "jetpack" ), // _inc/client/plans-prompt/index.jsx:48
 __( "You’re currently on Jetpack %(plan)s.", "jetpack" ), // _inc/client/plans/plan-grid.jsx:97
 __( "Your Plan", "jetpack" ), // _inc/client/plans/plan-grid.jsx:105
 __( "Manage your plan", "jetpack" ), // _inc/client/plans/plan-grid.jsx:107
 __( "View all Jetpack plans", "jetpack" ), // _inc/client/plans/plan-grid.jsx:109
 __( "Monthly", "jetpack" ), // _inc/client/plans/plan-grid.jsx:118
 __( "Yearly", "jetpack" ), // _inc/client/plans/plan-grid.jsx:119
-__( "Setting up", "jetpack" ), // _inc/client/pro-status/index.jsx:77
-__( "Action needed", "jetpack" ), // _inc/client/pro-status/index.jsx:82
-__( "Connected", "jetpack" ), // _inc/client/pro-status/index.jsx:87
-_x( "Threats", "A caption for a small button to fix security issues.", "jetpack" ), // _inc/client/pro-status/index.jsx:103
-_x( "Threats found!", "Short warning message about new threats found.", "jetpack" ), // _inc/client/pro-status/index.jsx:107
-_x( "FIX", "A caption for a small button to fix security issues.", "jetpack" ), // _inc/client/pro-status/index.jsx:110
-_x( "Secure", "Short message informing user that the site is secure.", "jetpack" ), // _inc/client/pro-status/index.jsx:120
-__( "ACTIVE", "jetpack" ), // _inc/client/pro-status/index.jsx:134
-_x( "Set up", "Caption for a button to set up a feature.", "jetpack" ), // _inc/client/pro-status/index.jsx:167
-__( "Activate", "jetpack" ), // _inc/client/searchable-modules/index.jsx:61
+/* translators: Describes how much a plan will cost per year. %(currencySymbol) is the currency symbol of the user's locale (e.g. $). %(planPrice) is the cost of a plan (e.g. 20). */
+__( "%(currencySymbol)s%(planPrice)s /year", "jetpack" ), // _inc/client/plans/single-product-backup.jsx:28
+__( "Explore our Jetpack plans", "jetpack" ), // _inc/client/plans-prompt/index.jsx:30
+__( "Now that you're set up, pick a plan that fits your needs.", "jetpack" ), // _inc/client/plans-prompt/index.jsx:32
+__( "Start with free", "jetpack" ), // _inc/client/plans-prompt/index.jsx:48
 _x( "privacy", "Search term.", "jetpack" ), // _inc/client/privacy/index.jsx:68
 _x( "tracks", "Search term.", "jetpack" ), // _inc/client/privacy/index.jsx:69
 _x( "data", "Search term.", "jetpack" ), // _inc/client/privacy/index.jsx:70
@@ -332,6 +324,16 @@ __( "Share information with our analytics tool about your use of services while 
 __( "This information helps us improve our products, make marketing to you more relevant, personalize your WordPress.com experience, and more as detailed in our {{pp}}privacy policy{{/pp}}.", "jetpack" ), // _inc/client/privacy/index.jsx:139
 __( "We use other tracking tools, including some from third parties. {{cookiePolicyLink}}Read about these{{/cookiePolicyLink}} and how to control them.", "jetpack" ), // _inc/client/privacy/index.jsx:156
 __( "For more information on how specific Jetpack features use data and track activity, please refer to our {{privacyCenterLink}}Privacy Center{{/privacyCenterLink}}.", "jetpack" ), // _inc/client/privacy/index.jsx:174
+__( "Setting up", "jetpack" ), // _inc/client/pro-status/index.jsx:77
+__( "Action needed", "jetpack" ), // _inc/client/pro-status/index.jsx:82
+__( "Connected", "jetpack" ), // _inc/client/pro-status/index.jsx:87
+_x( "Threats", "A caption for a small button to fix security issues.", "jetpack" ), // _inc/client/pro-status/index.jsx:103
+_x( "Threats found!", "Short warning message about new threats found.", "jetpack" ), // _inc/client/pro-status/index.jsx:107
+_x( "FIX", "A caption for a small button to fix security issues.", "jetpack" ), // _inc/client/pro-status/index.jsx:110
+_x( "Secure", "Short message informing user that the site is secure.", "jetpack" ), // _inc/client/pro-status/index.jsx:120
+__( "ACTIVE", "jetpack" ), // _inc/client/pro-status/index.jsx:134
+_x( "Set up", "Caption for a button to set up a feature.", "jetpack" ), // _inc/client/pro-status/index.jsx:167
+__( "Activate", "jetpack" ), // _inc/client/searchable-modules/index.jsx:61
 __( "Checking your spam protection…", "jetpack" ), // _inc/client/security/antispam.jsx:88
 __( "Fetching key…", "jetpack" ), // _inc/client/security/antispam.jsx:92
 __( "Your site needs an Antispam key.", "jetpack" ), // _inc/client/security/antispam.jsx:97
@@ -409,63 +411,6 @@ _x( "Sharing buttons", "Settings header", "jetpack" ), // _inc/client/sharing/sh
 __( "You can customize the sharing buttons and choose which services to display.", "jetpack" ), // _inc/client/sharing/share-buttons.jsx:86
 __( "Add sharing buttons so visitors can share your posts and pages on social media with a couple of quick clicks.", "jetpack" ), // _inc/client/sharing/share-buttons.jsx:93
 __( "Add sharing buttons to your posts and pages", "jetpack" ), // _inc/client/sharing/share-buttons.jsx:103
-__( "Duplicate existing posts, pages, Testimonials, and Portfolios. All the content will be copied including text, featured images, sharing settings, and more.", "jetpack" ), // _inc/client/writing/composing.jsx:56
-__( "Use Markdown syntax to compose content with links, lists, and other styles. This setting enables Markdown in the Classic Editor as well as within a Classic Editor block.", "jetpack" ), // _inc/client/writing/composing.jsx:80
-__( "LaTeX is a powerful markup language for writing complex mathematical equations and formulas.", "jetpack" ), // _inc/client/writing/composing.jsx:113
-__( "Compose using shortcodes to embed media from popular sites", "jetpack" ), // _inc/client/writing/composing.jsx:149
-_x( "Composing", "Settings header", "jetpack" ), // _inc/client/writing/composing.jsx:159
-__( "This feature has been disabled by a site administrator.", "jetpack" ), // _inc/client/writing/custom-content-types.jsx:67
-__( "Add {{testimonialLink}}testimonials{{/testimonialLink}} to your website to attract new customers. If your theme doesn’t support Jetpack Testimonials, you can still use a simple shortcode to display them on your site.", "jetpack" ), // _inc/client/writing/custom-content-types.jsx:78
-__( "Testimonials", "jetpack" ), // _inc/client/writing/custom-content-types.jsx:96
-__( "Testimonials shortcode: [testimonials]", "jetpack" ), // _inc/client/writing/custom-content-types.jsx:100
-__( "Add a testimonial", "jetpack" ), // _inc/client/writing/custom-content-types.jsx:109
-__( "Use {{portfolioLink}}portfolios{{/portfolioLink}} on your site to showcase your best work. If your theme doesn’t support Jetpack Portfolios, you can still use a simple shortcode to display them on your site.", "jetpack" ), // _inc/client/writing/custom-content-types.jsx:120
-__( "Portfolios", "jetpack" ), // _inc/client/writing/custom-content-types.jsx:138
-__( "Portfolios shortcode: [portfolio]", "jetpack" ), // _inc/client/writing/custom-content-types.jsx:142
-__( "Add a portfolio item", "jetpack" ), // _inc/client/writing/custom-content-types.jsx:151
-__( "Writing", "jetpack" ), // _inc/client/writing/index.jsx:79
-__( "Compose content the way you want to and streamline your publishing experience.", "jetpack" ), // _inc/client/writing/index.jsx:80
-__( "Writing tools available to you will be shown here when an administrator enables them.", "jetpack" ), // _inc/client/writing/index.jsx:108
-_x( "WordPress.com toolbar", "Settings header", "jetpack" ), // _inc/client/writing/masterbar.jsx:26
-__( "Adds a toolbar with links to all your sites, notifications, your WordPress.com profile, and the Reader.", "jetpack" ), // _inc/client/writing/masterbar.jsx:34
-__( "The WordPress.com toolbar replaces the default WordPress admin toolbar. It offers one-click access to notifications, your WordPress.com profile and your other Jetpack and WordPress.com websites. You can also catch up on the sites you follow in the Reader.", "jetpack" ), // _inc/client/writing/masterbar.jsx:41
-__( "Enable the WordPress.com toolbar", "jetpack" ), // _inc/client/writing/masterbar.jsx:55
-__( "Create a Jetpack account to use this feature", "jetpack" ), // _inc/client/writing/masterbar.jsx:64
-__( "Allows you to publish new posts by sending an email to a special address.", "jetpack" ), // _inc/client/writing/post-by-email.jsx:59
-__( "Post by email is a quick way to publish new posts without visiting your site. We’ll generate a unique email address for you to send your content to, which will then appear on your site just like any other post.", "jetpack" ), // _inc/client/writing/post-by-email.jsx:64
-__( "Send your new posts to this email address:", "jetpack" ), // _inc/client/writing/post-by-email.jsx:88
-_x( "Copy", "verb", "jetpack" ), // _inc/client/writing/post-by-email.jsx:92
-__( "Copied!", "jetpack" ), // _inc/client/writing/post-by-email.jsx:93
-__( "Highlight and copy the following text to your clipboard:", "jetpack" ), // _inc/client/writing/post-by-email.jsx:94
-__( "Regenerate address", "jetpack" ), // _inc/client/writing/post-by-email.jsx:101
-__( "Create address", "jetpack" ), // _inc/client/writing/post-by-email.jsx:101
-__( "Create a Jetpack account to use this feature", "jetpack" ), // _inc/client/writing/post-by-email.jsx:111
-__( "Theme enhancements", "jetpack" ), // _inc/client/writing/theme-enhancements.jsx:141
-__( "Loads the next posts automatically when the reader approaches the bottom of the page.", "jetpack" ), // _inc/client/writing/theme-enhancements.jsx:153
-__( "Create a smooth, uninterrupted reading experience by loading more content as visitors scroll to the bottom of your archive pages.", "jetpack" ), // _inc/client/writing/theme-enhancements.jsx:161
-__( "Load more posts using the default theme behavior", "jetpack" ), // _inc/client/writing/theme-enhancements.jsx:169
-__( "Load more posts in page with a button", "jetpack" ), // _inc/client/writing/theme-enhancements.jsx:173
-__( "Load more posts as the reader scrolls down", "jetpack" ), // _inc/client/writing/theme-enhancements.jsx:177
-__( "Theme support required.", "jetpack" ), // _inc/client/writing/theme-enhancements.jsx:194
-__( "Learn more about adding support for Infinite Scroll to your theme.", "jetpack" ), // _inc/client/writing/theme-enhancements.jsx:198
-__( "Learn more", "jetpack" ), // _inc/client/writing/theme-enhancements.jsx:202
-__( "Enables a lightweight, mobile-friendly theme that will be displayed to visitors on mobile devices.", "jetpack" ), // _inc/client/writing/theme-enhancements.jsx:214
-__( "Mobile Theme", "jetpack" ), // _inc/client/writing/theme-enhancements.jsx:221
-__( "Give your site a fast-loading, streamlined look for mobile devices. Visitors will still see your regular theme on other screen sizes.", "jetpack" ), // _inc/client/writing/theme-enhancements.jsx:223
-__( "Show excerpts instead of full posts on front page and archive pages", "jetpack" ), // _inc/client/writing/theme-enhancements.jsx:240
-__( "Show featured images", "jetpack" ), // _inc/client/writing/theme-enhancements.jsx:246
-__( "Show an ad for the WordPress mobile apps in the footer of the mobile theme", "jetpack" ), // _inc/client/writing/theme-enhancements.jsx:250
-__( "Enhance CSS customization panel", "jetpack" ), // _inc/client/writing/theme-enhancements.jsx:286
-_x( "Widgets", "Settings header", "jetpack" ), // _inc/client/writing/widgets.jsx:29
-__( "Make extra widgets available for use on your site including subscription forms and Twitter streams", "jetpack" ), // _inc/client/writing/widgets.jsx:47
-__( "Widget visibility lets you decide which widgets appear on which pages, so you can finely tailor widget content.", "jetpack" ), // _inc/client/writing/widgets.jsx:57
-__( "Enable widget visibility controls to display widgets only on particular posts or pages", "jetpack" ), // _inc/client/writing/widgets.jsx:69
-__( "Media", "jetpack" ), // _inc/client/writing/writing-media.jsx:61
-__( "Create full-screen carousel slideshows for the images in your posts and pages. Carousel galleries are mobile-friendly and encourage site visitors to interact with your photos.", "jetpack" ), // _inc/client/writing/writing-media.jsx:73
-__( "Display images in a full-screen carousel gallery", "jetpack" ), // _inc/client/writing/writing-media.jsx:86
-__( "Show photo Exif metadata in carousel (when available)", "jetpack" ), // _inc/client/writing/writing-media.jsx:99
-__( "Exif data shows viewers additional technical details of a photo, like its focal length, aperture, and ISO.", "jetpack" ), // _inc/client/writing/writing-media.jsx:104
-__( "Carousel color scheme", "jetpack" ), // _inc/client/writing/writing-media.jsx:111
 _x( "Ads", "Ads header", "jetpack" ), // _inc/client/traffic/ads.jsx:67
 __( "Displays high-quality ads on your site that allow you to earn income.", "jetpack" ), // _inc/client/traffic/ads.jsx:76
 __( "Show ads on the first article on your home page or at the end of every page and post. Place additional ads at the top of your site and to any widget area to increase your earnings.", "jetpack" ), // _inc/client/traffic/ads.jsx:81
@@ -536,6 +481,63 @@ __( "Note that {{b}}verifying your site with these services is not necessary{{/b
 __( "Bing", "jetpack" ), // _inc/client/traffic/verification-services.jsx:157
 __( "Pinterest", "jetpack" ), // _inc/client/traffic/verification-services.jsx:168
 __( "Yandex", "jetpack" ), // _inc/client/traffic/verification-services.jsx:179
+__( "Duplicate existing posts, pages, Testimonials, and Portfolios. All the content will be copied including text, featured images, sharing settings, and more.", "jetpack" ), // _inc/client/writing/composing.jsx:56
+__( "Use Markdown syntax to compose content with links, lists, and other styles. This setting enables Markdown in the Classic Editor as well as within a Classic Editor block.", "jetpack" ), // _inc/client/writing/composing.jsx:80
+__( "LaTeX is a powerful markup language for writing complex mathematical equations and formulas.", "jetpack" ), // _inc/client/writing/composing.jsx:113
+__( "Compose using shortcodes to embed media from popular sites", "jetpack" ), // _inc/client/writing/composing.jsx:149
+_x( "Composing", "Settings header", "jetpack" ), // _inc/client/writing/composing.jsx:159
+__( "This feature has been disabled by a site administrator.", "jetpack" ), // _inc/client/writing/custom-content-types.jsx:67
+__( "Add {{testimonialLink}}testimonials{{/testimonialLink}} to your website to attract new customers. If your theme doesn’t support Jetpack Testimonials, you can still use a simple shortcode to display them on your site.", "jetpack" ), // _inc/client/writing/custom-content-types.jsx:78
+__( "Testimonials", "jetpack" ), // _inc/client/writing/custom-content-types.jsx:96
+__( "Testimonials shortcode: [testimonials]", "jetpack" ), // _inc/client/writing/custom-content-types.jsx:100
+__( "Add a testimonial", "jetpack" ), // _inc/client/writing/custom-content-types.jsx:109
+__( "Use {{portfolioLink}}portfolios{{/portfolioLink}} on your site to showcase your best work. If your theme doesn’t support Jetpack Portfolios, you can still use a simple shortcode to display them on your site.", "jetpack" ), // _inc/client/writing/custom-content-types.jsx:120
+__( "Portfolios", "jetpack" ), // _inc/client/writing/custom-content-types.jsx:138
+__( "Portfolios shortcode: [portfolio]", "jetpack" ), // _inc/client/writing/custom-content-types.jsx:142
+__( "Add a portfolio item", "jetpack" ), // _inc/client/writing/custom-content-types.jsx:151
+__( "Writing", "jetpack" ), // _inc/client/writing/index.jsx:79
+__( "Compose content the way you want to and streamline your publishing experience.", "jetpack" ), // _inc/client/writing/index.jsx:80
+__( "Writing tools available to you will be shown here when an administrator enables them.", "jetpack" ), // _inc/client/writing/index.jsx:108
+_x( "WordPress.com toolbar", "Settings header", "jetpack" ), // _inc/client/writing/masterbar.jsx:26
+__( "Adds a toolbar with links to all your sites, notifications, your WordPress.com profile, and the Reader.", "jetpack" ), // _inc/client/writing/masterbar.jsx:34
+__( "The WordPress.com toolbar replaces the default WordPress admin toolbar. It offers one-click access to notifications, your WordPress.com profile and your other Jetpack and WordPress.com websites. You can also catch up on the sites you follow in the Reader.", "jetpack" ), // _inc/client/writing/masterbar.jsx:41
+__( "Enable the WordPress.com toolbar", "jetpack" ), // _inc/client/writing/masterbar.jsx:55
+__( "Create a Jetpack account to use this feature", "jetpack" ), // _inc/client/writing/masterbar.jsx:64
+__( "Allows you to publish new posts by sending an email to a special address.", "jetpack" ), // _inc/client/writing/post-by-email.jsx:59
+__( "Post by email is a quick way to publish new posts without visiting your site. We’ll generate a unique email address for you to send your content to, which will then appear on your site just like any other post.", "jetpack" ), // _inc/client/writing/post-by-email.jsx:64
+__( "Send your new posts to this email address:", "jetpack" ), // _inc/client/writing/post-by-email.jsx:88
+_x( "Copy", "verb", "jetpack" ), // _inc/client/writing/post-by-email.jsx:92
+__( "Copied!", "jetpack" ), // _inc/client/writing/post-by-email.jsx:93
+__( "Highlight and copy the following text to your clipboard:", "jetpack" ), // _inc/client/writing/post-by-email.jsx:94
+__( "Regenerate address", "jetpack" ), // _inc/client/writing/post-by-email.jsx:101
+__( "Create address", "jetpack" ), // _inc/client/writing/post-by-email.jsx:101
+__( "Create a Jetpack account to use this feature", "jetpack" ), // _inc/client/writing/post-by-email.jsx:111
+__( "Theme enhancements", "jetpack" ), // _inc/client/writing/theme-enhancements.jsx:141
+__( "Loads the next posts automatically when the reader approaches the bottom of the page.", "jetpack" ), // _inc/client/writing/theme-enhancements.jsx:153
+__( "Create a smooth, uninterrupted reading experience by loading more content as visitors scroll to the bottom of your archive pages.", "jetpack" ), // _inc/client/writing/theme-enhancements.jsx:161
+__( "Load more posts using the default theme behavior", "jetpack" ), // _inc/client/writing/theme-enhancements.jsx:169
+__( "Load more posts in page with a button", "jetpack" ), // _inc/client/writing/theme-enhancements.jsx:173
+__( "Load more posts as the reader scrolls down", "jetpack" ), // _inc/client/writing/theme-enhancements.jsx:177
+__( "Theme support required.", "jetpack" ), // _inc/client/writing/theme-enhancements.jsx:194
+__( "Learn more about adding support for Infinite Scroll to your theme.", "jetpack" ), // _inc/client/writing/theme-enhancements.jsx:198
+__( "Learn more", "jetpack" ), // _inc/client/writing/theme-enhancements.jsx:202
+__( "Enables a lightweight, mobile-friendly theme that will be displayed to visitors on mobile devices.", "jetpack" ), // _inc/client/writing/theme-enhancements.jsx:214
+__( "Mobile Theme", "jetpack" ), // _inc/client/writing/theme-enhancements.jsx:221
+__( "Give your site a fast-loading, streamlined look for mobile devices. Visitors will still see your regular theme on other screen sizes.", "jetpack" ), // _inc/client/writing/theme-enhancements.jsx:223
+__( "Show excerpts instead of full posts on front page and archive pages", "jetpack" ), // _inc/client/writing/theme-enhancements.jsx:240
+__( "Show featured images", "jetpack" ), // _inc/client/writing/theme-enhancements.jsx:246
+__( "Show an ad for the WordPress mobile apps in the footer of the mobile theme", "jetpack" ), // _inc/client/writing/theme-enhancements.jsx:250
+__( "Enhance CSS customization panel", "jetpack" ), // _inc/client/writing/theme-enhancements.jsx:286
+_x( "Widgets", "Settings header", "jetpack" ), // _inc/client/writing/widgets.jsx:29
+__( "Make extra widgets available for use on your site including subscription forms and Twitter streams", "jetpack" ), // _inc/client/writing/widgets.jsx:47
+__( "Widget visibility lets you decide which widgets appear on which pages, so you can finely tailor widget content.", "jetpack" ), // _inc/client/writing/widgets.jsx:57
+__( "Enable widget visibility controls to display widgets only on particular posts or pages", "jetpack" ), // _inc/client/writing/widgets.jsx:69
+__( "Media", "jetpack" ), // _inc/client/writing/writing-media.jsx:61
+__( "Create full-screen carousel slideshows for the images in your posts and pages. Carousel galleries are mobile-friendly and encourage site visitors to interact with your photos.", "jetpack" ), // _inc/client/writing/writing-media.jsx:73
+__( "Display images in a full-screen carousel gallery", "jetpack" ), // _inc/client/writing/writing-media.jsx:86
+__( "Show photo Exif metadata in carousel (when available)", "jetpack" ), // _inc/client/writing/writing-media.jsx:99
+__( "Exif data shows viewers additional technical details of a photo, like its focal length, aperture, and ISO.", "jetpack" ), // _inc/client/writing/writing-media.jsx:104
+__( "Carousel color scheme", "jetpack" ), // _inc/client/writing/writing-media.jsx:111
 /* translators: Referring to a number of page views */
 __( "Views today", "jetpack" ), // _inc/client/at-a-glance/stats/dash-stats-bottom.jsx:56
 /* translators: Referring to a number of page views */
