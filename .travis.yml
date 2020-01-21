@@ -68,6 +68,13 @@ matrix:
     after_script:
       - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT -t clover -p /tmp/wordpress-previous/src/wp-content/plugins/jetpack
 
+  # PHPStan PHP Static Analysis Tool
+  - php: "7.3"
+    name: "PHPStan"
+    env: WP_BRANCH=latest
+    script:
+    - yarn php:phpstan
+
   - php: "7.0"
     name: "E2E tests"
     if: branch !~ /(^branch-.*-built)/ AND env(RUN_E2E) = true
@@ -95,6 +102,7 @@ matrix:
     - name: "PHP Nightly"
     - name: "Spell check Markdown files"
     - name: "Code Coverage"
+    - name: "PHPStan"
 
 cache:
   directories:
