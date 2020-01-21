@@ -28,6 +28,7 @@ tools
 vendor/bin
 vendor/dealerdirect
 vendor/phpcompatibility
+vendor/phpstan
 vendor/sirbrillig
 vendor/squizlabs
 vendor/wp-coding-standards
@@ -42,6 +43,7 @@ vendor/automattic/**/assets/*.scss
 composer.lock
 package.json
 postcss.config.js
+phpstan.neon
 gulpfile.js
 gulpfile.babel.js
 node_modules
