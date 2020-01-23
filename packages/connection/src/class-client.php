@@ -70,7 +70,7 @@ class Client {
 		$token_key = sprintf(
 			'%s:%d:%d',
 			$token_key,
-			Utils::get_jetpack_api_version(),
+			Utils::get_jetpack_api_constant( 'JETPACK__API_VERSION' ),
 			$token->external_user_id
 		);
 

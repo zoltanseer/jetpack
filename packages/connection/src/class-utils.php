@@ -14,7 +14,8 @@ use Automattic\Jetpack\Constants;
  */
 class Utils {
 
-	const DEFAULT_JETPACK_API_VERSION = 1;
+	const DEFAULT_JETPACK__API_VERSION = 1;
+	const DEFAULT_JETPACK__API_BASE    = 'https://jetpack.wordpress.com/jetpack.';
 
 	/**
 	 * Some hosts disable the OpenSSL extension and so cannot make outgoing HTTPS requests.
@@ -63,14 +64,25 @@ class Utils {
 	}
 
 	/**
-	 * Returns the Jetpack__API_VERSION constant if it exists, else returns a
-	 * default value of 1.
+	 * Returns the value of the constant. The value is returned in this order:
+	 * 1) The value of the global constant with the constant name.
+	 * 2) The value of the class constant with the name DEFAULT_{$constant_name}.
+	 * 3) null.
 	 *
-	 * @return integer
+	 * @param string $constant_name The constant name.
+	 * @return mixed | null
 	 */
-	public static function get_jetpack_api_version() {
-		$api_version = Constants::get_constant( 'JETPACK__API_VERSION' );
-		$api_version = $api_version ? $api_version : self::DEFAULT_JETPACK_API_VERSION;
-		return $api_version;
+	public static function get_jetpack_api_constant( $constant_name ) {
+		if ( Constants::get_constant( $constant_name ) ) {
+			return Constants::get_constant( $constant_name );
+		}
+
+		if ( defined( 'self::DEFAULT_' . $constant_name ) ) {
+			$default_value = constant( 'self::DEFAULT_' . $constant_name );
+			Constants::set_constant( $constant_name, $default_value );
+			return $default_value;
+		}
+
+		return null;
 	}
 }

@@ -337,7 +337,7 @@ class Manager {
 		if (
 			empty( $token_key )
 		||
-			empty( $version ) || strval( Utils::get_jetpack_api_version() ) !== $version
+			empty( $version ) || strval( Utils::get_jetpack_api_constant( 'JETPACK__API_VERSION' ) ) !== $version
 		) {
 			return new \WP_Error( 'malformed_token', 'Malformed token in request', compact( 'signature_details' ) );
 		}
@@ -715,9 +715,8 @@ class Manager {
 	 * @return String API URL.
 	 */
 	public function api_url( $relative_url ) {
-		$api_base = Constants::get_constant( 'JETPACK__API_BASE' );
-		$api_base = $api_base ? $api_base : 'https://jetpack.wordpress.com/jetpack.';
-		$version  = '/' . Utils::get_jetpack_api_version() . '/';
+		$api_base = Utils::get_jetpack_api_constant( 'JETPACK__API_BASE' );
+		$version  = '/' . Utils::get_jetpack_api_constant( 'JETPACK__API_VERSION' ) . '/';
 
 		/**
 		 * Filters whether the connection manager should use the iframe authorization
@@ -762,7 +761,7 @@ class Manager {
 		$base = preg_replace(
 			'#(https?://[^?/]+)(/?.*)?$#',
 			'\\1',
-			Constants::get_constant( 'JETPACK__API_BASE' )
+			Utils::get_jetpack_api_constant( 'JETPACK__API_BASE' )
 		);
 		return untrailingslashit( $base ) . '/xmlrpc.php';
 	}
