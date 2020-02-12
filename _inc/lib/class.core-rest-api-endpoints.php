@@ -597,8 +597,9 @@ class Jetpack_Core_Json_Api_Endpoints {
 	}
 
 	/**
-	 * Dismisses a jitm
-	 * @param $request WP_REST_Request The request
+	 * Dismisses a jitm.
+	 *
+	 * @param WP_REST_Request $request The request.
 	 *
 	 * @return bool Always True
 	 */
