@@ -94,7 +94,7 @@
 		"@wordpress/base-styles": "1.0.0",
 		"@wordpress/browserslist-config": "2.5.0",
 		"@wordpress/compose": "3.5.0",
-		"@wordpress/data": "4.7.0",
+		"@wordpress/data": "4.6.0",
 		"@wordpress/element": "2.5.0",
 		"@wordpress/i18n": "3.5.0",
 		"@wordpress/url": "2.6.0",
