@@ -49,6 +49,10 @@ export const settings = {
 			type: 'array',
 			default: [],
 		},
+		mapStyle: {
+			type: 'string',
+			default: 'default',
+		},
 		mapDetails: {
 			type: 'boolean',
 			default: true,
