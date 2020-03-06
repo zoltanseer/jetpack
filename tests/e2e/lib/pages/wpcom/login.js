@@ -33,7 +33,6 @@ export default class LoginPage extends Page {
 		await waitAndType( this.page, passwordSelector, password );
 		this.page.waitFor( 2000 );
 
-		// await waitAndType( this.page, passwordSelector, password );
 		await waitAndClick( this.page, submitButtonSelector );
 
 		// NOTE: here we waiting for the redirect. For some reason it might take quite some time
