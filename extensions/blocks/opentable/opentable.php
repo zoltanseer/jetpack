@@ -9,8 +9,9 @@
 
 namespace Jetpack\OpenTable_Block;
 
-const FEATURE_NAME = 'opentable';
-const BLOCK_NAME   = 'jetpack/' . FEATURE_NAME;
+const FEATURE_NAME  = 'opentable';
+const BLOCK_NAME    = 'jetpack/' . FEATURE_NAME;
+const REQUIRED_PLAN = 'value_bundle';
 
 /**
  * Check if the block should be available on the site.
@@ -41,12 +42,10 @@ function is_available() {
  * registration if we need to.
  */
 function register_block() {
-	if ( is_available() ) {
-		jetpack_register_block(
-			BLOCK_NAME,
-			array( 'render_callback' => 'Jetpack\OpenTable_Block\load_assets' )
-		);
-	}
+	jetpack_register_block(
+		BLOCK_NAME,
+		array( 'render_callback' => 'Jetpack\OpenTable_Block\load_assets' )
+	);
 }
 add_action( 'init', 'Jetpack\OpenTable_Block\register_block' );
 
@@ -63,7 +62,7 @@ function set_availability() {
 			'missing_plan',
 			array(
 				'required_feature' => 'opentable',
-				'required_plan'    => 'premium-plan',
+				'required_plan'    => 'value_bundle',
 			)
 		);
 	}
@@ -89,6 +88,10 @@ add_action( 'enqueue_block_assets', 'Jetpack\OpenTable_Block\add_language_settin
  * @return string
  */
 function load_assets( $attributes ) {
+	if ( ! is_available() ) {
+		return \Jetpack_Gutenberg::upgrade_nudge( REQUIRED_PLAN );
+	}
+
 	\Jetpack_Gutenberg::load_assets_as_required( FEATURE_NAME );
 
 	$classes = array( sprintf( 'wp-block-jetpack-%s-theme-%s', FEATURE_NAME, get_attribute( $attributes, 'style' ) ) );
