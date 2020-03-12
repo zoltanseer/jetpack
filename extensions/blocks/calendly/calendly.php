@@ -44,7 +44,7 @@ function is_available() {
 function register_block() {
 	jetpack_register_block(
 		BLOCK_NAME,
-		array( 'render_callback' => 'Jetpack\Calendly_Block\load_assets' )
+		array( 'render_callback' => __NAMESPACE__ . '\load_assets' )
 	);
 }
 add_action( 'init', 'Jetpack\Calendly_Block\register_block' );
@@ -61,7 +61,7 @@ function set_availability() {
 			BLOCK_NAME,
 			'missing_plan',
 			array(
-				'required_feature' => 'calendly',
+				'required_feature' => FEATURE_NAME,
 				'required_plan'    => REQUIRED_PLAN,
 			)
 		);
