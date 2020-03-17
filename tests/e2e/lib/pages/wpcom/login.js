@@ -29,14 +29,18 @@ export default class LoginPage extends Page {
 		await waitAndClick( this.page, continueButtonSelector );
 
 		// sometimes it failing to type the whole password correctly. Trying to wait for the transition to happen
-		this.page.waitFor( 1000 );
+		this.page.waitFor( 2000 );
 		await waitAndType( this.page, passwordSelector, password );
+		this.page.waitFor( 2000 );
 
 		await waitAndType( this.page, passwordSelector, password );
 		await waitAndClick( this.page, submitButtonSelector );
 
 		// NOTE: here we waiting for the redirect. For some reason it might take quite some time
-		await waitForSelector( this.page, passwordSelector, { hidden: true, timeout: 90000 } );
+		await waitForSelector( this.page, passwordSelector, {
+			hidden: true,
+			timeout: 3 * 60000 /* 3 minutes */,
+		} );
 		await this.page.waitForNavigation( { waitFor: 'networkidle2' } );
 	}
 

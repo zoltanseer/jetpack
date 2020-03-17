@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, _x } from '@wordpress/i18n';
 import { createBlock } from '@wordpress/blocks';
 
 /**
@@ -20,30 +20,30 @@ import './view.scss';
 export const name = 'opentable';
 export const title = __( 'OpenTable', 'jetpack' );
 import { getAttributesFromEmbedCode, restRefRegex, ridRegex } from './utils';
-const supports = {
-	align: true,
-	html: false,
-};
+
 export const settings = {
 	title,
 	description: __( 'Allow visitors to book a reservation with OpenTable', 'jetpack' ),
 	icon,
 	category: 'jetpack',
 	keywords: [
-		__( 'opentable', 'jetpack' ),
-		__( 'reservation', 'jetpack' ),
-		__( 'restaurant', 'jetpack' ),
+		_x( 'booking', 'block search term', 'jetpack' ),
+		_x( 'reservation', 'block search term', 'jetpack' ),
+		_x( 'restaurant', 'block search term', 'jetpack' ),
 	],
-	supports,
+	supports: {
+		align: true,
+		html: false,
+	},
 	edit,
 	save: ( { attributes: { rid } } ) => (
-		<div>
+		<>
 			{ rid.map( restaurantId => (
 				<a href={ `https://www.opentable.com/restref/client/?rid=${ restaurantId }` }>
 					{ `https://www.opentable.com/restref/client/?rid=${ restaurantId }` }
 				</a>
 			) ) }
-		</div>
+		</>
 	),
 	attributes: defaultAttributes,
 	example: {
@@ -71,18 +71,4 @@ export const settings = {
 			},
 		],
 	},
-	deprecated: [
-		{
-			attributes: defaultAttributes,
-			save: ( { attributes: { rid } } ) => (
-				<>
-					{ rid.map( restaurantId => (
-						<a href={ `https://www.opentable.com/restref/client/?rid=${ restaurantId }` }>
-							{ `https://www.opentable.com/restref/client/?rid=${ restaurantId }` }
-						</a>
-					) ) }
-				</>
-			),
-		},
-	],
 };

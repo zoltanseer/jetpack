@@ -435,18 +435,32 @@ class Jetpack {
 					update_option( 'wpcom_publish_posts_with_markdown', true );
 				}
 
-				// Minileven deprecation. 8.3.0.
-				if ( get_option( 'wp_mobile_custom_css' ) ) {
-					delete_option( 'wp_mobile_custom_css' );
+				/*
+				 * Minileven deprecation. 8.3.0.
+				 * Only delete options if not using
+				 * the replacement standalone Minileven plugin.
+				 */
+				if (
+					! self::is_plugin_active( 'minileven-master/minileven.php' )
+					&& ! self::is_plugin_active( 'minileven/minileven.php' )
+				) {
+					if ( get_option( 'wp_mobile_custom_css' ) ) {
+						delete_option( 'wp_mobile_custom_css' );
+					}
+					if ( get_option( 'wp_mobile_excerpt' ) ) {
+						delete_option( 'wp_mobile_excerpt' );
+					}
+					if ( get_option( 'wp_mobile_featured_images' ) ) {
+						delete_option( 'wp_mobile_featured_images' );
+					}
+					if ( get_option( 'wp_mobile_app_promos' ) ) {
+						delete_option( 'wp_mobile_app_promos' );
+					}
 				}
-				if ( Jetpack_Options::get_option( 'wp_mobile_excerpt' ) ) {
-					Jetpack_Options::delete_option( 'wp_mobile_excerpt' );
-				}
-				if ( Jetpack_Options::get_option( 'wp_mobile_featured_images' ) ) {
-					Jetpack_Options::delete_option( 'wp_mobile_featured_images' );
-				}
-				if ( Jetpack_Options::get_option( 'wp_mobile_app_promos' ) ) {
-					Jetpack_Options::delete_option( 'wp_mobile_app_promos' );
+
+				// Upgrade to 8.4.0.
+				if ( Jetpack_Options::get_option( 'ab_connect_banner_green_bar' ) ) {
+					Jetpack_Options::delete_option( 'ab_connect_banner_green_bar' );
 				}
 
 				if ( did_action( 'wp_loaded' ) ) {
@@ -579,11 +593,6 @@ class Jetpack {
 		$first_priority = array_shift( $taken_priorities );
 
 		if ( defined( 'PHP_INT_MAX' ) && $first_priority <= - PHP_INT_MAX ) {
-			trigger_error( // phpcs:ignore
-				/* translators: plugins_loaded is a filter name in WordPress, no need to translate. */
-				__( 'A plugin on your site is using the plugins_loaded filter with a priority that is too high. Jetpack does not support this, you may experience problems.', 'jetpack' ), // phpcs:ignore
-				E_USER_NOTICE
-			);
 			$new_priority = - PHP_INT_MAX;
 		} else {
 			$new_priority = $first_priority - 1;
@@ -744,7 +753,9 @@ class Jetpack {
 			$config->ensure( 'jitm' );
 		}
 
-		$this->connection_manager = new Connection_Manager();
+		if ( ! $this->connection_manager ) {
+			$this->connection_manager = new Connection_Manager();
+		}
 
 		/*
 		 * Load things that should only be in Network Admin.
@@ -841,6 +852,11 @@ class Jetpack {
 		Jetpack_XMLRPC_Server $xmlrpc_server = null
 	) {
 		_deprecated_function( __METHOD__, 'jetpack-7.7', 'Automattic\\Jetpack\\Connection\\Manager::setup_xmlrpc_handlers' );
+
+		if ( ! $this->connection_manager ) {
+			$this->connection_manager = new Connection_Manager();
+		}
+
 		return $this->connection_manager->setup_xmlrpc_handlers(
 			$request_params,
 			$is_active,
@@ -857,6 +873,11 @@ class Jetpack {
 	 */
 	public function initialize_rest_api_registration_connector() {
 		_deprecated_function( __METHOD__, 'jetpack-7.7', 'Automattic\\Jetpack\\Connection\\Manager::initialize_rest_api_registration_connector' );
+
+		if ( ! $this->connection_manager ) {
+			$this->connection_manager = new Connection_Manager();
+		}
+
 		$this->connection_manager->initialize_rest_api_registration_connector();
 	}
 
@@ -972,6 +993,11 @@ class Jetpack {
 	 */
 	public function remove_non_jetpack_xmlrpc_methods( $methods ) {
 		_deprecated_function( __METHOD__, 'jetpack-7.7', 'Automattic\\Jetpack\\Connection\\Manager::remove_non_jetpack_xmlrpc_methods' );
+
+		if ( ! $this->connection_manager ) {
+			$this->connection_manager = new Connection_Manager();
+		}
+
 		return $this->connection_manager->remove_non_jetpack_xmlrpc_methods( $methods );
 	}
 
@@ -987,6 +1013,11 @@ class Jetpack {
 	 */
 	public function alternate_xmlrpc() {
 		_deprecated_function( __METHOD__, 'jetpack-7.7', 'Automattic\\Jetpack\\Connection\\Manager::alternate_xmlrpc' );
+
+		if ( ! $this->connection_manager ) {
+			$this->connection_manager = new Connection_Manager();
+		}
+
 		$this->connection_manager->alternate_xmlrpc();
 	}
 
@@ -1090,6 +1121,11 @@ class Jetpack {
 	 */
 	public function require_jetpack_authentication() {
 		_deprecated_function( __METHOD__, 'jetpack-7.7', 'Automattic\\Jetpack\\Connection\\Manager::require_jetpack_authentication' );
+
+		if ( ! $this->connection_manager ) {
+			$this->connection_manager = new Connection_Manager();
+		}
+
 		$this->connection_manager->require_jetpack_authentication();
 	}
 
@@ -1152,7 +1188,7 @@ class Jetpack {
 			wp_register_script(
 				'jetpack-facebook-embed',
 				Assets::get_file_url_for_environment( '_inc/build/facebook-embed.min.js', '_inc/facebook-embed.js' ),
-				array( 'jquery' ),
+				array(),
 				null,
 				true
 			);
@@ -3690,6 +3726,10 @@ p {
 		}
 
 		// Require Jetpack authentication for the remote file upload AJAX requests.
+		if ( ! $this->connection_manager ) {
+			$this->connection_manager = new Connection_Manager();
+		}
+
 		$this->connection_manager->require_jetpack_authentication();
 
 		// Register the remote file upload AJAX handlers.
@@ -5167,7 +5207,14 @@ endif;
 	 * @return Automattic\Jetpack\Connection\Manager
 	 */
 	public static function connection() {
-		return self::init()->connection_manager;
+		$jetpack = static::init();
+
+		// If the connection manager hasn't been instantiated, do that now.
+		if ( ! $jetpack->connection_manager ) {
+			$jetpack->connection_manager = new Connection_Manager();
+		}
+
+		return $jetpack->connection_manager;
 	}
 
 	/**
@@ -5363,6 +5410,11 @@ endif;
 	 */
 	public function reset_saved_auth_state() {
 		$this->rest_authentication_status = null;
+
+		if ( ! $this->connection_manager ) {
+			$this->connection_manager = new Connection_Manager();
+		}
+
 		$this->connection_manager->reset_saved_auth_state();
 	}
 
@@ -5406,6 +5458,11 @@ endif;
 	 */
 	public function authenticate_jetpack( $user, $username, $password ) {
 		_deprecated_function( __METHOD__, 'jetpack-7.7', 'Automattic\\Jetpack\\Connection\\Manager::authenticate_jetpack' );
+
+		if ( ! $this->connection_manager ) {
+			$this->connection_manager = new Connection_Manager();
+		}
+
 		return $this->connection_manager->authenticate_jetpack( $user, $username, $password );
 	}
 
@@ -5460,6 +5517,10 @@ endif;
 			return null;
 		}
 
+		if ( ! $this->connection_manager ) {
+			$this->connection_manager = new Connection_Manager();
+		}
+
 		$verified = $this->connection_manager->verify_xml_rpc_signature();
 
 		if (
@@ -5506,6 +5567,11 @@ endif;
 	 */
 	public function add_nonce( $timestamp, $nonce ) {
 		_deprecated_function( __METHOD__, 'jetpack-7.7', 'Automattic\\Jetpack\\Connection\\Manager::add_nonce' );
+
+		if ( ! $this->connection_manager ) {
+			$this->connection_manager = new Connection_Manager();
+		}
+
 		return $this->connection_manager->add_nonce( $timestamp, $nonce );
 	}
 
@@ -5521,6 +5587,11 @@ endif;
 	 */
 	public function xmlrpc_methods( $methods ) {
 		_deprecated_function( __METHOD__, 'jetpack-7.7', 'Automattic\\Jetpack\\Connection\\Manager::xmlrpc_methods' );
+
+		if ( ! $this->connection_manager ) {
+			$this->connection_manager = new Connection_Manager();
+		}
+
 		return $this->connection_manager->xmlrpc_methods( $methods );
 	}
 
@@ -5535,6 +5606,11 @@ endif;
 	 */
 	public function public_xmlrpc_methods( $methods ) {
 		_deprecated_function( __METHOD__, 'jetpack-7.7', 'Automattic\\Jetpack\\Connection\\Manager::public_xmlrpc_methods' );
+
+		if ( ! $this->connection_manager ) {
+			$this->connection_manager = new Connection_Manager();
+		}
+
 		return $this->connection_manager->public_xmlrpc_methods( $methods );
 	}
 
@@ -5549,6 +5625,11 @@ endif;
 	 */
 	public function jetpack_getOptions( $args ) { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid
 		_deprecated_function( __METHOD__, 'jetpack-7.7', 'Automattic\\Jetpack\\Connection\\Manager::jetpack_getOptions' );
+
+		if ( ! $this->connection_manager ) {
+			$this->connection_manager = new Connection_Manager();
+		}
+
 		return $this->connection_manager->jetpack_getOptions( $args );
 	}
 
@@ -5563,6 +5644,11 @@ endif;
 	 */
 	public function xmlrpc_options( $options ) {
 		_deprecated_function( __METHOD__, 'jetpack-7.7', 'Automattic\\Jetpack\\Connection\\Manager::xmlrpc_options' );
+
+		if ( ! $this->connection_manager ) {
+			$this->connection_manager = new Connection_Manager();
+		}
+
 		return $this->connection_manager->xmlrpc_options( $options );
 	}
 
@@ -5925,6 +6011,10 @@ endif;
 		$timestamp = (int) $environment['timestamp'];
 		$nonce     = stripslashes( (string) $environment['nonce'] );
 
+		if ( ! $this->connection_manager ) {
+			$this->connection_manager = new Connection_Manager();
+		}
+
 		if ( ! $this->connection_manager->add_nonce( $timestamp, $nonce ) ) {
 			// De-nonce the nonce, at least for 5 minutes.
 			// We have to reuse this nonce at least once (used the first time when the initial request is made, used a second time when the login form is POSTed)
@@ -6176,7 +6266,7 @@ endif;
 		}
 
 		/**
-		 * Allows sites to optin to IDC mitigation which blocks the site from syncing to WordPress.com when the home
+		 * Allows sites to opt in to IDC mitigation which blocks the site from syncing to WordPress.com when the home
 		 * URL or site URL do not match what WordPress.com expects. The default value is either false, or the value of
 		 * JETPACK_SYNC_IDC_OPTIN constant if set.
 		 *

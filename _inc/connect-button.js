@@ -42,7 +42,7 @@ jQuery( document ).ready( function( $ ) {
 			}
 		},
 		startConnectionFlow: function() {
-			var abTestName = 'jetpack_connect_in_place_v3';
+			var abTestName = 'jetpack_connect_in_place_v4';
 
 			$.ajax( {
 				url: 'https://public-api.wordpress.com/wpcom/v2/abtest/' + abTestName,
@@ -138,7 +138,8 @@ jQuery( document ).ready( function( $ ) {
 				},
 				success: function( data ) {
 					var siteData = JSON.parse( data.data );
-					jetpackConnectButton.isPaidPlan = ! siteData.plan.is_free;
+					jetpackConnectButton.isPaidPlan =
+						siteData.options.is_pending_plan || ! siteData.plan.is_free;
 				},
 			} );
 		},
